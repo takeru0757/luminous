@@ -1,19 +1,7 @@
 var gulp = require('gulp');
 var path = require('path');
 var livereload = require('gulp-livereload');
-//var requireDir = require('require-dir');
-
-// -----------------------------------------------------------------------------
-// Load tasks provided by the Luminous framework
-// -----------------------------------------------------------------------------
-
-// npm install ../luminous/luminous-gulp
 var luminousGulp = require('luminous-gulp');
-
-// var isChildTheme = path.basename(path.join(__dirname, '../')) !== 'luminous';
-// var luminousGulpPath = isChildTheme ? '../../luminous/gulp' : '../gulp';
-//
-// requireDir(path.join(luminousGulpPath, 'tasks'), { recurse: true });
 
 // -----------------------------------------------------------------------------
 // Tasks
