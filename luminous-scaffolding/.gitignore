@@ -1,0 +1,4 @@
+/resources/assets/vendor
+/node_modules
+/vendor
+.env

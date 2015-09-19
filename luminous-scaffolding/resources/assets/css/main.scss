@@ -1,0 +1,47 @@
+$brand-primary: #6393c0;
+@import '../vendor/bootstrap/scss/bootstrap';
+
+$fa-font-path: '/vendor/font-awesome';
+@import '../vendor/font-awesome/scss/font-awesome';
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 4.5rem;
+  font-weight: 400;
+  font-family: 'Lato', sans-serif;
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+.header-description,
+.footer-address {
+  margin: 0;
+  padding-top:    .5rem;
+  padding-bottom: .5rem;
+}
+
+.site-header {
+  background: #6393c0;
+  border-radius: 0;
+  h1 {
+    margin: 0 0 ($spacer-y * 1.5);
+  }
+  p {
+    margin: 0;
+  }
+  &, a {
+    color: #fff;
+  }
+  a:hover {
+    text-decoration: none;
+    color: #ddd;
+  }
+}

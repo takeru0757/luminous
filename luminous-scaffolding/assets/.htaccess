@@ -1,0 +1,49 @@
+Order Allow,Deny
+Allow from all
+Satisfy Any
+
+# ------------------------------------------------------------------------------
+# Compressed Files
+# ------------------------------------------------------------------------------
+
+AddEncoding x-gzip .gz
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^rev-manifest.json - [F]
+  RewriteCond %{HTTP:Accept-Encoding} gzip
+  RewriteCond %{REQUEST_FILENAME} !\.gz$
+  RewriteCond %{REQUEST_FILENAME}\.gz -s
+  RewriteRule . %{REQUEST_URI}.gz [L]
+</IfModule>
+
+<IfModule mod_deflate.c>
+  SetEnvIfNoCase Request_URI \.gz$ no-gzip
+</IfModule>
+<FilesMatch "\.gz$">
+  <IfModule mod_headers.c>
+    Header set Vary "Accept-Encoding"
+  </IfModule>
+</FilesMatch>
+<FilesMatch ".*\.css\.gz$">
+  ForceType "text/css; charset=UTF-8"
+</FilesMatch>
+<FilesMatch ".*\.js\.gz$">
+  ForceType "text/javascript; charset=UTF-8"
+</FilesMatch>
+
+# ------------------------------------------------------------------------------
+# Cache Control
+# ------------------------------------------------------------------------------
+
+<FilesMatch "\.\w{8}\.\w+(\.gz)?$">
+  FileETag none
+  <IfModule mod_headers.c>
+    Header set Cache-Control "public, max-age=31536000"
+  </IfModule>
+  <ifModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 year"
+  </ifModule>
+</FilesMatch>
