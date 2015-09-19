@@ -1,13 +1,18 @@
 <?php
 
-$composer = require __DIR__ . '/vendor/autoload.php';
-
 // -----------------------------------------------------------------------------
 // Determine The Current Theme Path
 // -----------------------------------------------------------------------------
 
 $themePath = is_child_theme() ? STYLESHEETPATH : TEMPLATEPATH.'/luminous-scaffolding';
-$composer->addPsr4('App\\', $themePath.'/app');
+
+spl_autoload_register(function ($className) use ($themePath) {
+    $className = ltrim($className, '\\');
+    if (strpos($className, 'App\\') === 0) {
+        $fileName = str_replace('\\', '/', substr($className, 4));
+        require "{$themePath}/app/{$fileName}.php";
+    }
+});
 
 // -----------------------------------------------------------------------------
 // Create The Application
@@ -15,26 +20,13 @@ $composer->addPsr4('App\\', $themePath.'/app');
 
 $app = require $themePath.'/la-bootstrap.php';
 
-/**
- * @SuppressWarnings(PHPMD.ExitExpression)
- */
-if (! function_exists('luminous_hook_wp_loaded')) {
-    /**
-     * Run The Application
-     *
-     * @return void
-     */
-    function luminous_hook_wp_loaded()
-    {
-        app()->run();
-        exit();
-    }
-}
-
 if (is_wp()) {
     require base_path('la-bridges.php');
 } else {
-    add_action('wp_loaded', 'luminous_hook_wp_loaded');
+    add_action('wp_loaded', function () use ($app) {
+        $app->run();
+        exit();
+    });
 }
 
-unset($composer, $themePath, $app);
+unset($themePath, $app);
