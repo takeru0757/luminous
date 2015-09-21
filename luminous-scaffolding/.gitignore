@@ -1,4 +1,4 @@
 /resources/assets/vendor
-/node_modules
-/vendor
+node_modules
+*.log
 .env

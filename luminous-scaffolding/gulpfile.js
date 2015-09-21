@@ -1,7 +1,5 @@
 var gulp = require('gulp');
-var path = require('path');
-var livereload = require('gulp-livereload');
-var luminousGulp = require('luminous-gulp');
+var lg = require('luminous-gulp');
 
 // -----------------------------------------------------------------------------
 // Tasks
@@ -12,16 +10,15 @@ gulp.task('default', ['assets']);
 // watch
 // -----------------------------------------------------------------------------
 
-gulp.task('watch', [luminousGulp.task('asstes:watch')], function () {
-  // views, lang
-  gulp.watch(['resources/views/**/*', 'resources/lang/**/*'], function () {
-    livereload.reload('/');
-  });
+gulp.task('watch', [lg('assets:watch')], function () {
+  // Watch views and lang.
+  gulp.watch(['resources/views/**/*', 'resources/lang/**/*'], lg.reload);
 
-  livereload.listen();
+  // Starts a livereload server.
+  lg.listen();
 });
 
 // assets
 // -----------------------------------------------------------------------------
 
-gulp.task('assets', [luminousGulp.task('assets')]);
+gulp.task('assets', [lg('assets')]);

@@ -1,11 +1,12 @@
-## Luminous
+# Luminous
+
+**This project is still under development.**
 
 Luminous is a [WordPress](https://wordpress.org/) theme framework based on [Laravel Lumen](http://lumen.laravel.com/).
-This framework will helps you to develop WordPress themes like modern web applications using modern PHP.
 
 ## License
 
-Luminous is released under the [GPL-2+ license](http://www.gnu.org/licenses/gpl-2.0.html).
+Luminous is released under the [GPL-2+ license](LICENSE.txt).
 
 ### screenshot.jpg
 

@@ -1,14 +1,13 @@
 {
     "name": "hrslash/luminous",
     "type": "wordpress-theme",
-    "description": "The WordPress theme framework based on Laravel Lumen.",
+    "description": "[under development] The WordPress theme framework based on Laravel Lumen.",
     "keywords": ["luminous", "framework", "theme", "WordPress", "laravel", "lumen"],
     "license": "GPL-2.0+",
     "authors": [
         {
             "name": "Takeru Hirose",
-            "email": "info@hrslash.com",
-            "homepage": "http://hrslash.com"
+            "email": "takeru0757@gmail.com"
         }
     ],
     "require": {

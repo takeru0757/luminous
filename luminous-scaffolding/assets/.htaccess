@@ -6,6 +6,7 @@ Satisfy Any
 # Compressed Files
 # ------------------------------------------------------------------------------
 
+AddType image/svg+xml svg
 AddEncoding x-gzip .gz
 
 <IfModule mod_rewrite.c>
@@ -31,6 +32,9 @@ AddEncoding x-gzip .gz
 </FilesMatch>
 <FilesMatch ".*\.js\.gz$">
   ForceType "text/javascript; charset=UTF-8"
+</FilesMatch>
+<FilesMatch ".*\.svg\.gz$">
+  ForceType "image/svg+xml"
 </FilesMatch>
 
 # ------------------------------------------------------------------------------

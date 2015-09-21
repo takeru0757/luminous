@@ -9,14 +9,14 @@
 
     @include('script-html5shiv')
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:100,400,700">
-    <link rel="stylesheet" href="{{ asset('css/main.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/bundle.css') }}">
 
     @include('script-jquery')
 
     <script src="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/js/bootstrap.min.js"></script>
     <script>window.jQuery.fn.alert || document.write('<script src="{{ asset('vendor/bootstrap/bootstrap.min.js') }}"><\/script>')</script>
 
-    <script src="{{ asset('js/main.js') }}"></script>
+    <script src="{{ asset('js/bundle.js') }}"></script>
   </head>
   <body>
     <nav class="navbar navbar-light">
