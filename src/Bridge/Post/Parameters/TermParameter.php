@@ -66,7 +66,7 @@ trait TermParameter
                 'taxonomy' => $where['column'],
                 'terms'    => $where['value'],
                 'operator' => strtoupper($where['operator']),
-                'field'    => $fields[$where['options']['filed']],
+                'field'    => $fields[$where['options']['field']],
                 'include_children' => $where['options']['include_children'],
             ];
         }

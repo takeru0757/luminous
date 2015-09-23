@@ -6,6 +6,8 @@ use DateTimeZone;
 use WP_Post;
 use Luminous\Bridge\Post\Builder as Post;
 use Luminous\Bridge\Post\Type as PostType;
+use Luminous\Bridge\Term\Builder as Term;
+use Luminous\Bridge\Term\Type as TermType;
 
 class WP
 {
@@ -53,7 +55,7 @@ class WP
      */
     public static function postType($name)
     {
-        return PostType::factory($name);
+        return PostType::get($name);
     }
 
     /**
@@ -69,7 +71,7 @@ class WP
     }
 
     /**
-     * Get the post query instance.
+     * Get the post entity instance.
      *
      * @param int|\WP_Post $id
      * @return \Luminous\Bridge\Post\Entities\Entity
@@ -77,5 +79,28 @@ class WP
     public static function post($id)
     {
         return Post::get($id);
+    }
+
+    /**
+     * Get the term type (taxonomy) instance.
+     *
+     * @param string $name
+     * @return \Luminous\Bridge\Term\Type
+     */
+    public static function termType($name)
+    {
+        return TermType::get($name);
+    }
+
+    /**
+     * Get the term entity instance.
+     *
+     * @param int|\stdClass $id
+     * @param string $type
+     * @return \Luminous\Bridge\Term\Entities\Entity
+     */
+    public static function term($id, $type = null)
+    {
+        return Term::get($id, $type);
     }
 }

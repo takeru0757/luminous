@@ -1,6 +1,6 @@
 <?php
 
-namespace Luminous\Bridge\Post;
+namespace Luminous\Bridge\Term;
 
 use InvalidArgumentException;
 use Luminous\Bridge\EntityAttributeTrait;
@@ -12,7 +12,7 @@ class Type
     /**
      * Instances.
      *
-     * @var \Luminous\Bridge\Post\Type[]
+     * @var \Luminous\Bridge\Term\Type[]
      */
     protected static $instances = [];
 
@@ -24,10 +24,10 @@ class Type
     protected $accessors = [];
 
     /**
-     * Get the post type instance.
+     * Get the term type (taxonomy) instance.
      *
      * @param string $name
-     * @return \Luminous\Bridge\Post\Type[]
+     * @return \Luminous\Bridge\Term\Type[]
      */
     public static function get($name)
     {
@@ -39,7 +39,7 @@ class Type
     }
 
     /**
-     * Create new post type instance.
+     * Create new term type (taxonomy) instance.
      *
      * @param string $name
      *
@@ -47,10 +47,10 @@ class Type
      */
     protected function __construct($name)
     {
-        $this->original = get_post_type_object($name);
+        $this->original = get_taxonomy($name);
 
         if (! $this->original) {
-            throw new InvalidArgumentException("No post type named [{$name}].");
+            throw new InvalidArgumentException("No term type named [{$name}].");
         }
     }
 }

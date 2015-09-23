@@ -42,15 +42,17 @@ $app->group(['prefix' => 'posts', 'namespace' => 'Luminous\Http\Controllers'], f
         'as' => 'post_archive',
     ]);
 
-    // $app->any('category/{term:.+}', [
-    //     'query' => ['postType' => $postType, 'limit' => $limit, 'termType' => 'category'],
-    //     'uses' => 'Controller@archive',
-    // ]);
-    //
-    // $app->any('tag/{term}', [
-    //     'query' => ['postType' => $postType, 'limit' => $limit, 'termType' => 'post_tag'],
-    //     'uses' => 'Controller@archive',
-    // ]);
+    $app->any('category/{path:.+}', [
+        'query' => ['postType' => $postType, 'limit' => $limit, 'termType' => 'category'],
+        'uses' => 'Controller@archive',
+        'as' => 'category_archive',
+    ]);
+
+    $app->any('tag/{slug}', [
+        'query' => ['postType' => $postType, 'limit' => $limit, 'termType' => 'post_tag'],
+        'uses' => 'Controller@archive',
+        'as' => 'post_tag_archive',
+    ]);
 });
 
 // -----------------------------------------------------------------------------

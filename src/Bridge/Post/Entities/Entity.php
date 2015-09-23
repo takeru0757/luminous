@@ -2,16 +2,15 @@
 
 namespace Luminous\Bridge\Post\Entities;
 
-use Closure;
-use DateTime;
+use ArrayAccess;
+use WP_Post;
 use Carbon\Carbon;
 use Luminous\Bridge\EntityAttributeTrait;
 use Luminous\Bridge\EntityParameterTrait;
 use Luminous\Bridge\WP;
 use Luminous\Bridge\Post\Type;
-use WP_Post;
 
-abstract class Entity
+abstract class Entity implements ArrayAccess
 {
     use EntityAttributeTrait;
     use EntityParameterTrait;
@@ -26,6 +25,7 @@ abstract class Entity
      * @var array
      */
     protected $accessors = [
+        'id'            => 'ID',
         'slug'          => 'post_name',
         'title'         => 'post_title',
         'raw_content'   => 'post_content',
@@ -59,21 +59,21 @@ abstract class Entity
      *
      * @var \Luminous\Bridge\Post\Type
      */
-    public $type;
+    protected $type;
 
     /**
      * The array of paged contents.
      *
      * @var array
      */
-    public $contents;
+    protected $contents;
 
     /**
      * The number of paged contents.
      *
      * @var int
      */
-    public $pages;
+    protected $pages;
 
     /**
      * Create a new entity instance.
@@ -84,7 +84,7 @@ abstract class Entity
     public function __construct(WP_Post $original)
     {
         $this->original = $original;
-        $this->type = Type::factory($original->post_type);
+        $this->type = Type::get($original->post_type);
 
         $this->prepareContent();
     }
@@ -214,13 +214,23 @@ abstract class Entity
     }
 
     /**
+     * The alias to `created_at`.
+     *
+     * @return \Carbon\Carbon
+     */
+    protected function getDateAttribute()
+    {
+        return $this->created_at;
+    }
+
+    /**
      * Get the formatted time.
      *
      * @param string $format
      * @param bool $updated
      * @return string
      */
-    public function date($format = DateTime::W3C, $updated = false)
+    public function date($format, $updated = false)
     {
         return $this->{$updated ? 'updated_at' : 'created_at'}->format($format);
     }

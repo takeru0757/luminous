@@ -2,6 +2,7 @@
 
 namespace Luminous\Bridge;
 
+use \BadMethodCallException;
 use Illuminate\Support\Str;
 
 trait EntityAttributeTrait
@@ -49,7 +50,7 @@ trait EntityAttributeTrait
      */
     public function getOriginalAttribute($key)
     {
-        return $this->original->{$this->accessor($key)};
+        return ($accessor = $this->accessor($key)) ? $this->original->{$accessor} : null;
     }
 
     /**
@@ -60,7 +61,10 @@ trait EntityAttributeTrait
      */
     protected function accessor($key)
     {
-        return isset($this->accessors[$key]) ? $this->accessors[$key] : $key;
+        if (isset($this->accessors[$key])) {
+            return $this->accessors[$key];
+        }
+        return property_exists($this->original, $key) ? $key : null;
     }
 
     /**
@@ -73,5 +77,57 @@ trait EntityAttributeTrait
     {
         $method = 'get'.Str::studly($key).'Attribute';
         return method_exists($this, $method) ? $method : null;
+    }
+
+    /**
+     * ArrayAccess::offsetExists()
+     *
+     * @param mixed $key
+     * @return bool
+     */
+    public function offsetExists($key)
+    {
+        return $this->accessor($key) || $this->getMutator($key);
+    }
+
+
+    /**
+     * ArrayAccess::offsetGet()
+     *
+     * @param mixed $key
+     * @return mixed
+     */
+    public function offsetGet($key)
+    {
+        return $this->getAttribute($key);
+    }
+
+    /**
+     * ArrayAccess::offsetSet()
+     *
+     * @param mixed $key
+     * @param mixed $value
+     * @return void
+     *
+     * @throws \BadMethodCallException
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
+    public function offsetSet($key, $value)
+    {
+        throw new BadMethodCallException();
+    }
+
+    /**
+     * ArrayAccess::offsetUnset()
+     *
+     * @param mixed $key
+     * @return void
+     *
+     * @throws \BadMethodCallException
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
+    public function offsetUnset($key)
+    {
+        throw new BadMethodCallException();
     }
 }

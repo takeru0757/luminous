@@ -33,7 +33,7 @@ trait EntityParameterTrait
             return $this->{$mutator}();
         }
 
-        if (isset($this->dateParameterFormats[$key]) && $this->dateParameter) {
+        if (isset($this->dateParameter, $this->dateParameterFormats[$key])) {
             $date = $this->{$this->dateParameter};
             return $date->format($this->dateParameterFormats[$key]);
         }

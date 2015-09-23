@@ -48,12 +48,10 @@ EOT;
     }
 }
 
-if (! function_exists('luminous_post_route')) {
-    function luminous_post_route($post, $placeholder)
+if (! function_exists('luminous_route')) {
+    function luminous_route($name, $entity, $placeholder = null)
     {
-        $entity = app('wp')->post($post);
-
-        $uri = route($entity->type->name);
+        $uri = route($name);
         $uri = home_url(substr($uri, strlen(app('request')->root())));
 
         return preg_replace_callback('/\{(.*?)(:.*?)?(\{[0-9,]+\})?\}/', function ($m) use ($entity, $placeholder) {

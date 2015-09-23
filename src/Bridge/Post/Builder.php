@@ -2,7 +2,6 @@
 
 namespace Luminous\Bridge\Post;
 
-use Closure;
 use WP_Post;
 use Luminous\Bridge\Exceptions\MissingEntityException;
 use Luminous\Bridge\Exceptions\RecordNotFoundException;
@@ -13,13 +12,6 @@ use Luminous\Bridge\Post\Entities\PostEntity;
 
 class Builder
 {
-    /**
-     * The array of post types.
-     *
-     * @var \Luminous\Bridge\Post\Type[string]
-     */
-    protected static $types;
-
     /**
      * The map of entity classes.
      *
@@ -48,7 +40,7 @@ class Builder
      * @param int|\WP_Post $id
      * @return \Luminous\Bridge\Post\Entities\Entity
      *
-     * @throws \Luminous\Bridge\Support\RecordNotFoundException
+     * @throws \Luminous\Bridge\Exceptions\RecordNotFoundException
      */
     public static function get($id)
     {
@@ -65,7 +57,7 @@ class Builder
      * @param string $type
      * @return string
      *
-     * @throws \Luminous\Bridge\Support\MissingEntityException
+     * @throws \Luminous\Bridge\Exceptions\MissingEntityException
      */
     public static function entityClass($type = null)
     {

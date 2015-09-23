@@ -102,15 +102,16 @@ class Controller extends BaseController
      */
     protected function getTermQuery(array $query)
     {
-        if (!isset($query['termType'], $query['term'])) {
+        if (!isset($query['termType'])) {
             return [];
         }
 
-        $value = $query['term'];
+        $value = isset($query['path']) ? $query['path'] : $query['slug'];
         $operator = 'in';
 
         if (strpos($value, '/') !== false) {
-            $value = end(explode('/', $value));
+            $paths = explode('/', $value);
+            $value = end($paths);
         } elseif (strpos($value, ',') !== false) {
             $value = explode(',', $value);
             $operator = 'in';
