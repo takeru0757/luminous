@@ -15,20 +15,8 @@ class Application extends BaseApplication
     {
         parent::bootstrapContainer();
 
-        $this->registerBridgeBindings();
-        $this->make('wp');
-    }
-
-    /**
-     * Register container bindings for the application.
-     *
-     * @return void
-     */
-    protected function registerBridgeBindings()
-    {
-        $this->singleton('wp', function () {
-            return $this->loadComponent('wp', 'Luminous\Bridge\BridgeServiceProvider');
-        });
+        $this->loadComponent('wp', 'Luminous\Bridge\BridgeServiceProvider');
+        $this->aliases['Luminous\Bridge\WP'] = 'wp';
     }
 
     /**
@@ -107,16 +95,9 @@ class Application extends BaseApplication
      */
     protected function handleFoundRoute($routeInfo)
     {
-        $action = $routeInfo[1];
-        $query = $routeInfo[2];
-
-        if (isset($action['query'])) {
-            foreach ($action['query'] as $key => $value) {
-                $query[$key] = $value;
-            }
+        if (isset($routeInfo[1]['query'])) {
+            $routeInfo[2] = ['query' => array_merge($routeInfo[1]['query'], $routeInfo[2])];
         }
-
-        $routeInfo[2] = ['query' => $query];
 
         return parent::handleFoundRoute($routeInfo);
     }

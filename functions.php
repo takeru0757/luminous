@@ -18,10 +18,10 @@ spl_autoload_register(function ($className) use ($themePath) {
 // Create The Application
 // -----------------------------------------------------------------------------
 
-$app = require $themePath.'/la-bootstrap.php';
+$app = require $themePath.'/bootstrap/app.php';
 
 if (is_wp()) {
-    require base_path('la-bridges.php');
+    require __DIR__.'/wp-bridges.php';
 } else {
     add_action('wp_loaded', function () use ($app) {
         $app->run();

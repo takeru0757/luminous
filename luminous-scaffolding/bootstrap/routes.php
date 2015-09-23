@@ -4,16 +4,14 @@
 // Utility Responces
 // -----------------------------------------------------------------------------
 
-// $app->group(['namespace' => 'App\Http'], function ($app) {
-//     $app->get('sitemap.xml', 'Controller@sitemap');
-//     $app->get('robots.txt', 'Controller@robots');
-// });
+// $app->get('sitemap.xml', 'Controller@sitemap');
+// $app->get('robots.txt', 'Controller@robots');
 
 // -----------------------------------------------------------------------------
 // for Post
 // -----------------------------------------------------------------------------
 
-$app->group(['prefix' => 'info', 'namespace' => 'App\Http'], function ($app) {
+$app->group(['prefix' => 'posts', 'namespace' => 'Luminous\Http\Controllers'], function ($app) {
     $postType = 'post';
     $limit = 10;
 
@@ -61,7 +59,7 @@ $app->group(['prefix' => 'info', 'namespace' => 'App\Http'], function ($app) {
 
 $app->any('{path:.+}', [
     'query' => ['postType' => 'page'],
-    'uses' => 'App\Http\Controller@show',
+    'uses' => 'Controller@show',
     'as' => 'page',
 ]);
 
@@ -70,6 +68,6 @@ $app->any('{path:.+}', [
 // -----------------------------------------------------------------------------
 
 $app->any('/', [
-    'uses' => 'App\Http\Controller@home',
+    'uses' => 'Controller@home',
     'as' => 'home',
 ]);

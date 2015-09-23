@@ -1,6 +1,6 @@
 <?php
 
-namespace Luminous\Http;
+namespace Luminous\Http\Controllers;
 
 use DateTime;
 use Carbon\Carbon;
@@ -15,7 +15,6 @@ class Controller extends BaseController
     /**
      * Handle requests for home.
      *
-     * @param \Illuminate\Http\Request $request
      * @return \Symfony\Component\HttpFoundation\Response
      */
     public function home()
@@ -26,13 +25,14 @@ class Controller extends BaseController
     /**
      * Handle requests for archive.
      *
+     * @param \Luminous\Bridge\WP $wp
      * @param array $query
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function archive($query)
+    public function archive(WP $wp, $query)
     {
-        $postType = Type::factory($query['postType']);
-        $postQuery = app('wp')->posts($postType);
+        $postType = $wp->postType($query['postType']);
+        $postQuery = $wp->posts($postType);
 
         if (isset($query['order'])) {
             $postQuery->orderBy($query['order']['column'], $query['order']['direction']);
@@ -63,13 +63,14 @@ class Controller extends BaseController
     /**
      * Handle requests for singular.
      *
+     * @param \Luminous\Bridge\WP $wp
      * @param array $query
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function show($query)
+    public function show(WP $wp, $query)
     {
-        $postType = Type::factory($query['postType']);
-        $postQuery = app('wp')->posts($postType);
+        $postType = $wp->postType($query['postType']);
+        $postQuery = $wp->posts($postType);
 
         $path = null;
 
@@ -188,9 +189,10 @@ class Controller extends BaseController
     protected function createResponse(View $view, DateTime $modified = null)
     {
         $response = response($view->render(), 200);
+        $expires = $this->expires();
 
-        $response->header('Cache-Control', "private,max-age={$this->expires()}");
-        $response->header('Expires', Carbon::now()->addSeconds($this->expires())->format(DateTime::RFC1123));
+        $response->header('Cache-Control', "private,max-age={$expires}");
+        $response->header('Expires', Carbon::now()->addSeconds($expires)->format(DateTime::RFC1123));
 
         if ($modified) {
             $response->header('Last-Modified', $modified->format(DateTime::RFC1123));

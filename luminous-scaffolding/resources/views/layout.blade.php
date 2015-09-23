@@ -7,11 +7,17 @@
 
     <title>@yield('title', e($site->name))</title>
 
-    @include('script-html5shiv')
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:100,400,700">
     <link rel="stylesheet" href="{{ asset('css/bundle.css') }}">
 
-    @include('script-jquery')
+    <!--[if lt IE 9]>
+    <script src="{{ asset('vendor/html5shiv/html5shiv.min.js') }}"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <![endif]-->
+    <!--[if gte IE 9]><!-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script>window.jQuery || document.write('<script src="{{ asset('vendor/jquery/jquery.min.js') }}"><\/script>')</script>
+    <!--<![endif]-->
 
     <script src="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/js/bootstrap.min.js"></script>
     <script>window.jQuery.fn.alert || document.write('<script src="{{ asset('vendor/bootstrap/bootstrap.min.js') }}"><\/script>')</script>

@@ -1,6 +1,6 @@
 <?php
 
-// Dotenv::load(__DIR__.'/');
+// Dotenv::load(__DIR__.'/../');
 
 // -----------------------------------------------------------------------------
 // Create The Application
@@ -11,10 +11,8 @@
 putenv('APP_TIMEZONE='.date_default_timezone_get());
 
 $app = new Luminous\Application(
-    realpath(__DIR__.'/')
+    realpath(__DIR__.'/../')
 );
-
-// $app->withFacades();
 
 // -----------------------------------------------------------------------------
 // Register Container Bindings
@@ -47,15 +45,11 @@ $app->singleton(
 // ]);
 
 // -----------------------------------------------------------------------------
-// Register Service Providers
-// -----------------------------------------------------------------------------
-
-$app->register(App\Providers\AppServiceProvider::class);
-
-// -----------------------------------------------------------------------------
 // Load Routes
 // -----------------------------------------------------------------------------
 
-require base_path('la-routes.php');
+$app->group(['namespace' => 'Luminous\Http\Controllers'], function ($app) {
+    require __DIR__.'/routes.php';
+});
 
 return $app;

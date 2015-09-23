@@ -14,33 +14,26 @@ class BridgeServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('wp', function () {
+        $this->app->singleton('wp', function ($app) {
+            $app->register('Illuminate\Pagination\PaginationServiceProvider');
             return new WP();
         });
-
-        $this->registerPaginationBindings();
-        $this->registerPostBuilderBindings();
     }
 
     /**
-     * Register container bindings for the application.
+     * Perform post-registration booting of services.
      *
      * @return void
      */
-    public function registerPaginationBindings()
+    public function boot()
     {
-        $this->app->register('Illuminate\Pagination\PaginationServiceProvider');
-    }
+        $view = $this->app->make('view');
 
-    /**
-     * Register the post builder instance.
-     *
-     * @return void
-     */
-    public function registerPostBuilderBindings()
-    {
-        $this->app->singleton('wp.post.builder', function () {
-            return new PostBuilder();
-        });
+        $view->share('wp', $wp = $this->app->make('wp'));
+        $view->share('site', (object) [
+            'name'          => $wp->option('blogname'),
+            'description'   => $wp->option('blogdescription'),
+            'url'           => $wp->option('home'),
+        ]);
     }
 }

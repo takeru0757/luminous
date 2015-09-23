@@ -4,8 +4,9 @@ if (! function_exists('is_wp')) {
     /**
      * Determine if the request should be handled by WordPress.
      *
-     * @uses \is_admin()
+     * @uses WP_INSTALLING
      * @uses $pagenow
+     * @uses \is_admin()
      *
      * @return bool
      */
@@ -46,8 +47,6 @@ if (! function_exists('asset')) {
     /**
      * Get the path to a versioned file.
      *
-     * @uses \home_url()
-     *
      * @param string $file
      * @return string
      *
@@ -56,15 +55,13 @@ if (! function_exists('asset')) {
     function asset($file)
     {
         static $manifest = null;
-        static $root = null;
 
         if (is_null($manifest)) {
-            $manifest = json_decode(file_get_contents(base_path('assets/rev-manifest.json')), true);
-            $root = parse_url(home_url(), PHP_URL_PATH).'/assets/';
+            $manifest = json_decode(file_get_contents(base_path('public/assets/rev-manifest.json')), true);
         }
 
         if (isset($manifest[$file])) {
-            return $root.$manifest[$file];
+            return url('assets/'.$manifest[$file]);
         }
 
         throw new InvalidArgumentException("File {$file} not defined in asset manifest.");
