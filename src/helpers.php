@@ -48,20 +48,24 @@ if (! function_exists('asset')) {
      * Get the path to a versioned file.
      *
      * @param string $file
+     * @param bool|null $secure
      * @return string
      *
      * @throws \InvalidArgumentException
      */
-    function asset($file)
+    function asset($file, $secure = null)
     {
         static $manifest = null;
+        static $prefix = null;
 
         if (is_null($manifest)) {
-            $manifest = json_decode(file_get_contents(base_path('public/assets/rev-manifest.json')), true);
+            $manifestPath = config('assets.manifest', base_path('public/assets/rev-manifest.json'));
+            $manifest = json_decode(file_get_contents($manifestPath), true);
+            $prefix = trim(config('assets.prefix', '/assets'), '/').'/';
         }
 
         if (isset($manifest[$file])) {
-            return url('assets/'.$manifest[$file]);
+            return app('url')->asset($prefix.$manifest[$file], $secure);
         }
 
         throw new InvalidArgumentException("File {$file} not defined in asset manifest.");
