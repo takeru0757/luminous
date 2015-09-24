@@ -1,6 +1,16 @@
 <?php
 
 if (! function_exists('luminous_mod_rewrite_rules')) {
+    /**
+     * Get the mod rewitre rules for Luminous.
+     *
+     * @uses \get_stylesheet_directory_uri()
+     * @uses \is_child_theme()
+     * @uses \wp_upload_dir()
+     * @uses \home_url()
+     *
+     * @return string
+     */
     function luminous_mod_rewrite_rules()
     {
         $publicUrl = get_stylesheet_directory_uri().(is_child_theme() ? '/public' : '/luminous-scaffolding/public');
@@ -48,14 +58,41 @@ EOT;
     }
 }
 
-if (! function_exists('luminous_route')) {
-    function luminous_route($name, $entity, $placeholder = null)
+if (! function_exists('luminous_archive_url')) {
+    /**
+     * Generate a URL to archive. (for admin)
+     *
+     * @uses \home_url()
+     *
+     * @param \Luminous\Bridge\HasArchive $archiveFor
+     * @return string
+     */
+    function luminous_archive_url(Luminous\Bridge\HasArchive $archiveFor)
     {
-        $uri = route($name);
-        $uri = home_url(substr($uri, strlen(app('request')->root())));
+        $uri = archive_url($archiveFor);
+        return home_url(substr($uri, strlen(app('request')->root())));
+    }
+}
 
-        return preg_replace_callback('/\{(.*?)(:.*?)?(\{[0-9,]+\})?\}/', function ($m) use ($entity, $placeholder) {
-            return $placeholder && in_array($m[1], ['slug', 'path']) ? $placeholder : $entity->parameter($m[1]);
-        }, $uri);
+if (! function_exists('luminous_post_url')) {
+    /**
+     * Generate a URL to the post. (for admin)
+     *
+     * @uses \home_url()
+     *
+     * @param \Luminous\Bridge\Post\Entities\Entity $post
+     * @param string $placeholder
+     * @return string
+     */
+    function luminous_post_url(Luminous\Bridge\Post\Entities\Entity $post, $placeholder = null)
+    {
+        if ($placeholder) {
+            $parameters = [$post->type->hierarchical ? 'path' : 'slug' => $placeholder];
+        } else {
+            $parameters = [];
+        }
+
+        $uri = post_url($post, $parameters);
+        return home_url(substr($uri, strlen(app('request')->root())));
     }
 }

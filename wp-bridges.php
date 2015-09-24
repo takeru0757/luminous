@@ -45,7 +45,7 @@ add_filter('post_link', function ($permalink, $post, $leavename) {
         return $permalink;
     }
     $placeholder = $leavename ? '%postname%' : null;
-    return luminous_route('post', app('wp')->post($post), $placeholder);
+    return luminous_post_url(app('wp')->post($post), $placeholder);
 }, 10, 3);
 
 // @link https://developer.wordpress.org/reference/functions/_get_page_link/
@@ -54,7 +54,7 @@ add_filter('_get_page_link', function ($permalink, $postId) {
         return $permalink;
     }
     $placeholder = strpos($permalink, '%pagename%') !== false ? '%pagename%' : null;
-    return luminous_route('page', app('wp')->post($postId), $placeholder);
+    return luminous_post_url(app('wp')->post($postId), $placeholder);
 }, 10, 2);
 
 // @link https://developer.wordpress.org/reference/functions/get_post_permalink/
@@ -63,10 +63,10 @@ add_filter('post_type_link', function ($permalink, $post, $leavename) {
         return $permalink;
     }
     $placeholder = $leavename ? "%{$post->post_type}%" : null;
-    return luminous_route($post->post_type, app('wp')->post($post), $placeholder);
+    return luminous_post_url(app('wp')->post($post), $placeholder);
 }, 10, 3);
 
 // @link https://developer.wordpress.org/reference/functions/get_term_link/
 add_filter('term_link', function ($termlink, $term, $taxonomy) {
-    return luminous_route("{$taxonomy}_archive", app('wp')->term($term));
+    return luminous_archive_url(app('wp')->term($term));
 }, 10, 3);

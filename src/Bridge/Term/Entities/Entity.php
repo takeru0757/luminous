@@ -7,10 +7,12 @@ use ArrayAccess;
 use Illuminate\Support\Collection;
 use Luminous\Bridge\EntityAttributeTrait;
 use Luminous\Bridge\EntityParameterTrait;
+use Luminous\Bridge\HasArchive;
+use Luminous\Bridge\HasParameter;
 use Luminous\Bridge\Term\Builder;
 use Luminous\Bridge\Term\Type;
 
-abstract class Entity implements ArrayAccess
+abstract class Entity implements HasArchive, HasParameter, ArrayAccess
 {
     use EntityAttributeTrait;
     use EntityParameterTrait;
@@ -29,7 +31,7 @@ abstract class Entity implements ArrayAccess
      *
      * @var \Luminous\Bridge\Term\Type
      */
-    protected $type;
+    public $type;
 
     /**
      * Create a new entity instance.
@@ -72,5 +74,25 @@ abstract class Entity implements ArrayAccess
     {
         $slugs = $this->ancestors->reverse()->pluck('slug')->push($this->slug);
         return implode('/', $slugs->all());
+    }
+
+    /**
+     * Get the route prefix for archive of this instance.
+     *
+     * @return string
+     */
+    public function getRoutePrefix()
+    {
+        return $this->type->name;
+    }
+
+    /**
+     * Wheter this instance has archive.
+     *
+     * @return bool
+     */
+    public function hasArchive()
+    {
+        return (bool) $this->type->public;
     }
 }

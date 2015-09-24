@@ -4,8 +4,8 @@
 // Utility Responces
 // -----------------------------------------------------------------------------
 
-// $app->get('sitemap.xml', 'Controller@sitemap');
-// $app->get('robots.txt', 'Controller@robots');
+$app->get('sitemap.xml', 'Controller@sitemap');
+$app->get('robots.txt', 'Controller@robots');
 
 // -----------------------------------------------------------------------------
 // for Post
@@ -24,34 +24,37 @@ $app->group(['prefix' => 'posts', 'namespace' => 'Luminous\Http\Controllers'], f
     $app->any('{year:\d{4}}/{month:\d{2}}/{day:\d{2}}', [
         'query' => ['postType' => $postType, 'limit' => $limit],
         'uses' => 'Controller@archive',
+        'as' => 'post:archive:daily',
     ]);
 
     $app->any('{year:\d{4}}/{month:\d{2}}', [
         'query' => ['postType' => $postType, 'limit' => $limit],
         'uses' => 'Controller@archive',
+        'as' => 'post:archive:monthly',
     ]);
 
     $app->any('{year:\d{4}}', [
         'query' => ['postType' => $postType, 'limit' => $limit],
         'uses' => 'Controller@archive',
+        'as' => 'post:archive:yearly',
     ]);
 
     $app->any('/', [
         'query' => ['postType' => $postType, 'limit' => $limit],
         'uses' => 'Controller@archive',
-        'as' => 'post_archive',
+        'as' => 'post:archive',
     ]);
 
     $app->any('category/{path:.+}', [
         'query' => ['postType' => $postType, 'limit' => $limit, 'termType' => 'category'],
         'uses' => 'Controller@archive',
-        'as' => 'category_archive',
+        'as' => 'category:archive',
     ]);
 
     $app->any('tag/{slug}', [
         'query' => ['postType' => $postType, 'limit' => $limit, 'termType' => 'post_tag'],
         'uses' => 'Controller@archive',
-        'as' => 'post_tag_archive',
+        'as' => 'post_tag:archive',
     ]);
 });
 

@@ -7,10 +7,11 @@ use WP_Post;
 use Carbon\Carbon;
 use Luminous\Bridge\EntityAttributeTrait;
 use Luminous\Bridge\EntityParameterTrait;
+use Luminous\Bridge\HasParameter;
 use Luminous\Bridge\WP;
 use Luminous\Bridge\Post\Type;
 
-abstract class Entity implements ArrayAccess
+abstract class Entity implements HasParameter, ArrayAccess
 {
     use EntityAttributeTrait;
     use EntityParameterTrait;
@@ -59,21 +60,21 @@ abstract class Entity implements ArrayAccess
      *
      * @var \Luminous\Bridge\Post\Type
      */
-    protected $type;
+    public $type;
 
     /**
      * The array of paged contents.
      *
      * @var array
      */
-    protected $contents;
+    public $contents;
 
     /**
      * The number of paged contents.
      *
      * @var int
      */
-    protected $pages;
+    public $pages;
 
     /**
      * Create a new entity instance.
@@ -233,5 +234,15 @@ abstract class Entity implements ArrayAccess
     public function date($format, $updated = false)
     {
         return $this->{$updated ? 'updated_at' : 'created_at'}->format($format);
+    }
+
+    /**
+     * Get the route name for this instance.
+     *
+     * @return string
+     */
+    public function getRouteName()
+    {
+        return $this->type->name;
     }
 }

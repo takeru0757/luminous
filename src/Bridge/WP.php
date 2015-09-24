@@ -4,6 +4,7 @@ namespace Luminous\Bridge;
 
 use DateTimeZone;
 use WP_Post;
+use Illuminate\Support\Collection;
 use Luminous\Bridge\Post\Builder as Post;
 use Luminous\Bridge\Post\Type as PostType;
 use Luminous\Bridge\Term\Builder as Term;
@@ -11,13 +12,6 @@ use Luminous\Bridge\Term\Type as TermType;
 
 class WP
 {
-    /**
-     * The timezone for display.
-     *
-     * @var \DateTimeZone
-     */
-    protected static $timezone;
-
     /**
      * Get the value from the options database table.
      *
@@ -39,12 +33,31 @@ class WP
      */
     public static function timezone()
     {
-        if (static::$timezone === null) {
-            $string = static::option('timezone_string');
-            static::$timezone = new DateTimeZone($string);
-        }
+        static $value = null;
+        return ! is_null($value) ? $value : ($value = new DateTimeZone(static::option('timezone_string')));
+    }
 
-        return static::$timezone;
+    /**
+     * Whether this site is public (`blog_public`).
+     *
+     * @return bool
+     */
+    public static function isPublic()
+    {
+        static $value = null;
+        return ! is_null($value) ? $value : ($value = (bool) static::option('blog_public'));
+    }
+
+    /**
+     * Get all post type instances.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public static function postTypes()
+    {
+        $types = get_post_types(['public' => true, '_builtin' => false]);
+        $types = array_merge(['page', 'post'], $types);
+        return new Collection(array_map(get_called_class().'::postType', $types));
     }
 
     /**

@@ -7,21 +7,6 @@ use Illuminate\Support\Str;
 trait EntityParameterTrait
 {
     /**
-     * Get parameters from the entity.
-     *
-     * @param array|string $keys
-     * @return array
-     */
-    public function parameters($keys)
-    {
-        if (is_string($keys)) {
-            $keys = func_get_args();
-        }
-
-        return array_combine($keys, array_map([$this, 'parameter'], $keys));
-    }
-
-    /**
      * Get an parameter from the entity.
      *
      * @param string $key

@@ -7,11 +7,16 @@ use Carbon\Carbon;
 use Laravel\Lumen\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
+use Luminous\Http\Controllers\Actions\RobotsActionTrait;
+use Luminous\Http\Controllers\Actions\SitemapActionTrait;
 use Luminous\Bridge\WP;
 use Luminous\Bridge\Post\Type;
 
 class Controller extends BaseController
 {
+    use RobotsActionTrait;
+    use SitemapActionTrait;
+
     /**
      * Handle requests for home.
      *
