@@ -79,7 +79,7 @@ class Controller extends BaseController
 
         $path = null;
 
-        foreach (['id', 'slug', 'path'] as $key) {
+        foreach (['id', 'path'] as $key) {
             if (isset($query[$key])) {
                 $postQuery->wherePost($key, $query[$key]);
                 $path = $query[$key];
@@ -107,11 +107,11 @@ class Controller extends BaseController
      */
     protected function getTermQuery(array $query)
     {
-        if (!isset($query['termType'])) {
+        if (! isset($query['termType'], $query['path'])) {
             return [];
         }
 
-        $value = isset($query['path']) ? $query['path'] : $query['slug'];
+        $value = $query['path'];
         $operator = 'in';
 
         if (strpos($value, '/') !== false) {

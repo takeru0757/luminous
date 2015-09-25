@@ -26,8 +26,8 @@ trait PostParameter
     protected $postColumns = [
         'id'        => ['in' => 'post__in', 'not in' => 'post__not_in'],
         'parent_id' => ['in' => 'post_parent__in', 'not in' => 'post_parent__not_in'],
-        'slug'      => ['=' => 'name'],
         'path'      => ['=' => 'pagename'],
+        'slug'      => ['=' => 'name'],
     ];
 
     /**

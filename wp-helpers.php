@@ -86,13 +86,7 @@ if (! function_exists('luminous_post_url')) {
      */
     function luminous_post_url(Luminous\Bridge\Post\Entities\Entity $post, $placeholder = null)
     {
-        if ($placeholder) {
-            $parameters = [$post->type->hierarchical ? 'path' : 'slug' => $placeholder];
-        } else {
-            $parameters = [];
-        }
-
-        $uri = post_url($post, $parameters);
+        $uri = post_url($post, $placeholder ? ['path' => $placeholder] : []);
         return home_url(substr($uri, strlen(app('request')->root())));
     }
 }

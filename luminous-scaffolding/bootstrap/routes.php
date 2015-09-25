@@ -15,7 +15,7 @@ $app->group(['prefix' => 'posts', 'namespace' => 'Luminous\Http\Controllers'], f
     $postType = 'post';
     $limit = 10;
 
-    $app->any('{year:\d{4}}/{month:\d{2}}/{day:\d{2}}/{slug}', [
+    $app->any('{year:\d{4}}/{month:\d{2}}/{day:\d{2}}/{path}', [
         'query' => ['postType' => $postType],
         'uses' => 'Controller@show',
         'as' => 'post',
@@ -51,7 +51,7 @@ $app->group(['prefix' => 'posts', 'namespace' => 'Luminous\Http\Controllers'], f
         'as' => 'category:archive',
     ]);
 
-    $app->any('tag/{slug}', [
+    $app->any('tag/{path}', [
         'query' => ['postType' => $postType, 'limit' => $limit, 'termType' => 'post_tag'],
         'uses' => 'Controller@archive',
         'as' => 'post_tag:archive',
