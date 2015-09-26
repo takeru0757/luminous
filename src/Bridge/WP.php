@@ -3,15 +3,48 @@
 namespace Luminous\Bridge;
 
 use DateTimeZone;
-use WP_Post;
 use Illuminate\Support\Collection;
-use Luminous\Bridge\Post\Builder as Post;
-use Luminous\Bridge\Post\Type as PostType;
-use Luminous\Bridge\Term\Builder as Term;
-use Luminous\Bridge\Term\Type as TermType;
+use Luminous\Bridge\Post\Builder as PostBuilder;
+use Luminous\Bridge\Term\Builder as TermBuilder;
 
 class WP
 {
+    /**
+     * The post builder.
+     *
+     * @var Luminous\Bridge\Post\Builder
+     */
+    protected static $post;
+
+    /**
+     * The term builder.
+     *
+     * @var Luminous\Bridge\Term\Builder
+     */
+    protected static $term;
+
+    /**
+     * Set the post builder.
+     *
+     * @param Luminous\Bridge\Post\Builder $builder
+     * @return void
+     */
+    public static function setPostBuilder(PostBuilder $builder)
+    {
+        static::$post = $builder;
+    }
+
+    /**
+     * Set the term builder.
+     *
+     * @param Luminous\Bridge\Term\Builder $builder
+     * @return void
+     */
+    public static function setTermBuilder(TermBuilder $builder)
+    {
+        static::$term = $builder;
+    }
+
     /**
      * Get the value from the options database table.
      *
@@ -51,7 +84,9 @@ class WP
     /**
      * Get all post type instances.
      *
-     * @return \Illuminate\Support\Collection
+     * @uses \get_post_types()
+     *
+     * @return \Illuminate\Support\Collection|\Luminous\Bridge\Post\Type[]
      */
     public static function postTypes()
     {
@@ -68,19 +103,7 @@ class WP
      */
     public static function postType($name)
     {
-        return PostType::get($name);
-    }
-
-    /**
-     * Get the post query instance.
-     *
-     * @param \Luminous\Bridge\Post\Type|string|array $type
-     * @return \Luminous\Bridge\Post\Query
-     */
-    public static function posts($type = null)
-    {
-        $query = Post::query();
-        return $type ? $query->type($type) : $query;
+        return static::$post->getType($name);
     }
 
     /**
@@ -91,7 +114,19 @@ class WP
      */
     public static function post($id)
     {
-        return Post::get($id);
+        return static::$post->get($id);
+    }
+
+    /**
+     * Get the post query instance.
+     *
+     * @param \Luminous\Bridge\Post\Type|string|array $type
+     * @return \Luminous\Bridge\Post\Query
+     */
+    public static function posts($type = null)
+    {
+        $query = static::$post->query();
+        return $type ? $query->type($type) : $query;
     }
 
     /**
@@ -102,7 +137,7 @@ class WP
      */
     public static function termType($name)
     {
-        return TermType::get($name);
+        return static::$term->getType($name);
     }
 
     /**
@@ -112,8 +147,8 @@ class WP
      * @param string $type
      * @return \Luminous\Bridge\Term\Entities\Entity
      */
-    public static function term($id, $type = null)
+    public static function term($id, $type)
     {
-        return Term::get($id, $type);
+        return static::$term->get($id, $type);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Luminous\Bridge;
 
-use \BadMethodCallException;
+use BadMethodCallException;
 use Illuminate\Support\Str;
 
 trait EntityAttributeTrait
@@ -89,7 +89,6 @@ trait EntityAttributeTrait
     {
         return $this->accessor($key) || $this->getMutator($key);
     }
-
 
     /**
      * ArrayAccess::offsetGet()

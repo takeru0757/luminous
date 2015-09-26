@@ -5,8 +5,6 @@ namespace Luminous\Bridge\Post;
 use WP_Query;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
-use Luminous\Bridge\Post\Builder;
 use Luminous\Bridge\Post\Parameters\DateParameter;
 use Luminous\Bridge\Post\Parameters\OrderParameter;
 use Luminous\Bridge\Post\Parameters\PostParameter;
@@ -243,11 +241,10 @@ class Query
         );
 
         $result = new WP_Query($query);
-        $items = $this->builder->hydrateMany($result->get_posts());
 
         return [
             'total' => intval($result->found_posts),
-            'items' => new Collection($items),
+            'items' => $this->builder->hydrateMany($result->get_posts()),
         ];
     }
 }

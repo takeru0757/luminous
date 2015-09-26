@@ -2,20 +2,12 @@
 
 namespace Luminous\Bridge\Post;
 
-use InvalidArgumentException;
 use Luminous\Bridge\EntityAttributeTrait;
 use Luminous\Bridge\HasArchive;
 
 class Type implements HasArchive
 {
     use EntityAttributeTrait;
-
-    /**
-     * Instances.
-     *
-     * @var \Luminous\Bridge\Post\Type[]
-     */
-    protected static $instances = [];
 
     /**
      * The accessors map for original instance.
@@ -25,34 +17,14 @@ class Type implements HasArchive
     protected $accessors = [];
 
     /**
-     * Get the post type instance.
-     *
-     * @param string $name
-     * @return \Luminous\Bridge\Post\Type[]
-     */
-    public static function get($name)
-    {
-        if (! array_key_exists($name, static::$instances)) {
-            static::$instances[$name] = new static($name);
-        }
-
-        return static::$instances[$name];
-    }
-
-    /**
      * Create new post type instance.
      *
-     * @param string $name
-     *
-     * @throws \InvalidArgumentException
+     * @param \stdClass $original
+     * @return void
      */
-    protected function __construct($name)
+    public function __construct($original)
     {
-        $this->original = get_post_type_object($name);
-
-        if (! $this->original) {
-            throw new InvalidArgumentException("No post type named [{$name}].");
-        }
+        $this->original = $original;
     }
 
     /**

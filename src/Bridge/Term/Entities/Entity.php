@@ -9,8 +9,8 @@ use Luminous\Bridge\EntityAttributeTrait;
 use Luminous\Bridge\EntityParameterTrait;
 use Luminous\Bridge\HasArchive;
 use Luminous\Bridge\HasParameter;
-use Luminous\Bridge\Term\Builder;
 use Luminous\Bridge\Term\Type;
+use Luminous\Bridge\WP;
 
 abstract class Entity implements HasArchive, HasParameter, ArrayAccess
 {
@@ -23,7 +23,7 @@ abstract class Entity implements HasArchive, HasParameter, ArrayAccess
      * @var array
      */
     protected $accessors = [
-        'id' => 'term_id', // int
+        'id' => 'term_id',
     ];
 
     /**
@@ -37,12 +37,13 @@ abstract class Entity implements HasArchive, HasParameter, ArrayAccess
      * Create a new entity instance.
      *
      * @param \stdClass $original
+     * @param \Luminous\Bridge\Term\Type $type
      * @return void
      */
-    public function __construct(stdClass $original)
+    public function __construct(stdClass $original, Type $type)
     {
         $this->original = $original;
-        $this->type = Type::get($original->taxonomy);
+        $this->type = $type;
     }
 
     /**
@@ -61,7 +62,7 @@ abstract class Entity implements HasArchive, HasParameter, ArrayAccess
         }
 
         return new Collection(array_map(function ($id) {
-            return Builder::get($id, $this->type->name);
+            return WP::term($id, $this->type->name);
         }, $ancestors));
     }
 
@@ -93,6 +94,6 @@ abstract class Entity implements HasArchive, HasParameter, ArrayAccess
      */
     public function hasArchive()
     {
-        return (bool) $this->type->public;
+        return $this->type->public;
     }
 }

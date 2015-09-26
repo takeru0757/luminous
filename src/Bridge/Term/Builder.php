@@ -2,83 +2,76 @@
 
 namespace Luminous\Bridge\Term;
 
-use stdClass;
-use Luminous\Bridge\Exceptions\MissingEntityException;
-use Luminous\Bridge\Exceptions\RecordNotFoundException;
-use Luminous\Bridge\Term\Entities\CategoryEntity;
-use Luminous\Bridge\Term\Entities\PostTagEntity;
+use Luminous\Bridge\Builder as BaseBuilder;
 
-class Builder
+class Builder extends BaseBuilder
 {
     /**
-     * The map of entity classes.
-     *
-     * @var string[string]
-     */
-    protected static $entityClasses = [
-        'category' => CategoryEntity::class,
-        'post_tag' => PostTagEntity::class,
-    ];
-
-    /**
-     * Find the entity.
+     * Get the original object.
      *
      * @uses \get_term()
      * @uses \is_wp_error()
-     * @param int|\stdClass $id
-     * @param string $type
-     * @return \Luminous\Bridge\Term\Entities\Entity
      *
-     * @throws \Luminous\Bridge\Exceptions\RecordNotFoundException
+     * @param mixed $id
+     * @param string $type
+     * @return \stdClass|null
      */
-    public static function get($id, $type = null)
+    protected function getOriginal($id, $type = null)
     {
-        if (is_object($id) && isset($id->taxonomy)) {
-            return static::hydrate($id);
-        } elseif (($term = get_term($id, $type)) && !is_wp_error($term)) {
-            return static::hydrate($term);
-        }
-
-        throw new RecordNotFoundException;
+        $original = get_term($id, $type);
+        return $original && ! is_wp_error($original) ? $original : null;
     }
 
     /**
-     * Get the entity class name.
+     * Get the type class name.
      *
-     * @param string $type
      * @return string
-     *
-     * @throws \Luminous\Bridge\Exceptions\MissingEntityException
      */
-    public static function entityClass($type = null)
+    protected function typeClass()
     {
-        if (! isset(static::$entityClasses[$type])) {
-            throw new MissingEntityException;
+        return Type::class;
+    }
+
+    /**
+     * Get the original type object.
+     *
+     * @uses \get_taxonomy()
+     *
+     * @param string $name
+     * @return \stdClass
+     */
+    protected function getOriginalType($name)
+    {
+        return get_taxonomy($name);
+    }
+
+    /**
+     * Get the entity type from original object.
+     *
+     * @param mixed $original
+     * @return string
+     */
+    protected function entityType($original)
+    {
+        return $this->getType($original->taxonomy);
+    }
+
+    /**
+     * Get the entity abstract from the type.
+     *
+     * @param \Luminous\Bridge\Type $type
+     * @return string
+     */
+    protected function entityAbstract($type)
+    {
+        $base = 'wp.term';
+
+        if ($this->container->bound("{$base}.{$type->name}")) {
+            $key = $type->name;
+        } else {
+            $key = $type->hierarchical ? 'category' : 'post_tag';
         }
 
-        return static::$entityClasses[$type];
-    }
-
-    /**
-     * Create an entity.
-     *
-     * @param \stdClass $original
-     * @return \Luminous\Bridge\Term\Entities\Entity
-     */
-    public static function hydrate(stdClass $original)
-    {
-        $entityClass = static::entityClass($original->taxonomy);
-        return new $entityClass($original);
-    }
-
-    /**
-     * Create a collection of entities.
-     *
-     * @param array $originals
-     * @return array
-     */
-    public static function hydrateMany(array $originals)
-    {
-        return array_map(get_called_class().'::hydrate', $originals);
+        return "{$base}.{$key}";
     }
 }

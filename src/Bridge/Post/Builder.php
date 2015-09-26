@@ -2,105 +2,86 @@
 
 namespace Luminous\Bridge\Post;
 
-use WP_Post;
-use Luminous\Bridge\Exceptions\MissingEntityException;
-use Luminous\Bridge\Exceptions\RecordNotFoundException;
-use Luminous\Bridge\Post\Query;
-use Luminous\Bridge\Post\Entities\AttachmentEntity;
-use Luminous\Bridge\Post\Entities\PageEntity;
-use Luminous\Bridge\Post\Entities\PostEntity;
+use Luminous\Bridge\Builder as BaseBuilder;
 
-class Builder
+class Builder extends BaseBuilder
 {
     /**
-     * The map of entity classes.
+     * Get the original object.
      *
-     * @var string[string]
+     * @uses \get_post()
+     *
+     * @param mixed $id
+     * @param string $type
+     * @return \WP_Post|null
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected static $entityClasses = [
-        'attachment' => AttachmentEntity::class,
-        'page' => PageEntity::class,
-        'post' => PostEntity::class,
-    ];
+    protected function getOriginal($id, $type = null)
+    {
+        return get_post($id);
+    }
 
     /**
-     * Get a new query builder instance.
+     * Get the type class name.
+     *
+     * @return string
+     */
+    protected function typeClass()
+    {
+        return Type::class;
+    }
+
+    /**
+     * Get the original type object.
+     *
+     * @uses \get_post_type_object()
+     *
+     * @param string $name
+     * @return \stdClass
+     */
+    protected function getOriginalType($name)
+    {
+        return get_post_type_object($name);
+    }
+
+    /**
+     * Get the entity type from original object.
+     *
+     * @param mixed $original
+     * @return string
+     */
+    protected function entityType($original)
+    {
+        return $this->getType($original->post_type);
+    }
+
+    /**
+     * Get the entity abstract from the type.
+     *
+     * @param \Luminous\Bridge\Type $type
+     * @return string
+     */
+    protected function entityAbstract($type)
+    {
+        $base = 'wp.post';
+
+        if ($this->container->bound("{$base}.{$type->name}")) {
+            $key = $type->name;
+        } else {
+            $key = $type->hierarchical ? 'page' : 'post';
+        }
+
+        return "{$base}.{$key}";
+    }
+
+    /**
+     * Get a new query instance.
      *
      * @return \Luminous\Bridge\Post\Query
      */
-    public static function query()
+    public function query()
     {
-        return new Query(new static);
-    }
-
-    /**
-     * Find the entity.
-     *
-     * @uses \get_post()
-     * @param int|\WP_Post $id
-     * @return \Luminous\Bridge\Post\Entities\Entity
-     *
-     * @throws \Luminous\Bridge\Exceptions\RecordNotFoundException
-     */
-    public static function get($id)
-    {
-        if ($post = get_post($id)) {
-            return static::hydrate($post);
-        }
-
-        throw new RecordNotFoundException;
-    }
-
-    /**
-     * Get the entity class name.
-     *
-     * @param string $type
-     * @return string
-     *
-     * @throws \Luminous\Bridge\Exceptions\MissingEntityException
-     */
-    public static function entityClass($type = null)
-    {
-        if (! isset(static::$entityClasses[$type])) {
-            throw new MissingEntityException;
-        }
-
-        return static::$entityClasses[$type];
-    }
-
-    /**
-     * Create an entity.
-     *
-     * @param \WP_Post $original
-     * @return \Luminous\Bridge\Post\Entities\Entity
-     */
-    public static function hydrate(WP_Post $original)
-    {
-        $entityClass = static::entityClass($original->post_type);
-        return new $entityClass($original);
-    }
-
-    /**
-     * Create a collection of entities.
-     *
-     * @param array $originals
-     * @return array
-     */
-    public static function hydrateMany(array $originals)
-    {
-        return array_map(get_called_class().'::hydrate', $originals);
-    }
-
-    /**
-     * Handle dynamic static method calls into the method.
-     *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
-     */
-    public static function __callStatic($method, $parameters)
-    {
-        $query = static::query();
-        return call_user_func_array([$query, $method], $parameters);
+        return new Query($this);
     }
 }

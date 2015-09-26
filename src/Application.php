@@ -16,7 +16,7 @@ class Application extends BaseApplication
         parent::bootstrapContainer();
 
         $this->loadComponent('wp', 'Luminous\Bridge\BridgeServiceProvider');
-        $this->aliases['Luminous\Bridge\WP'] = 'wp';
+        $this->alias('Luminous\Bridge\WP', 'wp');
     }
 
     /**

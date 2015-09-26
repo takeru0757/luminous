@@ -8,8 +8,8 @@ use Carbon\Carbon;
 use Luminous\Bridge\EntityAttributeTrait;
 use Luminous\Bridge\EntityParameterTrait;
 use Luminous\Bridge\HasParameter;
-use Luminous\Bridge\WP;
 use Luminous\Bridge\Post\Type;
+use Luminous\Bridge\WP;
 
 abstract class Entity implements HasParameter, ArrayAccess
 {
@@ -80,12 +80,13 @@ abstract class Entity implements HasParameter, ArrayAccess
      * Create a new entity instance.
      *
      * @param \WP_Post $original
+     * @param \Luminous\Bridge\Post\Type $type
      * @return void
      */
-    public function __construct(WP_Post $original)
+    public function __construct(WP_Post $original, Type $type)
     {
         $this->original = $original;
-        $this->type = Type::get($original->post_type);
+        $this->type = $type;
 
         $this->prepareContent();
     }

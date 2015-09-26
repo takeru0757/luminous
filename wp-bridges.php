@@ -68,5 +68,5 @@ add_filter('post_type_link', function ($permalink, $post, $leavename) {
 
 // @link https://developer.wordpress.org/reference/functions/get_term_link/
 add_filter('term_link', function ($termlink, $term, $taxonomy) {
-    return luminous_archive_url(app('wp')->term($term));
+    return luminous_archive_url(app('wp')->term($term, $taxonomy));
 }, 10, 3);
