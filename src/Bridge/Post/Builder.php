@@ -2,81 +2,87 @@
 
 namespace Luminous\Bridge\Post;
 
+use Luminous\Bridge\Exceptions\MissingEntityException;
+use Luminous\Bridge\Exceptions\RecordNotFoundException;
+use Luminous\Bridge\Exceptions\TypeNotExistException;
 use Luminous\Bridge\Builder as BaseBuilder;
 
 class Builder extends BaseBuilder
 {
     /**
-     * Get the original object.
+     * Get an original object.
      *
      * @uses \get_post()
      *
-     * @param mixed $id
-     * @param string $type
-     * @return \WP_Post|null
+     * @param int|\WP_Post $id
+     * @return \WP_Post
      *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     * @throws \Luminous\Bridge\Exceptions\RecordNotFoundException
      */
-    protected function getOriginal($id, $type = null)
+    protected function getOriginal($id)
     {
-        return get_post($id);
+        // WordPress uses global $post when $id is null.
+        if ($id && $original = get_post($id)) {
+            return $original;
+        }
+
+        throw new RecordNotFoundException([is_object($id) ? $id->ID : $id, 'posts']);
     }
 
     /**
-     * Get the type class name.
+     * Hydrate an original object.
      *
-     * @return string
+     * @param \WP_Post $original
+     * @return \Luminous\Bridge\Post\Entities\Entity
+     *
+     * @throws \Luminous\Bridge\Exceptions\MissingEntityException
      */
-    protected function typeClass()
+    public function make($original)
     {
-        return Type::class;
+        $type = $this->getType($original->post_type);
+        $base = 'wp.post.entities.';
+
+        if (! $this->container->bound($abstract = "{$base}{$type->name}")) {
+            if (! $this->container->bound($abstract = $base.($type->hierarchical ? 'page' : 'post'))) {
+                throw new MissingEntityException([$abstract]);
+            }
+        }
+
+        return $this->container->make($abstract, [$type, $original]);
     }
 
     /**
-     * Get the original type object.
+     * Get an original type object.
      *
      * @uses \get_post_type_object()
      *
      * @param string $name
      * @return \stdClass
+     *
+     * @throws \Luminous\Bridge\Exceptions\TypeNotExistException
      */
     protected function getOriginalType($name)
     {
-        return get_post_type_object($name);
-    }
-
-    /**
-     * Get the entity type from original object.
-     *
-     * @param mixed $original
-     * @return string
-     */
-    protected function entityType($original)
-    {
-        return $this->getType($original->post_type);
-    }
-
-    /**
-     * Get the entity abstract from the type.
-     *
-     * @param \Luminous\Bridge\Type $type
-     * @return string
-     */
-    protected function entityAbstract($type)
-    {
-        $base = 'wp.post';
-
-        if ($this->container->bound("{$base}.{$type->name}")) {
-            $key = $type->name;
-        } else {
-            $key = $type->hierarchical ? 'page' : 'post';
+        if ($original = get_post_type_object($name)) {
+            return $original;
         }
 
-        return "{$base}.{$key}";
+        throw new TypeNotExistException([$name, 'posts']);
     }
 
     /**
-     * Get a new query instance.
+     * Hydrate an original type object.
+     *
+     * @param \stdClass $original
+     * @return \Luminous\Bridge\Post\Type
+     */
+    protected function makeType($original)
+    {
+        return new Type($original);
+    }
+
+    /**
+     * Create a new query instance.
      *
      * @return \Luminous\Bridge\Post\Query
      */

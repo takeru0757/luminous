@@ -4,7 +4,7 @@ namespace Luminous\Bridge;
 
 use Illuminate\Support\Str;
 
-trait EntityParameterTrait
+trait HasParameterTrait
 {
     /**
      * Get an parameter from the entity.

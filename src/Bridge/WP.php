@@ -147,7 +147,7 @@ class WP
      * @param string $type
      * @return \Luminous\Bridge\Term\Entities\Entity
      */
-    public static function term($id, $type)
+    public static function term($id, $type = null)
     {
         return static::$term->get($id, $type);
     }

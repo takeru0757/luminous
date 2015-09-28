@@ -3,20 +3,14 @@
 namespace Luminous\Bridge\Term\Entities;
 
 use stdClass;
-use ArrayAccess;
 use Illuminate\Support\Collection;
-use Luminous\Bridge\EntityAttributeTrait;
-use Luminous\Bridge\EntityParameterTrait;
-use Luminous\Bridge\HasArchive;
-use Luminous\Bridge\HasParameter;
-use Luminous\Bridge\Term\Type;
 use Luminous\Bridge\WP;
+use Luminous\Bridge\HasArchive;
+use Luminous\Bridge\Entity as BaseEntity;
+use Luminous\Bridge\Term\Type;
 
-abstract class Entity implements HasArchive, HasParameter, ArrayAccess
+abstract class Entity extends BaseEntity implements HasArchive
 {
-    use EntityAttributeTrait;
-    use EntityParameterTrait;
-
     /**
      * The accessors map for original instance.
      *
@@ -27,23 +21,17 @@ abstract class Entity implements HasArchive, HasParameter, ArrayAccess
     ];
 
     /**
-     * The term type (taxonomy) object.
+     * Create a new term entity instance.
      *
-     * @var \Luminous\Bridge\Term\Type
-     */
-    public $type;
-
-    /**
-     * Create a new entity instance.
-     *
-     * @param \stdClass $original
      * @param \Luminous\Bridge\Term\Type $type
+     * @param \stdClass $original
      * @return void
      */
-    public function __construct(stdClass $original, Type $type)
+    public function __construct(Type $type, stdClass $original)
     {
-        $this->original = $original;
         $this->type = $type;
+        $this->original = $original;
+        $this->accessorsForOriginal = $this->accessors;
     }
 
     /**

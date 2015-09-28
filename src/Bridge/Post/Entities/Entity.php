@@ -2,20 +2,14 @@
 
 namespace Luminous\Bridge\Post\Entities;
 
-use ArrayAccess;
 use WP_Post;
 use Carbon\Carbon;
-use Luminous\Bridge\EntityAttributeTrait;
-use Luminous\Bridge\EntityParameterTrait;
-use Luminous\Bridge\HasParameter;
-use Luminous\Bridge\Post\Type;
 use Luminous\Bridge\WP;
+use Luminous\Bridge\Entity as BaseEntity;
+use Luminous\Bridge\Post\Type;
 
-abstract class Entity implements HasParameter, ArrayAccess
+abstract class Entity extends BaseEntity
 {
-    use EntityAttributeTrait;
-    use EntityParameterTrait;
-
     const PAGING_SEPALATOR = '/\n?<!--nextpage-->\n?/';
     const TEASER_SEPALATOR = '/<!--more(.*?)?-->/';
     const NO_TEASER_FLAG   = '/<!--noteaser-->/';
@@ -56,13 +50,6 @@ abstract class Entity implements HasParameter, ArrayAccess
     ];
 
     /**
-     * The post type object.
-     *
-     * @var \Luminous\Bridge\Post\Type
-     */
-    public $type;
-
-    /**
      * The array of paged contents.
      *
      * @var array
@@ -77,16 +64,17 @@ abstract class Entity implements HasParameter, ArrayAccess
     public $pages;
 
     /**
-     * Create a new entity instance.
+     * Create a new post entity instance.
      *
-     * @param \WP_Post $original
      * @param \Luminous\Bridge\Post\Type $type
+     * @param \WP_Post $original
      * @return void
      */
-    public function __construct(WP_Post $original, Type $type)
+    public function __construct(Type $type, WP_Post $original)
     {
-        $this->original = $original;
         $this->type = $type;
+        $this->original = $original;
+        $this->accessorsForOriginal = $this->accessors;
 
         $this->prepareContent();
     }
@@ -124,6 +112,8 @@ abstract class Entity implements HasParameter, ArrayAccess
      *
      * @link https://developer.wordpress.org/reference/functions/get_the_content/ get_the_content()
      * @link https://developer.wordpress.org/reference/functions/the_content/ the_content()
+     *
+     * @uses \apply_filters()
      *
      * @param int $page
      * @return string HTML

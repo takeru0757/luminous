@@ -244,7 +244,7 @@ class Query
 
         return [
             'total' => intval($result->found_posts),
-            'items' => $this->builder->hydrateMany($result->get_posts()),
+            'items' => $this->builder->makeMany($result->get_posts()),
         ];
     }
 }

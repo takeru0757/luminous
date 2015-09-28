@@ -52,9 +52,9 @@ class BridgeServiceProvider extends ServiceProvider
      */
     public function registerPostBuilder()
     {
-        $this->app->bind('wp.post.attachment', 'Luminous\Bridge\Post\Entities\AttachmentEntity');
-        $this->app->bind('wp.post.page', 'Luminous\Bridge\Post\Entities\PageEntity');
-        $this->app->bind('wp.post.post', 'Luminous\Bridge\Post\Entities\PostEntity');
+        $this->app->bind('wp.post.entities.attachment', 'Luminous\Bridge\Post\Entities\AttachmentEntity');
+        $this->app->bind('wp.post.entities.page', 'Luminous\Bridge\Post\Entities\PageEntity');
+        $this->app->bind('wp.post.entities.post', 'Luminous\Bridge\Post\Entities\PostEntity');
 
         $this->app->singleton('wp.post', function ($app) {
             return new PostBuilder($app);
@@ -68,8 +68,8 @@ class BridgeServiceProvider extends ServiceProvider
      */
     public function registerTermBuilder()
     {
-        $this->app->bind('wp.term.category', 'Luminous\Bridge\Term\Entities\CategoryEntity');
-        $this->app->bind('wp.term.post_tag', 'Luminous\Bridge\Term\Entities\PostTagEntity');
+        $this->app->bind('wp.term.entities.category', 'Luminous\Bridge\Term\Entities\CategoryEntity');
+        $this->app->bind('wp.term.entities.post_tag', 'Luminous\Bridge\Term\Entities\PostTagEntity');
 
         $this->app->singleton('wp.term', function ($app) {
             return new TermBuilder($app);

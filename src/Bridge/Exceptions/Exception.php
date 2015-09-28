@@ -2,16 +2,16 @@
 
 namespace Luminous\Bridge\Exceptions;
 
-use Luminous\Bridge\Exceptions\Exception as BaseException;
+use RuntimeException;
 
-class RecordNotFoundException extends BaseException
+abstract class Exception extends RuntimeException
 {
     /**
      * The message template.
      *
      * @var string
      */
-    protected $messageTemplate = 'Record [%s] not found in %s.';
+    protected $messageTemplate = '';
 
     /**
      * Create a new Exception instance.
@@ -21,8 +21,11 @@ class RecordNotFoundException extends BaseException
      * @param \Exception $previous
      * @return void
      */
-    public function __construct($message, $code = 404, \Exception $previous = null)
+    public function __construct($message, $code = 500, \Exception $previous = null)
     {
+        if (is_array($message)) {
+            $message = vsprintf($this->messageTemplate, $message);
+        }
         parent::__construct($message, $code, $previous);
     }
 }

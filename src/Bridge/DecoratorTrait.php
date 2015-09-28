@@ -2,17 +2,24 @@
 
 namespace Luminous\Bridge;
 
-use BadMethodCallException;
+use Exception;
 use Illuminate\Support\Str;
 
-trait EntityAttributeTrait
+trait DecoratorTrait
 {
     /**
      * The original instance.
      *
-     * @var mixed
+     * @var object
      */
     protected $original;
+
+    /**
+     * The accessors map for original instance.
+     *
+     * @var array
+     */
+    protected $accessorsForOriginal = [];
 
     /**
      * Dynamically retrieve attributes on the entity.
@@ -61,8 +68,8 @@ trait EntityAttributeTrait
      */
     protected function accessor($key)
     {
-        if (isset($this->accessors[$key])) {
-            return $this->accessors[$key];
+        if (isset($this->accessorsForOriginal[$key])) {
+            return $this->accessorsForOriginal[$key];
         }
         return property_exists($this->original, $key) ? $key : null;
     }
@@ -108,12 +115,13 @@ trait EntityAttributeTrait
      * @param mixed $value
      * @return void
      *
-     * @throws \BadMethodCallException
+     * @throws \Exception
+     *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function offsetSet($key, $value)
     {
-        throw new BadMethodCallException();
+        throw new Exception(__FUNCTION__.' is not implemented');
     }
 
     /**
@@ -122,11 +130,12 @@ trait EntityAttributeTrait
      * @param mixed $key
      * @return void
      *
-     * @throws \BadMethodCallException
+     * @throws \Exception
+     *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function offsetUnset($key)
     {
-        throw new BadMethodCallException();
+        throw new Exception(__FUNCTION__.' is not implemented');
     }
 }
