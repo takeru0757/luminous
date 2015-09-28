@@ -2,6 +2,7 @@
 
 namespace Luminous\Bridge;
 
+use stdClass;
 use ArrayAccess;
 use InvalidArgumentException;
 
@@ -17,12 +18,12 @@ abstract class Type implements ArrayAccess
     protected $accessors = [];
 
     /**
-     * Create new type instance.
+     * Create a new type instance.
      *
-     * @param mixed $original
+     * @param \stdClass $original
      * @return void
      */
-    public function __construct($original)
+    public function __construct(stdClass $original)
     {
         $this->original = $original;
         $this->accessorsForOriginal = $this->accessors;

@@ -23,15 +23,13 @@ abstract class Entity extends BaseEntity implements HasArchive
     /**
      * Create a new term entity instance.
      *
-     * @param \Luminous\Bridge\Term\Type $type
      * @param \stdClass $original
+     * @param \Luminous\Bridge\Term\Type $type
      * @return void
      */
-    public function __construct(Type $type, stdClass $original)
+    public function __construct(stdClass $original, Type $type)
     {
-        $this->type = $type;
-        $this->original = $original;
-        $this->accessorsForOriginal = $this->accessors;
+        parent::__construct($original, $type);
     }
 
     /**

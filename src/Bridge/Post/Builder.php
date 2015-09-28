@@ -3,10 +3,12 @@
 namespace Luminous\Bridge\Post;
 
 use Luminous\Bridge\Exceptions\MissingEntityException;
-use Luminous\Bridge\Exceptions\RecordNotFoundException;
-use Luminous\Bridge\Exceptions\TypeNotExistException;
 use Luminous\Bridge\Builder as BaseBuilder;
 
+/**
+ * @method \Luminous\Bridge\Post\Entities\Entity get(int|\WP_Post $id) Get an entity instance.
+ * @method \Luminous\Bridge\Post\Type getType(string $name) Get a type instance.
+ */
 class Builder extends BaseBuilder
 {
     /**
@@ -15,18 +17,12 @@ class Builder extends BaseBuilder
      * @uses \get_post()
      *
      * @param int|\WP_Post $id
-     * @return \WP_Post
-     *
-     * @throws \Luminous\Bridge\Exceptions\RecordNotFoundException
+     * @return \WP_Post|null
      */
     protected function getOriginal($id)
     {
         // WordPress uses global $post when $id is null.
-        if ($id && $original = get_post($id)) {
-            return $original;
-        }
-
-        throw new RecordNotFoundException([is_object($id) ? $id->ID : $id, 'posts']);
+        return $id && ($original = get_post($id)) ? $original : null;
     }
 
     /**
@@ -44,11 +40,11 @@ class Builder extends BaseBuilder
 
         if (! $this->container->bound($abstract = "{$base}{$type->name}")) {
             if (! $this->container->bound($abstract = $base.($type->hierarchical ? 'page' : 'post'))) {
-                throw new MissingEntityException([$abstract]);
+                throw new MissingEntityException($abstract);
             }
         }
 
-        return $this->container->make($abstract, [$type, $original]);
+        return $this->container->make($abstract, [$original, $type]);
     }
 
     /**
@@ -57,17 +53,11 @@ class Builder extends BaseBuilder
      * @uses \get_post_type_object()
      *
      * @param string $name
-     * @return \stdClass
-     *
-     * @throws \Luminous\Bridge\Exceptions\TypeNotExistException
+     * @return \stdClass|null
      */
     protected function getOriginalType($name)
     {
-        if ($original = get_post_type_object($name)) {
-            return $original;
-        }
-
-        throw new TypeNotExistException([$name, 'posts']);
+        return get_post_type_object($name) ?: null;
     }
 
     /**

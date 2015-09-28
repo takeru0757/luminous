@@ -4,9 +4,8 @@ namespace Luminous\Bridge;
 
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Collection;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Luminous\Bridge\Exceptions\RecordNotFoundException;
-use Luminous\Bridge\Exceptions\TypeNotExistException;
+use Luminous\Bridge\Exceptions\EntityNotFoundException;
+use Luminous\Bridge\Exceptions\EntityTypeNotExistException;
 
 abstract class Builder
 {
@@ -41,16 +40,14 @@ abstract class Builder
      * @param mixed $id
      * @return \Luminous\Bridge\Entity
      *
-     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     * @throws \Luminous\Bridge\Exceptions\EntityNotFoundException
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function get($id)
     {
-        try {
-            $original = call_user_func_array([$this, 'getOriginal'], func_get_args());
-        } catch (RecordNotFoundException $e) {
-            throw new NotFoundHttpException($e->getMessage(), $e);
+        if (! $original = call_user_func_array([$this, 'getOriginal'], func_get_args())) {
+            throw new EntityNotFoundException;
         }
 
         return $this->make($original);
@@ -60,26 +57,22 @@ abstract class Builder
      * Get an original object.
      *
      * @param mixed $id
-     * @return mixed
-     *
-     * @throws \Luminous\Bridge\Exceptions\RecordNotFoundException
+     * @return object|null
      */
     abstract protected function getOriginal($id);
 
     /**
      * Hydrate an original object.
      *
-     * @param mixed $original
+     * @param object $original
      * @return \Luminous\Bridge\Entity
-     *
-     * @throws \Luminous\Bridge\Exceptions\MissingEntityException
      */
     abstract public function make($original);
 
     /**
      * Hydrate many original objects.
      *
-     * @param array $originals
+     * @param object[] $originals
      * @return \Illuminate\Support\Collection|\Luminous\Bridge\Entity[]
      */
     public function makeMany($originals)
@@ -93,7 +86,7 @@ abstract class Builder
      * @param string $name
      * @return \Luminous\Bridge\Type
      *
-     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     * @throws \Luminous\Bridge\Exceptions\EntityTypeNotExistException
      */
     public function getType($name)
     {
@@ -101,10 +94,8 @@ abstract class Builder
             return $this->types[$name];
         }
 
-        try {
-            $original = $this->getOriginalType($name);
-        } catch (TypeNotExistException $e) {
-            throw new NotFoundHttpException($e->getMessage(), $e);
+        if (! $original = $this->getOriginalType($name)) {
+            throw new EntityTypeNotExistException;
         }
 
         return $this->types[$name] = $this->makeType($original);
@@ -114,16 +105,14 @@ abstract class Builder
      * Get an original type object.
      *
      * @param string $name
-     * @return mixed
-     *
-     * @throws \Luminous\Bridge\Exceptions\TypeNotExistException
+     * @return object|null
      */
     abstract protected function getOriginalType($name);
 
     /**
      * Hydrate an original type object.
      *
-     * @param mixed $original
+     * @param object $original
      * @return \Luminous\Bridge\Type
      */
     abstract protected function makeType($original);

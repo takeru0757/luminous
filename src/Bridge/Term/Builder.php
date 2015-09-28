@@ -2,27 +2,16 @@
 
 namespace Luminous\Bridge\Term;
 
+use InvalidArgumentException;
 use Luminous\Bridge\Exceptions\MissingEntityException;
-use Luminous\Bridge\Exceptions\RecordNotFoundException;
-use Luminous\Bridge\Exceptions\TypeNotExistException;
 use Luminous\Bridge\Builder as BaseBuilder;
 
+/**
+ * @method \Luminous\Bridge\Term\Entities\Entity get(int|\stdClass $id, string $type = null) Get an entity instance.
+ * @method \Luminous\Bridge\Term\Type getType(string $name) Get a type instance.
+ */
 class Builder extends BaseBuilder
 {
-    /**
-     * Get an entity instance.
-     *
-     * @param mixed $id
-     * @param string $type
-     * @return \Luminous\Bridge\Entity
-     *
-     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
-     */
-    public function get($id, $type = null)
-    {
-        return parent::get($id, $type);
-    }
-
     /**
      * Get an original object.
      *
@@ -31,9 +20,9 @@ class Builder extends BaseBuilder
      *
      * @param int|\stdClass $id
      * @param string $type
-     * @return \stdClass
+     * @return \stdClass|null
      *
-     * @throws \Luminous\Bridge\Exceptions\RecordNotFoundException
+     * @throws \InvalidArgumentException
      */
     protected function getOriginal($id, $type = null)
     {
@@ -41,11 +30,11 @@ class Builder extends BaseBuilder
             $type = $id->taxonomy;
         }
 
-        if (($original = get_term($id, $type)) && ! is_wp_error($original)) {
-            return $original;
+        if (empty($type)) {
+            throw new InvalidArgumentException("Type must be specified.");
         }
 
-        throw new RecordNotFoundException([is_object($id) ? $id->term_id : $id, "terms ({$type})"]);
+        return ($original = get_term($id, $type)) && ! is_wp_error($original) ? $original : null;
     }
 
     /**
@@ -63,11 +52,11 @@ class Builder extends BaseBuilder
 
         if (! $this->container->bound($abstract = "{$base}{$type->name}")) {
             if (! $this->container->bound($abstract = $base.($type->hierarchical ? 'category' : 'post_tag'))) {
-                throw new MissingEntityException([$abstract]);
+                throw new MissingEntityException($abstract);
             }
         }
 
-        return $this->container->make($abstract, [$type, $original]);
+        return $this->container->make($abstract, [$original, $type]);
     }
 
     /**
@@ -76,17 +65,11 @@ class Builder extends BaseBuilder
      * @uses \get_taxonomy()
      *
      * @param string $name
-     * @return \stdClass
-     *
-     * @throws \Luminous\Bridge\Exceptions\TypeNotExistException
+     * @return \stdClass|null
      */
     protected function getOriginalType($name)
     {
-        if ($original = get_taxonomy($name)) {
-            return $original;
-        }
-
-        throw new TypeNotExistException([$name, 'terms']);
+        return get_taxonomy($name) ?: null;
     }
 
     /**

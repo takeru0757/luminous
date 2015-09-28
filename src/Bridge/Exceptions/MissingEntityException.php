@@ -2,14 +2,22 @@
 
 namespace Luminous\Bridge\Exceptions;
 
-use Luminous\Bridge\Exceptions\Exception as BaseException;
+use Exception;
+use LogicException;
 
-class MissingEntityException extends BaseException
+class MissingEntityException extends LogicException
 {
     /**
-     * The message template.
+     * Create a new exception instance.
      *
-     * @var string
+     * @param string $abstract
+     * @param int $code
+     * @param \Exception $previous
+     * @return void
      */
-    protected $messageTemplate = 'Entity class [%s] could not be found.';
+    public function __construct($abstract, $code = 0, Exception $previous = null)
+    {
+        $message = sprintf("Entity class [%s] could not be found.", $abstract);
+        parent::__construct($message, $code, $previous);
+    }
 }

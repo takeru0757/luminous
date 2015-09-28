@@ -50,46 +50,22 @@ abstract class Entity extends BaseEntity
     ];
 
     /**
-     * The array of paged contents.
+     * The array of paged content.
      *
      * @var array
      */
-    public $contents;
-
-    /**
-     * The number of paged contents.
-     *
-     * @var int
-     */
-    public $pages;
+    protected $pagedContent;
 
     /**
      * Create a new post entity instance.
      *
-     * @param \Luminous\Bridge\Post\Type $type
      * @param \WP_Post $original
+     * @param \Luminous\Bridge\Post\Type $type
      * @return void
      */
-    public function __construct(Type $type, WP_Post $original)
+    public function __construct(WP_Post $original, Type $type)
     {
-        $this->type = $type;
-        $this->original = $original;
-        $this->accessorsForOriginal = $this->accessors;
-
-        $this->prepareContent();
-    }
-
-    /**
-     * prepare the content.
-     *
-     * @link https://developer.wordpress.org/reference/classes/wp_query/setup_postdata/ setup_postdata()
-     *
-     * @return void
-     */
-    protected function prepareContent()
-    {
-        $this->contents = preg_split(static::PAGING_SEPALATOR, $this->raw_content);
-        $this->pages = count($this->contents);
+        parent::__construct($original, $type);
     }
 
     /**
@@ -108,6 +84,7 @@ abstract class Entity extends BaseEntity
      * Get the content.
      *
      * @todo Support teaser & more link.
+     * @todo Support 'noteaser' flag.
      * @todo Support preview.
      *
      * @link https://developer.wordpress.org/reference/functions/get_the_content/ get_the_content()
@@ -121,7 +98,7 @@ abstract class Entity extends BaseEntity
     public function content($page = 0)
     {
         if ($page > 0) {
-            $content = $page <= $this->pages ? $this->contents[$page] : null;
+            $content = $this->pagedContent($page) ?: '';
         } else {
             $content = $this->raw_content;
         }
@@ -133,6 +110,27 @@ abstract class Entity extends BaseEntity
     }
 
     /**
+     * Get the paged content.
+     *
+     * @link https://developer.wordpress.org/reference/classes/wp_query/setup_postdata/ setup_postdata()
+     *
+     * @param null|int $page
+     * @return array|string|null
+     */
+    protected function pagedContent($page = null)
+    {
+        if (is_null($this->pagedContent)) {
+            $this->pagedContent = preg_split(static::PAGING_SEPALATOR, $this->raw_content);
+        }
+
+        if (is_null($page)) {
+            return $this->pagedContent;
+        }
+
+        return isset($this->pagedContent[$index = $page - 1]) ? $this->pagedContent[$index] : null;
+    }
+
+    /**
      * Get the content.
      *
      * @return string HTML
@@ -140,6 +138,16 @@ abstract class Entity extends BaseEntity
     protected function getContentAttribute()
     {
         return $this->content();
+    }
+
+    /**
+     * Get the number of paged content.
+     *
+     * @return int
+     */
+    protected function getPagesAttribute()
+    {
+        return count($this->pagedContent());
     }
 
     /**
