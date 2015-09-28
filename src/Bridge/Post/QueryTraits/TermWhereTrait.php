@@ -1,6 +1,6 @@
 <?php
 
-namespace Luminous\Bridge\Post\Parameters;
+namespace Luminous\Bridge\Post\QueryTraits;
 
 use Luminous\Bridge\Term\Type;
 use Luminous\Bridge\Term\Entities\Entity;
@@ -12,7 +12,7 @@ use Luminous\Bridge\Term\Entities\Entity;
  *
  * @link https://codex.wordpress.org/Class_Reference/WP_Query#Taxonomy_Parameters
  */
-trait TermParameter
+trait TermWhereTrait
 {
     /**
      * The term where parameters for the query.
@@ -28,9 +28,15 @@ trait TermParameter
      * - field: (string) 'slug' or 'id'. Default value is 'slug'.
      * - include_children: (bool) Defaults to true.
      *
-     * @param string $column The term type name (taxonomy).
+     * You can pass a term entity instance.
+     * ```php
+     * $query->whereTerm($term);
+     * $query->whereTerm($term, ['include_children' => false]);
+     * ```
+     *
+     * @param string|\Luminous\Bridge\Term\Type $column The term type (taxonomy).
      * @param string $operator Possible values are 'in', 'not in', 'and', 'exists' and 'not exists'.
-     * @param string|array $value
+     * @param int|string|\Luminous\Bridge\Term\Entities\Entity $value
      * @param array $options
      * @return $this
      */

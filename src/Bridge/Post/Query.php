@@ -5,17 +5,17 @@ namespace Luminous\Bridge\Post;
 use WP_Query;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Luminous\Bridge\Post\Parameters\DateParameter;
-use Luminous\Bridge\Post\Parameters\OrderParameter;
-use Luminous\Bridge\Post\Parameters\PostParameter;
-use Luminous\Bridge\Post\Parameters\TermParameter;
+use Luminous\Bridge\Post\QueryTraits\DateWhereTrait;
+use Luminous\Bridge\Post\QueryTraits\OrderByTrait;
+use Luminous\Bridge\Post\QueryTraits\PostWhereTrait;
+use Luminous\Bridge\Post\QueryTraits\TermWhereTrait;
 
 class Query
 {
-    use DateParameter;
-    use OrderParameter;
-    use PostParameter;
-    use TermParameter;
+    use DateWhereTrait;
+    use OrderByTrait;
+    use PostWhereTrait;
+    use TermWhereTrait;
 
     /**
      * The post builder instance.
@@ -23,27 +23,6 @@ class Query
      * @var \Luminous\Bridge\Post\Builder
      */
     protected $builder;
-
-    /**
-     * The post type for the query.
-     *
-     * @var string|string[]
-     */
-    public $type = 'post';
-
-    /**
-     * The post status for the query.
-     *
-     * @var string|string[]
-     */
-    public $status = 'publish';
-
-    /**
-     * Whether move sticky posts to the start of the set.
-     *
-     * @var bool
-     */
-    public $stickyPosts = false;
 
     /**
      * The maximum number of records to return.
@@ -68,49 +47,6 @@ class Query
     public function __construct(Builder $builder)
     {
         $this->builder = $builder;
-    }
-
-    /**
-     * Set the post type of the query.
-     *
-     * @param \Luminous\Bridge\Post\Type|string|array $value
-     * @return $this
-     */
-    public function type($value)
-    {
-        if ($value instanceof Type) {
-            $this->type = $value->name;
-        } else {
-            $this->type = $value;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Set the status of the query.
-     *
-     * @param string|array $value
-     * @return $this
-     */
-    public function status($value)
-    {
-        $this->status = $value;
-
-        return $this;
-    }
-
-    /**
-     * Set whether move sticky posts to the start of the set.
-     *
-     * @param bool $value
-     * @return $this
-     */
-    public function stickyPosts($value)
-    {
-        $this->stickyPosts = $value;
-
-        return $this;
     }
 
     /**
@@ -225,17 +161,14 @@ class Query
     protected function executeQuery()
     {
         $query = [
-            'post_type'             => $this->type,
-            'post_status'           => $this->status,
-            'posts_per_page'        => $this->limit ?: -1,
-            'offset'                => $this->offset,
-            'ignore_sticky_posts'   => !$this->stickyPosts,
+            'posts_per_page' => $this->limit ?: -1,
+            'offset' => $this->offset,
         ];
 
         $query = array_merge(
             $query,
-            $this->getOrderQuery(),
             $this->getDateQuery(),
+            $this->getOrderByQuery(),
             $this->getPostQuery(),
             $this->getTermQuery()
         );

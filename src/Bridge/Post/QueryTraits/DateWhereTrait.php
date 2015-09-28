@@ -1,6 +1,6 @@
 <?php
 
-namespace Luminous\Bridge\Post\Parameters;
+namespace Luminous\Bridge\Post\QueryTraits;
 
 use InvalidArgumentException;
 
@@ -14,7 +14,7 @@ use InvalidArgumentException;
  *
  * @link https://codex.wordpress.org/Class_Reference/WP_Query#Date_Parameters
  */
-trait DateParameter
+trait DateWhereTrait
 {
     /**
      * The date where parameters for the query.
@@ -24,11 +24,11 @@ trait DateParameter
     protected $dateWheres = [];
 
     /**
-     * The date columns.
+     * The columns for date where.
      *
      * @var array
      */
-    protected $dateColumns = [
+    protected $dateWhereColumns = [
         'created_at' => 'post_date',
         'updated_at' => 'post_modified',
     ];
@@ -44,7 +44,7 @@ trait DateParameter
      */
     public function whereDateAt($column, $value = null)
     {
-        if (! in_array($column, array_keys($this->dateColumns))) {
+        if (! in_array($column, array_keys($this->dateWhereColumns))) {
             throw new InvalidArgumentException;
         }
 
@@ -65,7 +65,7 @@ trait DateParameter
         $query = [];
 
         foreach ($this->dateWheres as $where) {
-            $column = $this->dateColumns[$where['column']];
+            $column = $this->dateWhereColumns[$where['column']];
             switch ($where['type']) {
                 case 'at':
                     $query[] = array_merge(compact('column'), $where['value']);

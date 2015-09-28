@@ -1,6 +1,6 @@
 <?php
 
-namespace Luminous\Bridge\Post\Parameters;
+namespace Luminous\Bridge\Post\QueryTraits;
 
 use InvalidArgumentException;
 use Illuminate\Support\Arr;
@@ -13,7 +13,7 @@ use Illuminate\Support\Arr;
  *
  * @link https://codex.wordpress.org/Class_Reference/WP_Query#Order_.26_Orderby_Parameters
  */
-trait OrderParameter
+trait OrderByTrait
 {
     /**
      * The ordering parameter for the query.
@@ -27,7 +27,7 @@ trait OrderParameter
      *
      * @var array
      */
-    protected $orderColumns = [
+    protected $orderByColumns = [
         'rand'          => 'rand',
         'id'            => 'ID',
         'created_at'    => 'date',
@@ -52,7 +52,7 @@ trait OrderParameter
      */
     public function orderBy($column, $direction = 'asc')
     {
-        if (! in_array($column, array_keys($this->orderColumns))) {
+        if (! in_array($column, array_keys($this->orderByColumns))) {
             throw new InvalidArgumentException;
         }
 
@@ -69,12 +69,12 @@ trait OrderParameter
      *
      * @var array
      */
-    protected function getOrderQuery()
+    protected function getOrderByQuery()
     {
         $query = [];
 
         foreach ($this->orders as $order) {
-            $query[$this->orderColumns[$order['column']]] = strtoupper($order['direction']);
+            $query[$this->orderByColumns[$order['column']]] = strtoupper($order['direction']);
         }
 
         return ['orderby' => $query ?: 'none' ];
