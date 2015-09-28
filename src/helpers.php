@@ -47,20 +47,20 @@ if (! function_exists('archive_url')) {
     /**
      * Generate a URL to archive.
      *
-     * @param \Luminous\Bridge\HasArchive $archiveFor
+     * @param \Luminous\Bridge\Post\Type $postType
      * @param string|array $sub
      * @param array $parameters
      * @return string
      *
      * @throws \InvalidArgumentException
      */
-    function archive_url(Luminous\Bridge\HasArchive $archiveFor, $sub = null, $parameters = [])
+    function archive_url(Luminous\Bridge\Post\Type $postType, $sub = null, $parameters = [])
     {
-        $name = "archive:{$archiveFor->getRouteType()}";
-
-        if (! $archiveFor->allowArchive()) {
-            throw new InvalidArgumentException("{$name} does not allow to show archive.");
+        if ($postType->hierarchical) {
+            throw new InvalidArgumentException("{$postType->name} does not have archive.");
         }
+
+        $name = "archive_url@{$postType->name}";
 
         if (is_array($sub)) {
             $parameters = $sub;
@@ -84,7 +84,7 @@ if (! function_exists('post_url')) {
     {
         return preg_replace_callback('/\{(.*?)(:.*?)?(\{[0-9,]+\})?\}/', function ($m) use ($post) {
             return $post->urlParameter($m[1]);
-        }, route("post:{$post->getRouteType()}", $parameters));
+        }, route("post_url@{$post->type->name}", $parameters));
     }
 }
 
@@ -99,7 +99,7 @@ if (! function_exists('term_url')) {
     function term_url(Luminous\Bridge\Term\Entities\Entity $term, $parameters = [])
     {
         $parameters['term'] = $term;
-        return archive_url($term->type, $parameters);
+        return route("term_url@{$term->type->name}", $parameters);
     }
 }
 

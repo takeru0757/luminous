@@ -18,43 +18,43 @@ $app->group(['prefix' => 'posts', 'namespace' => 'Luminous\Http\Controllers'], f
     $app->any('/', [
         'query' => ['postType' => $postType, 'limit' => $limit],
         'uses' => 'PostController@archive',
-        'as' => 'archive:post',
+        'as' => 'archive_url@post',
     ]);
 
     $app->any('/{year:\d{4}}/{month:\d{2}}/{day:\d{2}}', [
         'query' => ['postType' => $postType, 'limit' => $limit],
         'uses' => 'PostController@archive',
-        'as' => 'archive:post[daily]',
+        'as' => 'archive_url@post[daily]',
     ]);
 
     $app->any('/{year:\d{4}}/{month:\d{2}}', [
         'query' => ['postType' => $postType, 'limit' => $limit],
         'uses' => 'PostController@archive',
-        'as' => 'archive:post[monthly]',
+        'as' => 'archive_url@post[monthly]',
     ]);
 
     $app->any('/{year:\d{4}}', [
         'query' => ['postType' => $postType, 'limit' => $limit],
         'uses' => 'PostController@archive',
-        'as' => 'archive:post[yearly]',
+        'as' => 'archive_url@post[yearly]',
     ]);
 
     $app->any('/category/{term:.+}', [
         'query' => ['postType' => $postType, 'limit' => $limit, 'termType' => 'category'],
         'uses' => 'PostController@archive',
-        'as' => 'archive:term:category',
+        'as' => 'term_url@category',
     ]);
 
     $app->any('/tag/{term}', [
         'query' => ['postType' => $postType, 'limit' => $limit, 'termType' => 'post_tag'],
         'uses' => 'PostController@archive',
-        'as' => 'archive:term:post_tag',
+        'as' => 'term_url@post_tag',
     ]);
 
     $app->any('/{year:\d{4}}/{month:\d{2}}/{day:\d{2}}/{path}', [
         'query' => ['postType' => $postType],
         'uses' => 'PostController@post',
-        'as' => 'post:post',
+        'as' => 'post_url@post',
     ]);
 });
 
@@ -65,7 +65,7 @@ $app->group(['prefix' => 'posts', 'namespace' => 'Luminous\Http\Controllers'], f
 $app->any('/{path:.+}', [
     'query' => ['postType' => 'page'],
     'uses' => 'PostController@post',
-    'as' => 'post:page',
+    'as' => 'post_url@page',
 ]);
 
 // -----------------------------------------------------------------------------

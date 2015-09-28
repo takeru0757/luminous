@@ -218,16 +218,6 @@ abstract class Entity extends BaseEntity
     }
 
     /**
-     * Get the route type for this instance.
-     *
-     * @return string
-     */
-    public function getRouteType()
-    {
-        return $this->type->getRouteType();
-    }
-
-    /**
      * Get a URL parameter.
      *
      * @param string $key

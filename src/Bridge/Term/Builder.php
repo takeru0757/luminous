@@ -37,8 +37,8 @@ class Builder extends BaseBuilder
         }
 
         if (is_string($id)) {
-            $path = explode('/', $id);
-            $original = get_term_by('slug', last($path), $type);
+            $paths = explode('/', $id);
+            $original = get_term_by('slug', last($paths), $type);
         } else {
             $original = get_term($id, $type);
         }
