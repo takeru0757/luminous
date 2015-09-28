@@ -1,12 +1,30 @@
 <?php
 
-namespace Luminous\Http\Controllers\Actions;
+namespace Luminous\Http\Controllers;
 
 use Carbon\Carbon;
+use Laravel\Lumen\Routing\Controller as BaseController;
 use Luminous\Bridge\WP;
 
-trait SitemapActionTrait
+class RootController extends BaseController
 {
+    /**
+     * Handle requests for '/robots.txt'.
+     *
+     * @param \Luminous\Bridge\WP $wp
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function robots(WP $wp)
+    {
+        if (! $wp->isPublic()) {
+            $view = view('root.robots-noindex');
+        } else {
+            $view = view('root.robots');
+        }
+
+        return response($view->render())->header('Content-Type', 'text/plain; charset=utf-8');
+    }
+
     /**
      * Handle requests for '/sitemap.xml'.
      *

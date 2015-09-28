@@ -4,7 +4,6 @@ namespace Luminous\Bridge;
 
 use stdClass;
 use ArrayAccess;
-use InvalidArgumentException;
 
 abstract class Type implements ArrayAccess
 {

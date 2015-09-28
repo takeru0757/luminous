@@ -7,7 +7,8 @@ use Luminous\Bridge\Exceptions\MissingEntityException;
 use Luminous\Bridge\Builder as BaseBuilder;
 
 /**
- * @method \Luminous\Bridge\Term\Entities\Entity get(int|\stdClass $id, string $type = null) Get an entity instance.
+ * @method \Luminous\Bridge\Term\Entities\Entity get(int|string|\stdClass $id, string $type = null)
+ *         Get an entity instance.
  * @method \Luminous\Bridge\Term\Type getType(string $name) Get a type instance.
  */
 class Builder extends BaseBuilder
@@ -16,9 +17,10 @@ class Builder extends BaseBuilder
      * Get an original object.
      *
      * @uses \get_term()
+     * @uses \get_term_by()
      * @uses \is_wp_error()
      *
-     * @param int|\stdClass $id
+     * @param int|string|\stdClass $id
      * @param string $type
      * @return \stdClass|null
      *
@@ -34,7 +36,14 @@ class Builder extends BaseBuilder
             throw new InvalidArgumentException("Type must be specified.");
         }
 
-        return ($original = get_term($id, $type)) && ! is_wp_error($original) ? $original : null;
+        if (is_string($id)) {
+            $path = explode('/', $id);
+            $original = get_term_by('slug', last($path), $type);
+        } else {
+            $original = get_term($id, $type);
+        }
+
+        return $original && ! is_wp_error($original) ? $original : null;
     }
 
     /**

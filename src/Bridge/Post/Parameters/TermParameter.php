@@ -2,6 +2,9 @@
 
 namespace Luminous\Bridge\Post\Parameters;
 
+use Luminous\Bridge\Term\Type;
+use Luminous\Bridge\Term\Entities\Entity;
+
 /**
  * The term parameter for the post query.
  *
@@ -31,10 +34,21 @@ trait TermParameter
      * @param array $options
      * @return $this
      */
-    public function whereTerm($column, $operator, $value = null, $options = [])
+    public function whereTerm($column, $operator = null, $value = null, $options = [])
     {
-        if (func_num_args() == 2) {
+        if (func_num_args() === 1 && $column instanceof Entity) {
+            list($column, $operator, $value, $options) = [$column->type, 'in', $column, $operator ?: []];
+        } elseif (func_num_args() === 2) {
             list($operator, $value) = ['in', $operator];
+        }
+
+        if ($column instanceof Type) {
+            $column = $column->name;
+        }
+
+        if ($value instanceof Entity) {
+            $value = $value->id;
+            $options['field'] = 'id';
         }
 
         $options = array_merge([

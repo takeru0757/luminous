@@ -32,24 +32,6 @@ abstract class Entity extends BaseEntity
     ];
 
     /**
-     * The attribute name for date parameter.
-     *
-     * @var string
-     */
-    protected $dateParameter = 'created_at';
-
-    /**
-     * The formats for the date parameter.
-     *
-     * @var array
-     */
-    protected $dateParameterFormats = [
-        'year'  => 'Y',
-        'month' => 'm',
-        'day'   => 'd',
-    ];
-
-    /**
      * The array of paged content.
      *
      * @var array
@@ -236,12 +218,33 @@ abstract class Entity extends BaseEntity
     }
 
     /**
-     * Get the route name for this instance.
+     * Get the route type for this instance.
      *
      * @return string
      */
-    public function getRouteName()
+    public function getRouteType()
     {
-        return $this->type->name;
+        return $this->type->getRouteType();
+    }
+
+    /**
+     * Get a URL parameter.
+     *
+     * @param string $key
+     * @return string
+     */
+    public function urlParameter($key)
+    {
+        $dateFormats = [
+            'year'  => 'Y',
+            'month' => 'm',
+            'day'   => 'd',
+        ];
+
+        if (array_key_exists($key, $dateFormats)) {
+            return $this->date($dateFormats[$key]);
+        }
+
+        return $this->{$key};
     }
 }

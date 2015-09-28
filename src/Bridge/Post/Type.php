@@ -8,21 +8,21 @@ use Luminous\Bridge\Type as BaseType;
 class Type extends BaseType implements HasArchive
 {
     /**
-     * Get the route prefix for archive of this instance.
+     * Get the route type for this instance.
      *
      * @return string
      */
-    public function getRoutePrefix()
+    public function getRouteType()
     {
         return $this->name;
     }
 
     /**
-     * Wheter this instance has archive.
+     * Determine if this instance allows to show archive.
      *
      * @return bool
      */
-    public function hasArchive()
+    public function allowArchive()
     {
         return $this->original->public && ! $this->original->hierarchical;
     }

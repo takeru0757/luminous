@@ -4,19 +4,15 @@ namespace Luminous\Http\Controllers;
 
 use DateTime;
 use Carbon\Carbon;
-use Laravel\Lumen\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
-use Luminous\Http\Controllers\Actions\RobotsActionTrait;
-use Luminous\Http\Controllers\Actions\SitemapActionTrait;
+use Laravel\Lumen\Routing\Controller as BaseController;
 use Luminous\Bridge\WP;
 use Luminous\Bridge\Post\Type;
+use Luminous\Bridge\Post\Entities\Entity;
 
-class Controller extends BaseController
+class PostController extends BaseController
 {
-    use RobotsActionTrait;
-    use SitemapActionTrait;
-
     /**
      * Handle requests for home.
      *
@@ -45,12 +41,15 @@ class Controller extends BaseController
             $postQuery->orderBy('created_at', 'desc');
         }
 
-        if ($date = $this->getDate($query)) {
-            $postQuery->whereDateAt('created_at', $date);
+        if (isset($query['termType'], $query['term'])) {
+            $term = $wp->term($query['term'], $query['termType']);
+            $postQuery->whereTerm($term);
+        } else {
+            $term = null;
         }
 
-        if ($term = $this->getTermQuery($query)) {
-            $postQuery->whereTerm($term['column'], $term['operator'], $term['value']);
+        if ($date = $this->getDateQuery($query)) {
+            $postQuery->whereDateAt('created_at', $date);
         }
 
         $posts = $postQuery->paginate(isset($query['limit']) ? $query['limit'] : 10);
@@ -60,29 +59,26 @@ class Controller extends BaseController
         }
 
         return $this->createResponse(
-            view($this->getTemplateName($postType), compact('posts')),
+            view($this->getTemplateName($postType), compact('posts', 'term', 'date')),
             $posts->first()->updated_at
         );
     }
 
     /**
-     * Handle requests for singular.
+     * Handle requests for the post.
      *
      * @param \Luminous\Bridge\WP $wp
      * @param array $query
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function show(WP $wp, $query)
+    public function post(WP $wp, $query)
     {
         $postType = $wp->postType($query['postType']);
         $postQuery = $wp->posts($postType);
 
-        $path = null;
-
         foreach (['id', 'path'] as $key) {
             if (isset($query[$key])) {
                 $postQuery->wherePost($key, $query[$key]);
-                $path = $query[$key];
                 break;
             }
         }
@@ -94,40 +90,8 @@ class Controller extends BaseController
         }
 
         return $this->createResponse(
-            view($this->getTemplateName($postType, $path), compact('post')),
+            view($this->getTemplateName($postType, $post), compact('post')),
             $post->updated_at
-        );
-    }
-
-    /**
-     * Get the term parameter from the query.
-     *
-     * @param array $query
-     * @return array
-     */
-    protected function getTermQuery(array $query)
-    {
-        if (! isset($query['termType'], $query['path'])) {
-            return [];
-        }
-
-        $value = $query['path'];
-        $operator = 'in';
-
-        if (strpos($value, '/') !== false) {
-            $paths = explode('/', $value);
-            $value = end($paths);
-        } elseif (strpos($value, ',') !== false) {
-            $value = explode(',', $value);
-            $operator = 'in';
-        } elseif (strpos($value, '+') !== false) {
-            $value = explode('+', $value);
-            $operator = 'and';
-        }
-
-        return array_merge(
-            ['column' => $query['termType']],
-            compact('operator', 'value')
         );
     }
 
@@ -137,7 +101,7 @@ class Controller extends BaseController
      * @param array $query
      * @return array
      */
-    protected function getDate(array $query)
+    protected function getDateQuery(array $query)
     {
         $value = [];
 
@@ -154,32 +118,30 @@ class Controller extends BaseController
      * Determine the template name.
      *
      * @param \Luminous\Bridge\Post\Type $postType
-     * @param array $query
+     * @param \Luminous\Bridge\Post\Entities\Entity $post
      * @return string
      */
-    protected function getTemplateName(Type $postType, $path = null)
+    protected function getTemplateName(Type $postType, Entity $post = null)
     {
-        $parts = [];
+        $factory = view();
+        $files = [];
 
-        if ($postType->hierarchical) {
-            $parts = array_merge($parts, array_filter(explode('/', $path), 'strlen'));
-        } else {
-            $parts[] = $path === null ? 'archive' : 'show';
-        }
-
-        while ($parts) {
-            $name = implode('.', $parts);
-            $file = "{$postType->name}.{$name}";
-            if (view()->exists($file)) {
-                return $file;
+        if ($post && $postType->hierarchical) {
+            $files[] = implode('.', $paths = explode('/', $post->path)).'.index';
+            while ($paths) {
+                $file = implode('.', $paths);
+                array_push($files, "{$file}.base", $file);
+                array_pop($paths);
             }
-            array_pop($parts);
         }
 
-        $base = "{$postType->name}.base";
+        $files[] = $post ? 'post' : 'archive';
+        $files[] = 'base';
 
-        if (view()->exists($base)) {
-            return $base;
+        foreach ($files as $file) {
+            if ($factory->exists($name = "{$postType->name}.{$file}")) {
+                return $name;
+            }
         }
 
         return 'layout';
@@ -210,7 +172,7 @@ class Controller extends BaseController
     /**
      * Get expires in seconds.
      *
-     * @return int 600
+     * @return int 600 or 0 (debug)
      */
     protected function expires()
     {

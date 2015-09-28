@@ -5,11 +5,10 @@ namespace Luminous\Bridge\Term\Entities;
 use stdClass;
 use Illuminate\Support\Collection;
 use Luminous\Bridge\WP;
-use Luminous\Bridge\HasArchive;
 use Luminous\Bridge\Entity as BaseEntity;
 use Luminous\Bridge\Term\Type;
 
-abstract class Entity extends BaseEntity implements HasArchive
+abstract class Entity extends BaseEntity
 {
     /**
      * The accessors map for original instance.
@@ -61,25 +60,5 @@ abstract class Entity extends BaseEntity implements HasArchive
     {
         $slugs = $this->ancestors->reverse()->pluck('slug')->push($this->slug);
         return implode('/', $slugs->all());
-    }
-
-    /**
-     * Get the route prefix for archive of this instance.
-     *
-     * @return string
-     */
-    public function getRoutePrefix()
-    {
-        return $this->type->name;
-    }
-
-    /**
-     * Wheter this instance has archive.
-     *
-     * @return bool
-     */
-    public function hasArchive()
-    {
-        return $this->type->public;
     }
 }

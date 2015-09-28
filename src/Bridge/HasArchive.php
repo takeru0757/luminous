@@ -5,16 +5,16 @@ namespace Luminous\Bridge;
 interface HasArchive
 {
     /**
-     * Get the route prefix for archive of this instance.
+     * Get the route type for this instance.
      *
      * @return string
      */
-    public function getRoutePrefix();
+    public function getRouteType();
 
     /**
-     * Wheter this instance has archive.
+     * Determine if this instance allows to show archive.
      *
      * @return bool
      */
-    public function hasArchive();
+    public function allowArchive();
 }

@@ -58,22 +58,6 @@ EOT;
     }
 }
 
-if (! function_exists('luminous_archive_url')) {
-    /**
-     * Generate a URL to archive. (for admin)
-     *
-     * @uses \home_url()
-     *
-     * @param \Luminous\Bridge\HasArchive $archiveFor
-     * @return string
-     */
-    function luminous_archive_url(Luminous\Bridge\HasArchive $archiveFor)
-    {
-        $uri = archive_url($archiveFor);
-        return home_url(substr($uri, strlen(app('request')->root())));
-    }
-}
-
 if (! function_exists('luminous_post_url')) {
     /**
      * Generate a URL to the post. (for admin)
@@ -87,6 +71,22 @@ if (! function_exists('luminous_post_url')) {
     function luminous_post_url(Luminous\Bridge\Post\Entities\Entity $post, $placeholder = null)
     {
         $uri = post_url($post, $placeholder ? ['path' => $placeholder] : []);
+        return home_url(substr($uri, strlen(app('request')->root())));
+    }
+}
+
+if (! function_exists('luminous_term_url')) {
+    /**
+     * Generate a URL to the term. (for admin)
+     *
+     * @uses \home_url()
+     *
+     * @param \Luminous\Bridge\Term\Entities\Entity $term
+     * @return string
+     */
+    function luminous_term_url(Luminous\Bridge\Term\Entities\Entity $term)
+    {
+        $uri = term_url($term);
         return home_url(substr($uri, strlen(app('request')->root())));
     }
 }

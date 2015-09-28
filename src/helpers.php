@@ -43,28 +43,12 @@ if (! function_exists('framework_base_path')) {
     }
 }
 
-if (! function_exists('replace_url_parameters_with_entity')) {
-     /**
-      * Replace parameters with the entity.
-      *
-      * @param string $uri
-      * @param \Luminous\Bridge\HasParameter $entity
-      * @return string
-      */
-    function replace_url_parameters_with_entity($uri, Luminous\Bridge\HasParameter $entity)
-    {
-        return preg_replace_callback('/\{(.*?)(:.*?)?(\{[0-9,]+\})?\}/', function ($m) use ($entity) {
-            return $entity->parameter($m[1]);
-        }, $uri);
-    }
-}
-
 if (! function_exists('archive_url')) {
     /**
      * Generate a URL to archive.
      *
      * @param \Luminous\Bridge\HasArchive $archiveFor
-     * @param string $sub
+     * @param string|array $sub
      * @param array $parameters
      * @return string
      *
@@ -72,25 +56,19 @@ if (! function_exists('archive_url')) {
      */
     function archive_url(Luminous\Bridge\HasArchive $archiveFor, $sub = null, $parameters = [])
     {
-        if (! $archiveFor->hasArchive()) {
-            throw new InvalidArgumentException("{$archiveFor} does not have archive.");
-        }
+        $name = "archive:{$archiveFor->getRouteType()}";
 
-        $names = [$archiveFor->getRoutePrefix(), 'archive'];
+        if (! $archiveFor->allowArchive()) {
+            throw new InvalidArgumentException("{$name} does not allow to show archive.");
+        }
 
         if (is_array($sub)) {
             $parameters = $sub;
         } elseif ($sub) {
-            $names[] = $sub;
+            $name .= "[{$sub}]";
         }
 
-        $uri = route(implode(':', $names), $parameters);
-
-        if ($archiveFor instanceof Luminous\Bridge\HasParameter) {
-            $uri = replace_url_parameters_with_entity($uri, $archiveFor);
-        }
-
-        return $uri;
+        return route($name, $parameters);
     }
 }
 
@@ -104,8 +82,24 @@ if (! function_exists('post_url')) {
      */
     function post_url(Luminous\Bridge\Post\Entities\Entity $post, $parameters = [])
     {
-        $uri = route($post->getRouteName(), $parameters);
-        return replace_url_parameters_with_entity($uri, $post);
+        return preg_replace_callback('/\{(.*?)(:.*?)?(\{[0-9,]+\})?\}/', function ($m) use ($post) {
+            return $post->urlParameter($m[1]);
+        }, route("post:{$post->getRouteType()}", $parameters));
+    }
+}
+
+if (! function_exists('term_url')) {
+    /**
+     * Generate a URL to the term.
+     *
+     * @param \Luminous\Bridge\Term\Entities\Entity $term
+     * @param array $parameters
+     * @return string
+     */
+    function term_url(Luminous\Bridge\Term\Entities\Entity $term, $parameters = [])
+    {
+        $parameters['term'] = $term;
+        return archive_url($term->type, $parameters);
     }
 }
 
