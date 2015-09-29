@@ -36,19 +36,15 @@ abstract class Entity extends BaseEntity
      *
      * @uses \get_ancestors()
      *
-     * @return \Illuminate\Support\Collection
+     * @return \Illuminate\Support\Collection|\Luminous\Bridge\Term\Entities\Entity[]
      */
     protected function getAncestorsAttribute()
     {
-        if ($this->type->hierarchical) {
-            $ancestors = get_ancestors($this->id, $this->type->name, 'taxonomy');
-        } else {
-            $ancestors = [];
-        }
-
-        return new Collection(array_map(function ($id) {
+        $ancestors = array_map(function ($id) {
             return WP::term($id, $this->type->name);
-        }, $ancestors));
+        }, get_ancestors($this->original->term_id, $this->original->taxonomy, 'taxonomy'));
+
+        return new Collection($ancestors);
     }
 
     /**

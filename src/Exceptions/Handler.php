@@ -60,7 +60,7 @@ class Handler extends ExceptionHandler
     {
         if ($e instanceof HttpException) {
             $status = $e->getStatusCode();
-            $file = "errors.{$status}";
+            $file = "error.{$status}";
             if (view()->exists($file)) {
                 return view($file, ['status' => $status, 'exception' => $e]);
             }
@@ -68,7 +68,7 @@ class Handler extends ExceptionHandler
 
         if (! env('APP_DEBUG', false)) {
             $status = 500;
-            $file = "errors.{$status}";
+            $file = "error.{$status}";
             if (view()->exists($file)) {
                 return view($file, ['status' => $status, 'exception' => $e]);
             }

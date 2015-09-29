@@ -10,6 +10,7 @@ use Laravel\Lumen\Routing\Controller as BaseController;
 use Luminous\Bridge\WP;
 use Luminous\Bridge\Post\Type;
 use Luminous\Bridge\Post\Entities\Entity;
+use Luminous\Http\RequestTree\Generator as Tree;
 
 class PostController extends BaseController
 {
@@ -26,14 +27,18 @@ class PostController extends BaseController
     /**
      * Handle requests for archive.
      *
+     * @param \Illuminate\Http\Request $request
      * @param \Luminous\Bridge\WP $wp
      * @param array $query
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function archive(WP $wp, $query)
+    public function archive(Request $request, WP $wp, $query)
     {
         $postType = $wp->postType($query['postType']);
         $postQuery = $wp->posts($postType);
+
+        $tree = (new Tree())->setPostType($postType);
+        $tree->setPage($page = $request->query('page', 1));
 
         if (isset($query['order'])) {
             $postQuery->orderBy($query['order']['column'], $query['order']['direction']);
@@ -41,26 +46,25 @@ class PostController extends BaseController
             $postQuery->orderBy('created_at', 'desc');
         }
 
-        if (isset($query['termType'], $query['term'])) {
-            $term = $wp->term($query['term'], $query['termType']);
-            $postQuery->whereTerm($term);
-        } else {
-            $term = null;
-        }
-
         if ($date = $this->getDateQuery($query)) {
             $postQuery->whereDateAt('created_at', $date);
+            $tree->setDate($date);
+        }
+
+        if (isset($query['termType'], $query['term'])) {
+            $postQuery->whereTerm($term = $wp->term($query['term'], $query['termType']));
+            $tree->setTerm($term);
         }
 
         $posts = $postQuery->paginate(isset($query['limit']) ? $query['limit'] : 10);
 
-        if ($posts->isEmpty()) {
+        if ($posts->isEmpty() && $page > 1) {
             abort(404);
         }
 
         return $this->createResponse(
-            view($this->getTemplateName($postType), compact('posts', 'term', 'date')),
-            $posts->first()->updated_at
+            view($this->getTemplateName($postType), compact('tree', 'posts')),
+            ($first = $posts->first()) ? $first->updated_at : null
         );
     }
 
@@ -76,6 +80,8 @@ class PostController extends BaseController
         $postType = $wp->postType($query['postType']);
         $postQuery = $wp->posts($postType);
 
+        $tree = (new Tree())->setPostType($postType);
+
         foreach (['id', 'path'] as $key) {
             if (isset($query[$key])) {
                 $postQuery->wherePost($key, $query[$key]);
@@ -83,14 +89,14 @@ class PostController extends BaseController
             }
         }
 
-        $post = $postQuery->first();
-
-        if (! $post) {
+        if (! $post = $postQuery->first()) {
             abort(404);
         }
 
+        $tree->setPost($post);
+
         return $this->createResponse(
-            view($this->getTemplateName($postType, $post), compact('post')),
+            view($this->getTemplateName($postType, $post), compact('tree', 'post')),
             $post->updated_at
         );
     }

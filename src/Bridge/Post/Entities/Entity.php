@@ -4,6 +4,7 @@ namespace Luminous\Bridge\Post\Entities;
 
 use WP_Post;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Luminous\Bridge\WP;
 use Luminous\Bridge\Entity as BaseEntity;
 use Luminous\Bridge\Post\Type;
@@ -36,7 +37,7 @@ abstract class Entity extends BaseEntity
      *
      * @var array
      */
-    protected $pagedContent;
+    protected $cachedPagedContent;
 
     /**
      * Create a new post entity instance.
@@ -48,6 +49,22 @@ abstract class Entity extends BaseEntity
     public function __construct(WP_Post $original, Type $type)
     {
         parent::__construct($original, $type);
+    }
+
+    /**
+     * Get the ancestors.
+     *
+     * @uses \get_post_ancestors()
+     *
+     * @return \Illuminate\Support\Collection|\Luminous\Bridge\Post\Entities\Entity[]
+     */
+    protected function getAncestorsAttribute()
+    {
+        $ancestors = array_map(function ($id) {
+            return WP::post($id);
+        }, get_post_ancestors($this->original));
+
+        return new Collection($ancestors);
     }
 
     /**
@@ -101,15 +118,15 @@ abstract class Entity extends BaseEntity
      */
     protected function pagedContent($page = null)
     {
-        if (is_null($this->pagedContent)) {
-            $this->pagedContent = preg_split(static::PAGING_SEPALATOR, $this->raw_content);
+        if (is_null($this->cachedPagedContent)) {
+            $this->cachedPagedContent = preg_split(static::PAGING_SEPALATOR, $this->raw_content);
         }
 
         if (is_null($page)) {
-            return $this->pagedContent;
+            return $this->cachedPagedContent;
         }
 
-        return isset($this->pagedContent[$index = $page - 1]) ? $this->pagedContent[$index] : null;
+        return isset($this->cachedPagedContent[$index = $page - 1]) ? $this->cachedPagedContent[$index] : null;
     }
 
     /**

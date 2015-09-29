@@ -1,11 +1,24 @@
 <?php
 
 // -----------------------------------------------------------------------------
-// Utility Responces
+// for Error (Debug)
 // -----------------------------------------------------------------------------
 
-$app->get('sitemap.xml', 'RootController@sitemap');
-$app->get('robots.txt', 'RootController@robots');
+if (env('APP_DEBUG', false)) {
+    $app->get('/404', function () {
+        abort(404);
+    });
+    $app->get('/500', function () {
+        abort(500);
+    });
+}
+
+// -----------------------------------------------------------------------------
+// for Root
+// -----------------------------------------------------------------------------
+
+$app->get('/sitemap.xml', 'RootController@sitemap');
+$app->get('/robots.txt', 'RootController@robots');
 
 // -----------------------------------------------------------------------------
 // for Post

@@ -56,7 +56,7 @@ if (! function_exists('archive_url')) {
      */
     function archive_url(Luminous\Bridge\Post\Type $postType, $sub = null, $parameters = [])
     {
-        if ($postType->hierarchical) {
+        if (! $postType->hasArchive()) {
             throw new InvalidArgumentException("{$postType->name} does not have archive.");
         }
 

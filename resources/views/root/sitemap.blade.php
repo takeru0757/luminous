@@ -10,7 +10,7 @@
 
   <?php $posts = $wp->posts($type)->orderBy('updated_at', 'desc')->get(); ?>
 
-  @if ($type->allowArchive() && $latest = $posts->first())
+  @if ($type->hasArchive() && $latest = $posts->first())
   <url>
     <loc>{{ archive_url($type) }}</loc>
     <lastmod>{{ $latest->updated_at->toW3cString() }}</lastmod>
