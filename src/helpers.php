@@ -119,9 +119,9 @@ if (! function_exists('asset')) {
         static $prefix = null;
 
         if (is_null($manifest)) {
-            $manifestPath = config('assets.manifest', base_path('public/assets/rev-manifest.json'));
+            $manifestPath = config('assets.manifest');
             $manifest = json_decode(file_get_contents($manifestPath), true);
-            $prefix = trim(config('assets.prefix', '/assets'), '/').'/';
+            $prefix = trim(config('assets.prefix'), '/').'/';
         }
 
         if (isset($manifest[$file])) {

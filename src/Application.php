@@ -14,9 +14,29 @@ class Application extends BaseApplication
     protected function bootstrapContainer()
     {
         parent::bootstrapContainer();
+        $this->loadBridge();
+        $this->loadAssets();
+    }
 
+    /**
+     * Load the Luminous\Bridge library for the application.
+     *
+     * @return void
+     */
+    protected function loadBridge()
+    {
         $this->loadComponent('wp', 'Luminous\Bridge\BridgeServiceProvider');
         $this->alias('Luminous\Bridge\WP', 'wp');
+    }
+
+    /**
+     * Load assets configuration for the application.
+     *
+     * @return void
+     */
+    protected function loadAssets()
+    {
+        $this->configure('assets');
     }
 
     /**
