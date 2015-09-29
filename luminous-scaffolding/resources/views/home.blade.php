@@ -12,7 +12,7 @@
       <a href="{{ post_url($p) }}" class="list-group-item">
         <p class="h5 list-group-item-heading">{{ $p->title }}</p>
         <p class="list-group-item-text">{{ $p->excerpt }}</p>
-        <p class="list-group-item-text"><small class="text-muted">{{ $p->date('F j, Y') }}</small></p>
+        <p class="list-group-item-text"><small class="text-muted">{{ $p->date($site->dateFormat) }}</small></p>
       </a>
       @endforeach
     </div>
@@ -27,7 +27,7 @@
       <a href="{{ post_url($p) }}" class="list-group-item">
         <p class="h5 list-group-item-heading">{{ $p->title }}</p>
         <p class="list-group-item-text">{{ $p->excerpt }}</p>
-        <p class="list-group-item-text"><small class="text-muted">{{ $p->date('F j, Y') }}</small></p>
+        <p class="list-group-item-text"><small class="text-muted">{{ $p->date($site->dateFormat) }}</small></p>
       </a>
       @endforeach
     </div>

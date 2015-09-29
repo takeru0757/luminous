@@ -24,6 +24,8 @@ class BridgeServiceProvider extends ServiceProvider
             'name'          => $wp->option('blogname'),
             'description'   => $wp->option('blogdescription'),
             'url'           => $wp->option('home'),
+            'dateFormat'    => $wp->option('date_format'),
+            'timeFormat'    => $wp->option('time_format'),
         ];
 
         $this->app['view']->share(compact('wp', 'site'));

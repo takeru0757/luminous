@@ -1,12 +1,15 @@
 <?php
+
 return [
     // -------------------------------------------------------------------------
-    // URL Prefix for Assets
+    // Encryption Key
     // -------------------------------------------------------------------------
-    'prefix' => url('/assets'),
+    'key' => NONCE_SALT,
+    'cipher' => 'AES-256-CBC',
 
     // -------------------------------------------------------------------------
-    // Manifest File Path
+    // Application Locale Configuration
     // -------------------------------------------------------------------------
-    'manifest' => realpath(base_path('public/assets/rev-manifest.json')),
+    'locale' => WPLANG,
+    'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 ];

@@ -112,6 +112,9 @@ class Generator
     /**
      * Set the current post type.
      *
+     * @uses \trans()
+     * @uses \archive_url()
+     *
      * @param \Luminous\Bridge\Post\Type $postType
      * @return $this
      */
@@ -120,7 +123,8 @@ class Generator
         $this->postType = $postType;
 
         if ($this->postType->hasArchive()) {
-            $this->add($this->postType->label, archive_url($this->postType), $this->postType);
+            $label = $this->postType->name === 'post' ? trans('labels.post') : $this->postType->label;
+            $this->add($label, archive_url($this->postType), $this->postType);
         }
 
         return $this;
@@ -128,6 +132,9 @@ class Generator
 
     /**
      * Set the current date.
+     *
+     * @uses \trans()
+     * @uses \archive_url()
      *
      * @param array $date
      * @return $this
@@ -151,7 +158,8 @@ class Generator
             $this->date = $this->createDate($result['params']);
 
             $dateUrl = archive_url($this->postType, $this->dateType, $result['params']);
-            $this->add($this->date->format('F, Y'), $dateUrl, $this->date);
+            $format = trans("labels.date.{$this->dateType}");
+            $this->add($this->date->format($format), $dateUrl, $this->date);
         }
 
         return $this;
@@ -174,6 +182,8 @@ class Generator
     /**
      * Set the current term entity.
      *
+     * @uses \term_url()
+     *
      * @param \Luminous\Bridge\Term\Entities\Entity $term
      * @return $this
      */
@@ -192,6 +202,8 @@ class Generator
 
     /**
      * Set the current post entity.
+     *
+     * @uses \post_url()
      *
      * @param \Luminous\Bridge\Post\Entities\Entity $post
      * @return $this
@@ -212,6 +224,8 @@ class Generator
     /**
      * Get the tree.
      *
+     * @uses \trans()
+     *
      * @param bool $withPage
      * @return \Illuminate\Support\Collection|Luminous\Http\RequestTree\Node[]
      */
@@ -220,7 +234,7 @@ class Generator
         $tree = new Collection($this->tree->all());
 
         if ($withPage && $this->page > 1) {
-            $tree->push(new Node(sprintf("Page: %d", $this->page), null));
+            $tree->push(new Node(trans('labels.page', ['page' => $this->page]), null));
         }
 
         return $tree;
