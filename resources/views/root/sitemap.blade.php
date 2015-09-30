@@ -4,9 +4,9 @@
     <loc>{{ url('/') }}</loc>
     <priority>1.0</priority>
     <changefreq>daily</changefreq>
-    <lastmod>{{ $modified->toW3cString() }}</lastmod>
+    <lastmod>{{ $wp->lastModified()->toW3cString() }}</lastmod>
   </url>
-  @foreach ($types as $type)
+  @foreach ($wp->postTypes() as $type)
 
   <?php $posts = $wp->posts($type)->orderBy('modified_at', 'desc')->get(); ?>
 

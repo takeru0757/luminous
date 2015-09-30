@@ -1,5 +1,8 @@
 <?php
+
 require __DIR__.'/wp-helpers.php';
+
+use Luminous\Bridge\WP;
 
 // -----------------------------------------------------------------------------
 // Rewrite Rules
@@ -70,3 +73,23 @@ add_filter('post_type_link', function ($permalink, $post, $leavename) {
 add_filter('term_link', function ($termlink, $term, $taxonomy) {
     return luminous_term_url(app('wp')->term($term, $taxonomy));
 }, 10, 3);
+
+// -----------------------------------------------------------------------------
+// Last Modified
+// -----------------------------------------------------------------------------
+
+foreach (['edit_post', 'deleted_post'] as $_action) {
+    add_action($_action, function ($id) {
+        update_option(WP::OPTION_LAST_MODIFIED, time());
+    });
+}
+
+// Activation
+add_action('after_switch_theme', function () {
+    update_option(WP::OPTION_LAST_MODIFIED, time());
+});
+
+// Deactivation
+add_action('switch_theme', function () {
+    delete_option(WP::OPTION_LAST_MODIFIED);
+});

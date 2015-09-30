@@ -30,13 +30,10 @@ class RootController extends BaseController
      */
     public function robots(WP $wp)
     {
-        if (! $wp->isPublic()) {
-            $view = view('root.robots-noindex');
-        } else {
-            $view = view('root.robots');
-        }
+        $view = $wp->isPublic() ? 'root.robots' : 'root.robots-noindex';
+        $content = view($view)->render();
 
-        return response($view->render())->header('Content-Type', 'text/plain; charset=utf-8');
+        return response($content)->header('Content-Type', 'text/plain; charset=utf-8');
     }
 
     /**
@@ -47,6 +44,8 @@ class RootController extends BaseController
      *
      * @param \Luminous\Bridge\WP $wp
      * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
     public function sitemap(WP $wp)
     {
@@ -54,15 +53,8 @@ class RootController extends BaseController
             abort(404);
         }
 
-        if ($latest = $wp->posts('any')->orderBy('modified_at', 'desc')->first()) {
-            $modified = $latest->modified_at;
-        } else {
-            $modified = Carbon::now();
-        }
+        $content = view('root.sitemap')->render();
 
-        $types = $wp->postTypes();
-
-        $view = view('root.sitemap', compact('modified', 'types'));
-        return response($view->render())->header('Content-Type', 'application/xml; charset=utf-8');
+        return response($content)->header('Content-Type', 'application/xml; charset=utf-8');
     }
 }

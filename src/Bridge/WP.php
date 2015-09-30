@@ -3,12 +3,27 @@
 namespace Luminous\Bridge;
 
 use DateTimeZone;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Luminous\Bridge\Post\Builder as PostBuilder;
 use Luminous\Bridge\Term\Builder as TermBuilder;
 
 class WP
 {
+    /**
+     * The option key for the time when posts were modified at.
+     *
+     * @var string
+     */
+    const OPTION_LAST_MODIFIED = 'luminous_last_modified';
+
+    /**
+     * The time when the application was modified at.
+     *
+     * @var int UNIX time
+     */
+    protected static $appLastModified = 0;
+
     /**
      * The post builder.
      *
@@ -22,6 +37,17 @@ class WP
      * @var Luminous\Bridge\Term\Builder
      */
     protected static $term;
+
+    /**
+     * Set the time when the application was modified at.
+     *
+     * @param int $time UNIX time
+     * @return void
+     */
+    public static function setAppLastModified($time)
+    {
+        static::$appLastModified = (int) $time;
+    }
 
     /**
      * Set the post builder.
@@ -57,6 +83,24 @@ class WP
     public static function option($name, $default = false)
     {
         return get_option($name, $default);
+    }
+
+    /**
+     * Get the time when the site was modified at.
+     *
+     * @return \Carbon\Carbon
+     */
+    public static function lastModified()
+    {
+        static $value = null;
+
+        if (is_null($value)) {
+            $lastModified = static::option(static::OPTION_LAST_MODIFIED, time());
+            $time = max($lastModified, static::$appLastModified);
+            $value = Carbon::createFromTimeStamp($time, static::timezone());
+        }
+
+        return $value;
     }
 
     /**

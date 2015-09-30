@@ -15,10 +15,10 @@ class BridgeServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        WP::setPostBuilder($this->app['wp.post']);
-        WP::setTermBuilder($this->app['wp.term']);
-
         $wp = $this->app['wp'];
+
+        $wp->setPostBuilder($this->app['wp.post']);
+        $wp->setTermBuilder($this->app['wp.term']);
 
         $site = (object) [
             'name'          => $wp->option('blogname'),
@@ -43,7 +43,11 @@ class BridgeServiceProvider extends ServiceProvider
 
         $this->app->singleton('wp', function ($app) {
             $app->register('Illuminate\Pagination\PaginationServiceProvider');
-            return new WP();
+
+            $wp = new WP();
+            $wp->setAppLastModified($app['config']['app.last_modified']);
+
+            return $wp;
         });
     }
 
@@ -54,11 +58,11 @@ class BridgeServiceProvider extends ServiceProvider
      */
     public function registerPostBuilder()
     {
-        $this->app->bind('wp.post.entities.attachment', 'Luminous\Bridge\Post\Entities\AttachmentEntity');
-        $this->app->bind('wp.post.entities.hierarchical', 'Luminous\Bridge\Post\Entities\HierarchicalEntity');
-        $this->app->bind('wp.post.entities.nonhierarchical', 'Luminous\Bridge\Post\Entities\NonHierarchicalEntity');
-
         $this->app->singleton('wp.post', function ($app) {
+            $app->bind('wp.post.entities.attachment', 'Luminous\Bridge\Post\Entities\AttachmentEntity');
+            $app->bind('wp.post.entities.hierarchical', 'Luminous\Bridge\Post\Entities\HierarchicalEntity');
+            $app->bind('wp.post.entities.nonhierarchical', 'Luminous\Bridge\Post\Entities\NonHierarchicalEntity');
+
             return new PostBuilder($app);
         });
     }
@@ -70,10 +74,10 @@ class BridgeServiceProvider extends ServiceProvider
      */
     public function registerTermBuilder()
     {
-        $this->app->bind('wp.term.entities.hierarchical', 'Luminous\Bridge\Term\Entities\HierarchicalEntity');
-        $this->app->bind('wp.term.entities.nonhierarchical', 'Luminous\Bridge\Term\Entities\NonHierarchicalEntity');
-
         $this->app->singleton('wp.term', function ($app) {
+            $app->bind('wp.term.entities.hierarchical', 'Luminous\Bridge\Term\Entities\HierarchicalEntity');
+            $app->bind('wp.term.entities.nonhierarchical', 'Luminous\Bridge\Term\Entities\NonHierarchicalEntity');
+
             return new TermBuilder($app);
         });
     }

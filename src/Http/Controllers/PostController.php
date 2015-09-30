@@ -21,6 +21,8 @@ class PostController extends BaseController
      * @param \Luminous\Bridge\WP $wp
      * @param array $query
      * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
     public function archive(Request $request, WP $wp, $query)
     {
@@ -52,10 +54,9 @@ class PostController extends BaseController
             abort(404);
         }
 
-        return $this->createResponse(
-            view($this->getTemplateName($postType), compact('tree', 'posts')),
-            ($first = $posts->first()) ? $first->modified_at : null
-        );
+        $view = view($this->getTemplateName($postType), compact('tree', 'posts'));
+
+        return $this->createResponse($view);
     }
 
     /**
@@ -67,6 +68,8 @@ class PostController extends BaseController
      * @param \Luminous\Bridge\WP $wp
      * @param array $query
      * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
     public function post(WP $wp, $query)
     {
@@ -88,10 +91,9 @@ class PostController extends BaseController
 
         $tree->setPost($post);
 
-        return $this->createResponse(
-            view($this->getTemplateName($postType, $post), compact('tree', 'post')),
-            $post->modified_at
-        );
+        $view = view($this->getTemplateName($postType, $post), compact('tree', 'post'));
+
+        return $this->createResponse($view);
     }
 
     /**

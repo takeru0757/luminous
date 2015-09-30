@@ -25,6 +25,7 @@ class Application extends BaseApplication
      */
     protected function loadBridge()
     {
+        $this->configure('app');
         $this->loadComponent('wp', 'Luminous\Bridge\BridgeServiceProvider');
         $this->alias('Luminous\Bridge\WP', 'wp');
     }
