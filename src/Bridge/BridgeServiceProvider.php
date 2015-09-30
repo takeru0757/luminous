@@ -55,8 +55,8 @@ class BridgeServiceProvider extends ServiceProvider
     public function registerPostBuilder()
     {
         $this->app->bind('wp.post.entities.attachment', 'Luminous\Bridge\Post\Entities\AttachmentEntity');
-        $this->app->bind('wp.post.entities.page', 'Luminous\Bridge\Post\Entities\PageEntity');
-        $this->app->bind('wp.post.entities.post', 'Luminous\Bridge\Post\Entities\PostEntity');
+        $this->app->bind('wp.post.entities.hierarchical', 'Luminous\Bridge\Post\Entities\HierarchicalEntity');
+        $this->app->bind('wp.post.entities.nonhierarchical', 'Luminous\Bridge\Post\Entities\NonHierarchicalEntity');
 
         $this->app->singleton('wp.post', function ($app) {
             return new PostBuilder($app);
@@ -70,8 +70,8 @@ class BridgeServiceProvider extends ServiceProvider
      */
     public function registerTermBuilder()
     {
-        $this->app->bind('wp.term.entities.category', 'Luminous\Bridge\Term\Entities\CategoryEntity');
-        $this->app->bind('wp.term.entities.post_tag', 'Luminous\Bridge\Term\Entities\PostTagEntity');
+        $this->app->bind('wp.term.entities.hierarchical', 'Luminous\Bridge\Term\Entities\HierarchicalEntity');
+        $this->app->bind('wp.term.entities.nonhierarchical', 'Luminous\Bridge\Term\Entities\NonHierarchicalEntity');
 
         $this->app->singleton('wp.term', function ($app) {
             return new TermBuilder($app);

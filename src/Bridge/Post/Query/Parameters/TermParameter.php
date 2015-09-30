@@ -1,9 +1,9 @@
 <?php
 
-namespace Luminous\Bridge\Post\QueryTraits;
+namespace Luminous\Bridge\Post\Query\Parameters;
 
 use Luminous\Bridge\Term\Type;
-use Luminous\Bridge\Term\Entities\Entity;
+use Luminous\Bridge\Term\Entity;
 
 /**
  * The term parameter for the post query.
@@ -12,7 +12,7 @@ use Luminous\Bridge\Term\Entities\Entity;
  *
  * @link https://codex.wordpress.org/Class_Reference/WP_Query#Taxonomy_Parameters
  */
-trait TermWhereTrait
+trait TermParameter
 {
     /**
      * The term where parameters for the query.
@@ -36,7 +36,7 @@ trait TermWhereTrait
      *
      * @param string|\Luminous\Bridge\Term\Type $column The term type (taxonomy).
      * @param string $operator Possible values are 'in', 'not in', 'and', 'exists' and 'not exists'.
-     * @param int|string|\Luminous\Bridge\Term\Entities\Entity $value
+     * @param int|string|\Luminous\Bridge\Term\Entity $value
      * @param array $options
      * @return $this
      */

@@ -7,7 +7,7 @@ use Luminous\Bridge\Exceptions\MissingEntityException;
 use Luminous\Bridge\Builder as BaseBuilder;
 
 /**
- * @method \Luminous\Bridge\Term\Entities\Entity get(int|string|\stdClass $id, string $type = null)
+ * @method \Luminous\Bridge\Term\Entity get(int|string|\stdClass $id, string $type = null)
  *         Get an entity instance.
  * @method \Luminous\Bridge\Term\Type getType(string $name) Get a type instance.
  */
@@ -50,7 +50,7 @@ class Builder extends BaseBuilder
      * Hydrate an original object.
      *
      * @param \stdClass $original
-     * @return \Luminous\Bridge\Term\Entities\Entity
+     * @return \Luminous\Bridge\Term\Entity
      *
      * @throws \Luminous\Bridge\Exceptions\MissingEntityException
      */
@@ -59,8 +59,9 @@ class Builder extends BaseBuilder
         $type = $this->getType($original->taxonomy);
         $base = 'wp.term.entities.';
 
-        if (! $this->container->bound($abstract = "{$base}{$type->name}")) {
-            if (! $this->container->bound($abstract = $base.($type->hierarchical ? 'category' : 'post_tag'))) {
+        if (! $this->container->bound($abstract = $base.$type->name)) {
+            $abstract = $base.($type->hierarchical ? 'hierarchical' : 'nonhierarchical');
+            if (! $this->container->bound($abstract)) {
                 throw new MissingEntityException($abstract);
             }
         }

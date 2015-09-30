@@ -62,13 +62,15 @@ if (! function_exists('luminous_post_url')) {
     /**
      * Generate a URL to the post. (for admin)
      *
+     * @uses \post_url()
      * @uses \home_url()
+     * @uses \app()
      *
-     * @param \Luminous\Bridge\Post\Entities\Entity $post
+     * @param \Luminous\Bridge\Post\Entity $post
      * @param string $placeholder
      * @return string
      */
-    function luminous_post_url(Luminous\Bridge\Post\Entities\Entity $post, $placeholder = null)
+    function luminous_post_url(Luminous\Bridge\Post\Entity $post, $placeholder = null)
     {
         $uri = post_url($post, $placeholder ? ['path' => $placeholder] : []);
         return home_url(substr($uri, strlen(app('request')->root())));
@@ -79,12 +81,14 @@ if (! function_exists('luminous_term_url')) {
     /**
      * Generate a URL to the term. (for admin)
      *
+     * @uses \term_url()
      * @uses \home_url()
+     * @uses \app()
      *
-     * @param \Luminous\Bridge\Term\Entities\Entity $term
+     * @param \Luminous\Bridge\Term\Entity $term
      * @return string
      */
-    function luminous_term_url(Luminous\Bridge\Term\Entities\Entity $term)
+    function luminous_term_url(Luminous\Bridge\Term\Entity $term)
     {
         $uri = term_url($term);
         return home_url(substr($uri, strlen(app('request')->root())));

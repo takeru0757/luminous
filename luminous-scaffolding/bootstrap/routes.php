@@ -17,6 +17,8 @@ if (env('APP_DEBUG', false)) {
 // for Root
 // -----------------------------------------------------------------------------
 
+$app->any('/', ['uses' => 'RootController@home', 'as' => 'home']);
+
 $app->get('/sitemap.xml', 'RootController@sitemap');
 $app->get('/robots.txt', 'RootController@robots');
 
@@ -79,13 +81,4 @@ $app->any('/{path:.+}', [
     'query' => ['postType' => 'page'],
     'uses' => 'PostController@post',
     'as' => 'post_url@page',
-]);
-
-// -----------------------------------------------------------------------------
-// for Home
-// -----------------------------------------------------------------------------
-
-$app->any('/', [
-    'uses' => 'PostController@home',
-    'as' => 'home',
 ]);

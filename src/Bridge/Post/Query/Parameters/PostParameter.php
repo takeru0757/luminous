@@ -1,6 +1,6 @@
 <?php
 
-namespace Luminous\Bridge\Post\QueryTraits;
+namespace Luminous\Bridge\Post\Query\Parameters;
 
 use InvalidArgumentException;
 use Luminous\Bridge\Post\Type;
@@ -10,7 +10,7 @@ use Luminous\Bridge\Post\Type;
  *
  * @link https://codex.wordpress.org/Class_Reference/WP_Query#Post_.26_Page_Parameters
  */
-trait PostWhereTrait
+trait PostParameter
 {
     /**
      * The post type for the query.

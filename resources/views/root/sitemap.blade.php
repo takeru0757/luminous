@@ -8,12 +8,12 @@
   </url>
   @foreach ($types as $type)
 
-  <?php $posts = $wp->posts($type)->orderBy('updated_at', 'desc')->get(); ?>
+  <?php $posts = $wp->posts($type)->orderBy('modified_at', 'desc')->get(); ?>
 
   @if ($type->hasArchive() && $latest = $posts->first())
   <url>
     <loc>{{ archive_url($type) }}</loc>
-    <lastmod>{{ $latest->updated_at->toW3cString() }}</lastmod>
+    <lastmod>{{ $latest->modified_at->toW3cString() }}</lastmod>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
   </url>
@@ -22,7 +22,7 @@
   @foreach ($posts as $post)
   <url>
     <loc>{{ post_url($post) }}</loc>
-    <lastmod>{{ $post->updated_at->toW3cString() }}</lastmod>
+    <lastmod>{{ $post->modified_at->toW3cString() }}</lastmod>
     @if ($type->hierarchical)
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>

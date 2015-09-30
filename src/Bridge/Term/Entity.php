@@ -1,12 +1,11 @@
 <?php
 
-namespace Luminous\Bridge\Term\Entities;
+namespace Luminous\Bridge\Term;
 
 use stdClass;
 use Illuminate\Support\Collection;
 use Luminous\Bridge\WP;
 use Luminous\Bridge\Entity as BaseEntity;
-use Luminous\Bridge\Term\Type;
 
 abstract class Entity extends BaseEntity
 {
@@ -36,7 +35,7 @@ abstract class Entity extends BaseEntity
      *
      * @uses \get_ancestors()
      *
-     * @return \Illuminate\Support\Collection|\Luminous\Bridge\Term\Entities\Entity[]
+     * @return \Illuminate\Support\Collection|\Luminous\Bridge\Term\Entity[]
      */
     protected function getAncestorsAttribute()
     {

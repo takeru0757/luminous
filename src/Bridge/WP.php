@@ -107,26 +107,26 @@ class WP
     }
 
     /**
-     * Get the post entity instance.
-     *
-     * @param int|\WP_Post $id
-     * @return \Luminous\Bridge\Post\Entities\Entity
-     */
-    public static function post($id)
-    {
-        return static::$post->get($id);
-    }
-
-    /**
      * Get the post query instance.
      *
      * @param \Luminous\Bridge\Post\Type|string|array $type
-     * @return \Luminous\Bridge\Post\Query
+     * @return \Luminous\Bridge\Post\Query\Builder
      */
     public static function posts($type = null)
     {
         $query = static::$post->query();
         return $type ? $query->type($type) : $query;
+    }
+
+    /**
+     * Get the post entity instance.
+     *
+     * @param int|\WP_Post $id
+     * @return \Luminous\Bridge\Post\Entity
+     */
+    public static function post($id)
+    {
+        return static::$post->get($id);
     }
 
     /**
@@ -145,7 +145,7 @@ class WP
      *
      * @param int|\stdClass $id
      * @param string $type
-     * @return \Luminous\Bridge\Term\Entities\Entity
+     * @return \Luminous\Bridge\Term\Entity
      */
     public static function term($id, $type = null)
     {

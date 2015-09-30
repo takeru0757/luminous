@@ -3,13 +3,27 @@
 namespace Luminous\Http\Controllers;
 
 use Carbon\Carbon;
-use Laravel\Lumen\Routing\Controller as BaseController;
+use Luminous\Routing\Controller as BaseController;
 use Luminous\Bridge\WP;
 
 class RootController extends BaseController
 {
     /**
+     * Handle requests for home.
+     *
+     * @uses \view()
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function home()
+    {
+        return $this->createResponse(view('root.home'));
+    }
+
+    /**
      * Handle requests for '/robots.txt'.
+     *
+     * @uses \view()
      *
      * @param \Luminous\Bridge\WP $wp
      * @return \Symfony\Component\HttpFoundation\Response
@@ -28,6 +42,9 @@ class RootController extends BaseController
     /**
      * Handle requests for '/sitemap.xml'.
      *
+     * @uses \abort()
+     * @uses \view()
+     *
      * @param \Luminous\Bridge\WP $wp
      * @return \Symfony\Component\HttpFoundation\Response
      */
@@ -37,8 +54,8 @@ class RootController extends BaseController
             abort(404);
         }
 
-        if ($latest = $wp->posts('any')->orderBy('updated_at', 'desc')->first()) {
-            $modified = $latest->updated_at;
+        if ($latest = $wp->posts('any')->orderBy('modified_at', 'desc')->first()) {
+            $modified = $latest->modified_at;
         } else {
             $modified = Carbon::now();
         }

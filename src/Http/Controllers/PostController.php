@@ -2,30 +2,20 @@
 
 namespace Luminous\Http\Controllers;
 
-use DateTime;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Contracts\View\View;
-use Laravel\Lumen\Routing\Controller as BaseController;
+use Luminous\Routing\Controller as BaseController;
 use Luminous\Bridge\WP;
 use Luminous\Bridge\Post\Type;
-use Luminous\Bridge\Post\Entities\Entity;
+use Luminous\Bridge\Post\Entity;
 use Luminous\Http\RequestTree\Generator as Tree;
 
 class PostController extends BaseController
 {
     /**
-     * Handle requests for home.
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function home()
-    {
-        return $this->createResponse(view('home'));
-    }
-
-    /**
      * Handle requests for archive.
+     *
+     * @uses \abort()
+     * @uses \view()
      *
      * @param \Illuminate\Http\Request $request
      * @param \Luminous\Bridge\WP $wp
@@ -64,12 +54,15 @@ class PostController extends BaseController
 
         return $this->createResponse(
             view($this->getTemplateName($postType), compact('tree', 'posts')),
-            ($first = $posts->first()) ? $first->updated_at : null
+            ($first = $posts->first()) ? $first->modified_at : null
         );
     }
 
     /**
      * Handle requests for the post.
+     *
+     * @uses \abort()
+     * @uses \view()
      *
      * @param \Luminous\Bridge\WP $wp
      * @param array $query
@@ -97,7 +90,7 @@ class PostController extends BaseController
 
         return $this->createResponse(
             view($this->getTemplateName($postType, $post), compact('tree', 'post')),
-            $post->updated_at
+            $post->modified_at
         );
     }
 
@@ -123,8 +116,10 @@ class PostController extends BaseController
     /**
      * Determine the template name.
      *
+     * @uses \view()
+     *
      * @param \Luminous\Bridge\Post\Type $postType
-     * @param \Luminous\Bridge\Post\Entities\Entity $post
+     * @param \Luminous\Bridge\Post\Entity $post
      * @return string
      */
     protected function getTemplateName(Type $postType, Entity $post = null)
@@ -151,37 +146,5 @@ class PostController extends BaseController
         }
 
         return 'layout';
-    }
-
-    /**
-     * Create the response with headers.
-     *
-     * @param \Illuminate\Contracts\View\View $view
-     * @param \DateTime $modified
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    protected function createResponse(View $view, DateTime $modified = null)
-    {
-        $response = response($view->render(), 200);
-        $expires = $this->expires();
-
-        $response->header('Cache-Control', "private,max-age={$expires}");
-        $response->header('Expires', Carbon::now()->addSeconds($expires)->format(DateTime::RFC1123));
-
-        if ($modified) {
-            $response->header('Last-Modified', $modified->format(DateTime::RFC1123));
-        }
-
-        return $response;
-    }
-
-    /**
-     * Get expires in seconds.
-     *
-     * @return int 600 or 0 (debug)
-     */
-    protected function expires()
-    {
-        return env('APP_DEBUG', false) ? 0 : 600;
     }
 }

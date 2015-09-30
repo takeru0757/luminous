@@ -1,9 +1,8 @@
 <?php
 
-namespace Luminous\Bridge\Post\QueryTraits;
+namespace Luminous\Bridge\Post\Query\Parameters;
 
 use InvalidArgumentException;
-use Illuminate\Support\Arr;
 
 /**
  * The ordering parameter for the post query.
@@ -13,7 +12,7 @@ use Illuminate\Support\Arr;
  *
  * @link https://codex.wordpress.org/Class_Reference/WP_Query#Order_.26_Orderby_Parameters
  */
-trait OrderByTrait
+trait OrderByParameter
 {
     /**
      * The ordering parameter for the query.
@@ -31,7 +30,7 @@ trait OrderByTrait
         'rand'          => 'rand',
         'id'            => 'ID',
         'created_at'    => 'date',
-        'updated_at'    => 'modified',
+        'modified_at'   => 'modified',
         'order'         => 'menu_order',
         'slug'          => 'name',
         'parent_id'     => 'parent',

@@ -4,9 +4,10 @@ namespace Luminous\Bridge\Post;
 
 use Luminous\Bridge\Exceptions\MissingEntityException;
 use Luminous\Bridge\Builder as BaseBuilder;
+use Luminous\Bridge\Post\Query\Builder as QueryBuilder;
 
 /**
- * @method \Luminous\Bridge\Post\Entities\Entity get(int|\WP_Post $id) Get an entity instance.
+ * @method \Luminous\Bridge\Post\Entity get(int|\WP_Post $id) Get an entity instance.
  * @method \Luminous\Bridge\Post\Type getType(string $name) Get a type instance.
  */
 class Builder extends BaseBuilder
@@ -29,7 +30,7 @@ class Builder extends BaseBuilder
      * Hydrate an original object.
      *
      * @param \WP_Post $original
-     * @return \Luminous\Bridge\Post\Entities\Entity
+     * @return \Luminous\Bridge\Post\Entity
      *
      * @throws \Luminous\Bridge\Exceptions\MissingEntityException
      */
@@ -38,8 +39,9 @@ class Builder extends BaseBuilder
         $type = $this->getType($original->post_type);
         $base = 'wp.post.entities.';
 
-        if (! $this->container->bound($abstract = "{$base}{$type->name}")) {
-            if (! $this->container->bound($abstract = $base.($type->hierarchical ? 'page' : 'post'))) {
+        if (! $this->container->bound($abstract = $base.$type->name)) {
+            $abstract = $base.($type->hierarchical ? 'hierarchical' : 'nonhierarchical');
+            if (! $this->container->bound($abstract)) {
                 throw new MissingEntityException($abstract);
             }
         }
@@ -74,10 +76,10 @@ class Builder extends BaseBuilder
     /**
      * Create a new query instance.
      *
-     * @return \Luminous\Bridge\Post\Query
+     * @return \Luminous\Bridge\Post\Query\Builder
      */
     public function query()
     {
-        return new Query($this);
+        return new QueryBuilder($this);
     }
 }

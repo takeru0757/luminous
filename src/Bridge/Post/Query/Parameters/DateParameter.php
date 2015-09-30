@@ -1,6 +1,6 @@
 <?php
 
-namespace Luminous\Bridge\Post\QueryTraits;
+namespace Luminous\Bridge\Post\Query\Parameters;
 
 use InvalidArgumentException;
 
@@ -14,7 +14,7 @@ use InvalidArgumentException;
  *
  * @link https://codex.wordpress.org/Class_Reference/WP_Query#Date_Parameters
  */
-trait DateWhereTrait
+trait DateParameter
 {
     /**
      * The date where parameters for the query.
@@ -30,7 +30,7 @@ trait DateWhereTrait
      */
     protected $dateWhereColumns = [
         'created_at' => 'post_date',
-        'updated_at' => 'post_modified',
+        'modified_at' => 'post_modified',
     ];
 
     /**

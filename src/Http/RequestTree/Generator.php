@@ -6,8 +6,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Luminous\Bridge\WP;
 use Luminous\Bridge\Post\Type as PostType;
-use Luminous\Bridge\Post\Entities\Entity as PostEntity;
-use Luminous\Bridge\Term\Entities\Entity as TermEntity;
+use Luminous\Bridge\Post\Entity as PostEntity;
+use Luminous\Bridge\Term\Entity as TermEntity;
 
 class Generator
 {
@@ -53,14 +53,14 @@ class Generator
     /**
      * The current term entity.
      *
-     * @var \Luminous\Bridge\Term\Entities\Entity
+     * @var \Luminous\Bridge\Term\Entity
      */
     public $term;
 
     /**
      * The current post entity.
      *
-     * @var \Luminous\Bridge\Post\Entities\Entity
+     * @var \Luminous\Bridge\Post\Entity
      */
     public $post;
 
@@ -184,7 +184,7 @@ class Generator
      *
      * @uses \term_url()
      *
-     * @param \Luminous\Bridge\Term\Entities\Entity $term
+     * @param \Luminous\Bridge\Term\Entity $term
      * @return $this
      */
     public function setTerm(TermEntity $term)
@@ -205,7 +205,7 @@ class Generator
      *
      * @uses \post_url()
      *
-     * @param \Luminous\Bridge\Post\Entities\Entity $post
+     * @param \Luminous\Bridge\Post\Entity $post
      * @return $this
      */
     public function setPost(PostEntity $post)

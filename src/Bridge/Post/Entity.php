@@ -1,13 +1,12 @@
 <?php
 
-namespace Luminous\Bridge\Post\Entities;
+namespace Luminous\Bridge\Post;
 
 use WP_Post;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Luminous\Bridge\WP;
 use Luminous\Bridge\Entity as BaseEntity;
-use Luminous\Bridge\Post\Type;
 
 abstract class Entity extends BaseEntity
 {
@@ -29,7 +28,7 @@ abstract class Entity extends BaseEntity
         'status'        => 'post_status',
         'order'         => 'menu_order',
         'created_at'    => 'post_date',
-        'updated_at'    => 'post_modified',
+        'modified_at'   => 'post_modified',
     ];
 
     /**
@@ -56,7 +55,7 @@ abstract class Entity extends BaseEntity
      *
      * @uses \get_post_ancestors()
      *
-     * @return \Illuminate\Support\Collection|\Luminous\Bridge\Post\Entities\Entity[]
+     * @return \Illuminate\Support\Collection|\Luminous\Bridge\Post\Entity[]
      */
     protected function getAncestorsAttribute()
     {
@@ -191,7 +190,7 @@ abstract class Entity extends BaseEntity
     }
 
     /**
-     * Get the time when the post was created.
+     * Get the time when the post was created at.
      *
      * @param string $value
      * @return \Carbon\Carbon
@@ -202,12 +201,12 @@ abstract class Entity extends BaseEntity
     }
 
     /**
-     * Get the time when the post was updated.
+     * Get the time when the post was modified at.
      *
      * @param string $value
      * @return \Carbon\Carbon
      */
-    protected function getUpdatedAtAttribute($value)
+    protected function getModifiedAtAttribute($value)
     {
         return Carbon::createFromFormat('Y-m-d H:i:s', $value, WP::timezone());
     }
@@ -226,12 +225,12 @@ abstract class Entity extends BaseEntity
      * Get the formatted time.
      *
      * @param string $format
-     * @param bool $updated
+     * @param bool $modified
      * @return string
      */
-    public function date($format, $updated = false)
+    public function date($format, $modified = false)
     {
-        return $this->{$updated ? 'updated_at' : 'created_at'}->format($format);
+        return $this->{$modified ? 'modified_at' : 'created_at'}->format($format);
     }
 
     /**

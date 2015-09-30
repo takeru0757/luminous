@@ -4,8 +4,8 @@ if (! function_exists('is_wp')) {
     /**
      * Determine if the request should be handled by WordPress.
      *
-     * @uses WP_INSTALLING
      * @uses $pagenow
+     * @uses \WP_INSTALLING
      * @uses \is_admin()
      *
      * @return bool
@@ -34,6 +34,8 @@ if (! function_exists('framework_base_path')) {
     /**
      * Get the path to the Luminous framework directory.
      *
+     * @uses \app()
+     *
      * @param string $path
      * @return string
      */
@@ -46,6 +48,8 @@ if (! function_exists('framework_base_path')) {
 if (! function_exists('archive_url')) {
     /**
      * Generate a URL to archive.
+     *
+     * @uses \route()
      *
      * @param \Luminous\Bridge\Post\Type $postType
      * @param string|array $sub
@@ -76,11 +80,13 @@ if (! function_exists('post_url')) {
     /**
      * Generate a URL to the post.
      *
-     * @param \Luminous\Bridge\Post\Entities\Entity $post
+     * @uses \route()
+     *
+     * @param \Luminous\Bridge\Post\Entity $post
      * @param array $parameters
      * @return string
      */
-    function post_url(Luminous\Bridge\Post\Entities\Entity $post, $parameters = [])
+    function post_url(Luminous\Bridge\Post\Entity $post, $parameters = [])
     {
         return preg_replace_callback('/\{(.*?)(:.*?)?(\{[0-9,]+\})?\}/', function ($m) use ($post) {
             return $post->urlParameter($m[1]);
@@ -92,11 +98,13 @@ if (! function_exists('term_url')) {
     /**
      * Generate a URL to the term.
      *
-     * @param \Luminous\Bridge\Term\Entities\Entity $term
+     * @uses \route()
+     *
+     * @param \Luminous\Bridge\Term\Entity $term
      * @param array $parameters
      * @return string
      */
-    function term_url(Luminous\Bridge\Term\Entities\Entity $term, $parameters = [])
+    function term_url(Luminous\Bridge\Term\Entity $term, $parameters = [])
     {
         $parameters['term'] = $term;
         return route("term_url@{$term->type->name}", $parameters);
@@ -106,6 +114,9 @@ if (! function_exists('term_url')) {
 if (! function_exists('asset')) {
     /**
      * Get the path to a versioned file.
+     *
+     * @uses \config()
+     * @uses \app()
      *
      * @param string $file
      * @param bool|null $secure

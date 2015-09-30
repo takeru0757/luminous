@@ -1,28 +1,29 @@
 <?php
 
-namespace Luminous\Bridge\Post;
+namespace Luminous\Bridge\Post\Query;
 
 use WP_Query;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Luminous\Bridge\Post\QueryTraits\DateWhereTrait;
-use Luminous\Bridge\Post\QueryTraits\OrderByTrait;
-use Luminous\Bridge\Post\QueryTraits\PostWhereTrait;
-use Luminous\Bridge\Post\QueryTraits\TermWhereTrait;
+use Luminous\Bridge\Post\Builder as PostBuilder;
+use Luminous\Bridge\Post\Query\Parameters\DateParameter;
+use Luminous\Bridge\Post\Query\Parameters\OrderByParameter;
+use Luminous\Bridge\Post\Query\Parameters\PostParameter;
+use Luminous\Bridge\Post\Query\Parameters\TermParameter;
 
-class Query
+class Builder
 {
-    use DateWhereTrait;
-    use OrderByTrait;
-    use PostWhereTrait;
-    use TermWhereTrait;
+    use DateParameter;
+    use OrderByParameter;
+    use PostParameter;
+    use TermParameter;
 
     /**
      * The post builder instance.
      *
      * @var \Luminous\Bridge\Post\Builder
      */
-    protected $builder;
+    protected $postBuilder;
 
     /**
      * The maximum number of records to return.
@@ -44,9 +45,9 @@ class Query
      * @param \Luminous\Bridge\Post\Builder $builder
      * @return void
      */
-    public function __construct(Builder $builder)
+    public function __construct(PostBuilder $postBuilder)
     {
-        $this->builder = $builder;
+        $this->postBuilder = $postBuilder;
     }
 
     /**
@@ -66,7 +67,7 @@ class Query
      * Alias to set the "offset" value of the query.
      *
      * @param int $value
-     * @return \Luminous\Bridge\Post\Query|static
+     * @return \Luminous\Bridge\Post\Query\Builder|static
      */
     public function skip($value)
     {
@@ -94,7 +95,7 @@ class Query
      * Alias to set the "limit" value of the query.
      *
      * @param int $value
-     * @return \Luminous\Bridge\Post\Query|static
+     * @return \Luminous\Bridge\Post\Query\Builder|static
      */
     public function take($value)
     {
@@ -106,7 +107,7 @@ class Query
      *
      * @param int $page
      * @param int $perPage
-     * @return \Luminous\Bridge\Post\Query|static
+     * @return \Luminous\Bridge\Post\Query\Builder|static
      */
     public function forPage($page, $perPage = 10)
     {
@@ -127,7 +128,7 @@ class Query
     /**
      * Execute the query and get the first result.
      *
-     * @return \Luminous\Bridge\Post\Entities\Entity|null
+     * @return \Luminous\Bridge\Post\Entity|null
      */
     public function first()
     {
@@ -177,7 +178,7 @@ class Query
 
         return [
             'total' => intval($result->found_posts),
-            'items' => $this->builder->makeMany($result->get_posts()),
+            'items' => $this->postBuilder->makeMany($result->get_posts()),
         ];
     }
 }
