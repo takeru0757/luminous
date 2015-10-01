@@ -2,48 +2,26 @@
 
 namespace Luminous;
 
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Laravel\Lumen\Application as BaseApplication;
 
 class Application extends BaseApplication
 {
     /**
-     * Bootstrap the application container.
-     *
-     * @return void
+     * {@inheritdoc}
      */
     protected function bootstrapContainer()
     {
         parent::bootstrapContainer();
-        $this->loadBridge();
-        $this->loadAssets();
+
+        $this->availableBindings['wp'] = 'registerBridgeBidings';
+        $this->availableBindings['modified'] = 'registerModifiedBidings';
     }
 
     /**
-     * Load the Luminous\Bridge library for the application.
-     *
-     * @return void
-     */
-    protected function loadBridge()
-    {
-        $this->configure('app');
-        $this->loadComponent('wp', 'Luminous\Bridge\BridgeServiceProvider');
-        $this->alias('Luminous\Bridge\WP', 'wp');
-    }
-
-    /**
-     * Load assets configuration for the application.
-     *
-     * @return void
-     */
-    protected function loadAssets()
-    {
-        $this->configure('assets');
-    }
-
-    /**
-     * Get the version number of the application.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function version()
     {
@@ -62,10 +40,63 @@ class Application extends BaseApplication
     }
 
     /**
-     * Get the path to the given configuration file.
+     * Register container bindings for the application.
      *
-     * @param string $name
-     * @return string
+     * @return void
+     */
+    protected function registerBridgeBidings()
+    {
+        $this->singleton('wp', function () {
+            return $this->loadComponent('wp', 'Luminous\Bridge\BridgeServiceProvider');
+        });
+    }
+
+    /**
+     * Register container bindings for the application.
+     *
+     * @return void
+     */
+    protected function registerModifiedBidings()
+    {
+        $this->bind('modified', function () {
+            static $timestamp = null;
+
+            if (is_null($timestamp)) {
+                $timestamp = @filemtime($this->basePath('style.css')) ?: 0;
+            }
+
+            return Carbon::createFromTimeStamp($timestamp);
+        });
+    }
+
+    /**
+     * {@inheritdoc}
+     *
+     * Remove magic quotes from `$_GET`, `$_POST`, `$_COOKIE`, and `$_SERVER`.
+     *
+     * @see \wp_magic_quotes() https://developer.wordpress.org/reference/functions/wp_magic_quotes/
+     * @uses \stripslashes_deep()
+     */
+    protected function registerRequestBindings()
+    {
+        $this->singleton('Illuminate\Http\Request', function () {
+            Request::enableHttpMethodParameterOverride();
+
+            $base = SymfonyRequest::createFromGlobals();
+
+            foreach (['request', 'query', 'cookies', 'server', 'headers'] as $param) {
+                $striped = array_map('stripslashes_deep', $base->{$param}->all());
+                $base->{$param}->replace($striped);
+            }
+
+            return Request::createFromBase($base)->setRouteResolver(function () {
+                return $this->currentRoute;
+            });
+        });
+    }
+
+    /**
+     * {@inheritdoc}
      */
     protected function getConfigurationPath($name)
     {
@@ -80,9 +111,7 @@ class Application extends BaseApplication
     }
 
     /**
-     * Get the path to the application's language files.
-     *
-     * @return string
+     * {@inheritdoc}
      */
     protected function getLanguagePath()
     {
@@ -94,36 +123,6 @@ class Application extends BaseApplication
     }
 
     /**
-     * Register a route with the application.
-     *
-     * @param string $uri
-     * @param mixed $action
-     * @return $this
-     */
-    public function any($uri, $action)
-    {
-        foreach (['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as $method) {
-            $this->addRoute($method, $uri, $action);
-        }
-        return $this;
-    }
-
-    /**
-     * Handle a route found by the dispatcher.
-     *
-     * @param array $routeInfo
-     * @return mixed
-     */
-    protected function handleFoundRoute($routeInfo)
-    {
-        if (isset($routeInfo[1]['query'])) {
-            $routeInfo[2] = ['query' => array_merge($routeInfo[1]['query'], $routeInfo[2])];
-        }
-
-        return parent::handleFoundRoute($routeInfo);
-    }
-
-    /**
      * Get the path to the Luminous framework directory.
      *
      * @param string $path
@@ -132,5 +131,44 @@ class Application extends BaseApplication
     public function frameworkBasePath($path = null)
     {
         return dirname(__DIR__).($path ? '/'.$path : $path);
+    }
+
+    /**
+     * Register a route with the application.
+     *
+     * @param string $uri
+     * @param mixed $action
+     * @return $this
+     */
+    public function any($uri, $action)
+    {
+        foreach (['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE'] as $method) {
+            $this->addRoute($method, $uri, $action);
+        }
+
+        return $this;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function dispatch($request = null)
+    {
+        $this->configure('assets');
+        $this->make('wp');
+
+        return parent::dispatch($request);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function handleFoundRoute($routeInfo)
+    {
+        if (isset($routeInfo[1]['query'])) {
+            $routeInfo[2] = ['query' => array_merge($routeInfo[1]['query'], $routeInfo[2])];
+        }
+
+        return parent::handleFoundRoute($routeInfo);
     }
 }

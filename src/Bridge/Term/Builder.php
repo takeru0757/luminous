@@ -66,7 +66,7 @@ class Builder extends BaseBuilder
             }
         }
 
-        return $this->container->make($abstract, [$original, $type]);
+        return $this->container->make($abstract, [$this->container['wp'], $original, $type]);
     }
 
     /**

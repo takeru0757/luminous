@@ -2,68 +2,50 @@
 
 namespace Luminous\Routing;
 
-use Exception;
-use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
 use Laravel\Lumen\Routing\Controller as BaseController;
 
 abstract class Controller extends BaseController
 {
     /**
-     * Create the response with headers.
+     * Create a new response.
      *
-     * @uses \app()
+     * - Set `Cache-Control` header.
+     * - Set `Etag` header and set 304 status code if not modified.
+     * - Fix `Content-Type` header (add the charset) and protocol version.
+     *
      * @uses \response()
      *
+     * @param \Illuminate\Http\Request $request
      * @param \Illuminate\Contracts\View\View $view
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param array $headers
+     * @return \Illuminate\Http\Response
      */
-    protected function createResponse(View $view)
+    protected function createResponse(Request $request, View $view, array $headers = [])
     {
-        $modified = app('wp')->lastModified();
-        $expires = $this->expires();
+        $response = response($view->render(), 200, $headers);
 
-        if ($expires > 0 && $this->isNotModified($modified)) {
-            $response = response('', 304);
-        } else {
-            $response = response($view->render(), 200);
+        if ($maxAge = $this->maxAge()) {
+            $response->setCache(['private' => true, 'max_age' => $maxAge]);
         }
 
-        $response->header('Cache-Control', "private,max-age={$expires}");
-        $response->header('Last-Modified', $modified->toRfc1123String());
+        // The method `Request::isNotModified()` contains `Request::setNotModified()`.
+        // https://github.com/symfony/symfony/issues/13678
+        $response->setEtag(md5($response->getContent()));
+        $response->isNotModified($request);
 
-        return $response;
+        return $response->prepare($request);
     }
 
     /**
-     * Determine if the content was modified.
-     *
-     * @uses \app()
-     *
-     * @param \Carbon\Carbon $modified
-     * @return bool
-     */
-    protected function isNotModified(Carbon $modified)
-    {
-        if (! $header = app('request')->header('If-Modified-Since')) {
-            return false;
-        }
-
-        try {
-            return Carbon::parse($header)->gte($modified);
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-
-    /**
-     * Get expires in seconds.
+     * Get the `max-age`.
      *
      * @uses \env()
      *
      * @return int Returns `600` (`0` when debug).
      */
-    protected function expires()
+    protected function maxAge()
     {
         return env('APP_DEBUG', false) ? 0 : 600;
     }

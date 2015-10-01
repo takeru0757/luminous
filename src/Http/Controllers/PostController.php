@@ -4,7 +4,6 @@ namespace Luminous\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Luminous\Routing\Controller as BaseController;
-use Luminous\Bridge\WP;
 use Luminous\Bridge\Post\Type;
 use Luminous\Bridge\Post\Entity;
 use Luminous\Http\RequestTree\Generator as Tree;
@@ -14,18 +13,20 @@ class PostController extends BaseController
     /**
      * Handle requests for archive.
      *
+     * @uses \app()
      * @uses \abort()
      * @uses \view()
      *
      * @param \Illuminate\Http\Request $request
-     * @param \Luminous\Bridge\WP $wp
      * @param array $query
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return \Illuminate\Http\Response
      *
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
-    public function archive(Request $request, WP $wp, $query)
+    public function archive(Request $request, $query)
     {
+        $wp = app('wp');
+
         $postType = $wp->postType($query['postType']);
         $postQuery = $wp->posts($postType);
 
@@ -56,23 +57,26 @@ class PostController extends BaseController
 
         $view = view($this->getTemplateName($postType), compact('tree', 'posts'));
 
-        return $this->createResponse($view);
+        return $this->createResponse($request, $view);
     }
 
     /**
      * Handle requests for the post.
      *
+     * @uses \app()
      * @uses \abort()
      * @uses \view()
      *
-     * @param \Luminous\Bridge\WP $wp
+     * @param \Illuminate\Http\Request $request
      * @param array $query
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return \Illuminate\Http\Response
      *
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
-    public function post(WP $wp, $query)
+    public function post(Request $request, $query)
     {
+        $wp = app('wp');
+
         $postType = $wp->postType($query['postType']);
         $postQuery = $wp->posts($postType);
 
@@ -93,7 +97,7 @@ class PostController extends BaseController
 
         $view = view($this->getTemplateName($postType, $post), compact('tree', 'post'));
 
-        return $this->createResponse($view);
+        return $this->createResponse($request, $view);
     }
 
     /**

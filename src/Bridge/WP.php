@@ -2,6 +2,7 @@
 
 namespace Luminous\Bridge;
 
+use Exception;
 use DateTimeZone;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -18,13 +19,6 @@ class WP
     const OPTION_LAST_MODIFIED = 'luminous_last_modified';
 
     /**
-     * The time when the application was modified at.
-     *
-     * @var int UNIX time
-     */
-    protected static $appLastModified = 0;
-
-    /**
      * The post builder.
      *
      * @var Luminous\Bridge\Post\Builder
@@ -37,17 +31,6 @@ class WP
      * @var Luminous\Bridge\Term\Builder
      */
     protected static $term;
-
-    /**
-     * Set the time when the application was modified at.
-     *
-     * @param int $time UNIX time
-     * @return void
-     */
-    public static function setAppLastModified($time)
-    {
-        static::$appLastModified = (int) $time;
-    }
 
     /**
      * Set the post builder.
@@ -89,15 +72,18 @@ class WP
      * Get the time when the site was modified at.
      *
      * @return \Carbon\Carbon
+     *
+     * @throws \Exception
      */
     public static function lastModified()
     {
         static $value = null;
 
         if (is_null($value)) {
-            $lastModified = static::option(static::OPTION_LAST_MODIFIED, time());
-            $time = max($lastModified, static::$appLastModified);
-            $value = Carbon::createFromTimeStamp($time, static::timezone());
+            if (($option = static::OPTION_LAST_MODIFIED) && ! $timestamp = static::option($option)) {
+                throw new Exception("Option [{$option}] could not be found.");
+            }
+            $value = Carbon::createFromTimeStamp((int) $timestamp, static::timezone());
         }
 
         return $value;

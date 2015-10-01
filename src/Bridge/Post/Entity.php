@@ -41,13 +41,14 @@ abstract class Entity extends BaseEntity
     /**
      * Create a new post entity instance.
      *
+     * @param \Luminous\Bridge\WP $wp
      * @param \WP_Post $original
      * @param \Luminous\Bridge\Post\Type $type
      * @return void
      */
-    public function __construct(WP_Post $original, Type $type)
+    public function __construct(WP $wp, WP_Post $original, Type $type)
     {
-        parent::__construct($original, $type);
+        parent::__construct($wp, $original, $type);
     }
 
     /**
@@ -60,7 +61,7 @@ abstract class Entity extends BaseEntity
     protected function getAncestorsAttribute()
     {
         $ancestors = array_map(function ($id) {
-            return WP::post($id);
+            return $this->wp->post($id);
         }, get_post_ancestors($this->original));
 
         return new Collection($ancestors);

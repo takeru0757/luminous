@@ -3,8 +3,8 @@
 namespace Luminous\Http\Controllers;
 
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Luminous\Routing\Controller as BaseController;
-use Luminous\Bridge\WP;
 
 class RootController extends BaseController
 {
@@ -13,48 +13,54 @@ class RootController extends BaseController
      *
      * @uses \view()
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
      */
-    public function home()
+    public function home(Request $request)
     {
-        return $this->createResponse(view('root.home'));
+        return $this->createResponse($request, view('root.home'));
     }
 
     /**
      * Handle requests for '/robots.txt'.
      *
+     * @uses \app()
      * @uses \view()
      *
-     * @param \Luminous\Bridge\WP $wp
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
      */
-    public function robots(WP $wp)
+    public function robots(Request $request)
     {
-        $view = $wp->isPublic() ? 'root.robots' : 'root.robots-noindex';
-        $content = view($view)->render();
+        $view = view(app('wp')->isPublic() ? 'root.robots' : 'root.robots-noindex');
 
-        return response($content)->header('Content-Type', 'text/plain; charset=utf-8');
+        return $this->createResponse($request, $view, ['Content-Type' => 'text/plain']);
     }
 
     /**
      * Handle requests for '/sitemap.xml'.
      *
+     * @uses \app()
      * @uses \abort()
      * @uses \view()
      *
-     * @param \Luminous\Bridge\WP $wp
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
      *
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
-    public function sitemap(WP $wp)
+    public function sitemap(Request $request)
     {
+        $wp = app('wp');
+
         if (! $wp->isPublic()) {
             abort(404);
         }
 
-        $content = view('root.sitemap')->render();
+        $view = view('root.sitemap', [
+            'appModified' => app('modified')->setTimezone($wp->timezone())
+        ]);
 
-        return response($content)->header('Content-Type', 'application/xml; charset=utf-8');
+        return $this->createResponse($request, $view, ['Content-Type' => 'text/xml']);
     }
 }

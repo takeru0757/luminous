@@ -11,6 +11,13 @@ abstract class Entity implements ArrayAccess, UrlRoutable
     use DecoratorTrait;
 
     /**
+     * The WP.
+     *
+     * @var \Luminous\Bridge\WP
+     */
+    protected $wp = [];
+
+    /**
      * The accessors map for original instance.
      *
      * @var array
@@ -27,12 +34,14 @@ abstract class Entity implements ArrayAccess, UrlRoutable
     /**
      * Create a new entity instance.
      *
+     * @param \Luminous\Bridge\WP $wp
      * @param object $original
      * @param \Luminous\Bridge\Type $type
      * @return void
      */
-    public function __construct($original, Type $type)
+    public function __construct(WP $wp, $original, Type $type)
     {
+        $this->wp = $wp;
         $this->original = $original;
         $this->accessorsForOriginal = $this->accessors;
         $this->type = $type;

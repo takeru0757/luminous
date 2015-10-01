@@ -21,13 +21,14 @@ abstract class Entity extends BaseEntity
     /**
      * Create a new term entity instance.
      *
+     * @param \Luminous\Bridge\WP $wp
      * @param \stdClass $original
      * @param \Luminous\Bridge\Term\Type $type
      * @return void
      */
-    public function __construct(stdClass $original, Type $type)
+    public function __construct(WP $wp, stdClass $original, Type $type)
     {
-        parent::__construct($original, $type);
+        parent::__construct($wp, $original, $type);
     }
 
     /**
@@ -40,7 +41,7 @@ abstract class Entity extends BaseEntity
     protected function getAncestorsAttribute()
     {
         $ancestors = array_map(function ($id) {
-            return WP::term($id, $this->type->name);
+            return $this->wp->term($id, $this->type->name);
         }, get_ancestors($this->original->term_id, $this->original->taxonomy, 'taxonomy'));
 
         return new Collection($ancestors);
