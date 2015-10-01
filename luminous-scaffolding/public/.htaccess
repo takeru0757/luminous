@@ -1,12 +1,15 @@
+# ------------------------------------------------------------------------------
+# Make Public
+# ------------------------------------------------------------------------------
+
 Order Allow,Deny
 Allow from all
-Satisfy Any
+Satisfy any
 
 # ------------------------------------------------------------------------------
 # Compressed Files
 # ------------------------------------------------------------------------------
 
-AddType image/svg+xml svg
 AddEncoding x-gzip .gz
 
 <IfModule mod_rewrite.c>
@@ -22,19 +25,31 @@ AddEncoding x-gzip .gz
 <IfModule mod_deflate.c>
   SetEnvIfNoCase Request_URI \.gz$ no-gzip
 </IfModule>
-<FilesMatch "\.gz$">
-  <IfModule mod_headers.c>
-    Header set Vary "Accept-Encoding"
-  </IfModule>
-</FilesMatch>
+
+<IfModule mod_headers.c>
+  <FilesMatch "\.gz$">
+      Header set Vary "Accept-Encoding"
+  </FilesMatch>
+</IfModule>
+
+# css --------------------------------------------------------------------------
+
 <FilesMatch ".*\.css\.gz$">
-  ForceType "text/css; charset=UTF-8"
+  ForceType "text/css; charset=utf-8"
 </FilesMatch>
+
+# js ---------------------------------------------------------------------------
+
 <FilesMatch ".*\.js\.gz$">
-  ForceType "text/javascript; charset=UTF-8"
+  ForceType "text/javascript; charset=utf-8"
 </FilesMatch>
+
+# svg --------------------------------------------------------------------------
+
+AddType image/svg+xml svg
+
 <FilesMatch ".*\.svg\.gz$">
-  ForceType "image/svg+xml"
+  ForceType "image/svg+xml; charset=utf-8"
 </FilesMatch>
 
 # ------------------------------------------------------------------------------
@@ -44,10 +59,6 @@ AddEncoding x-gzip .gz
 <FilesMatch "\.\w{8}\.\w+(\.gz)?$">
   FileETag none
   <IfModule mod_headers.c>
-    Header set Cache-Control "public, max-age=31536000"
+    Header set Cache-Control "public,max-age=31536000"
   </IfModule>
-  <ifModule mod_expires.c>
-    ExpiresActive On
-    ExpiresDefault "access plus 1 year"
-  </ifModule>
 </FilesMatch>

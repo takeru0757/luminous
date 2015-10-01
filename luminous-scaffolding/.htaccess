@@ -1,9 +1,7 @@
+<IfModule mod_setenvif.c>
+  SetEnvIfNoCase Cookie (^|;\s*)wordpress_logged_in_[a-z0-9]{32}=[^;\s]+ wordpress_logged_in=true
+</IfModule>
+
 Order Deny,Allow
 Deny from all
-Satisfy All
-
-<Files "screenshot.jpg">
-  Order Allow,Deny
-  Allow from all
-  Satisfy Any
-</Files>
+Allow from env=wordpress_logged_in
