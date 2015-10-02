@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
 
-    @include('_components.meta')
+    @include('_components.meta', ['tree' => isset($tree) ? $tree : null, 'post' => isset($post) ? $post : null])
 
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:100,400,700">
     <link rel="stylesheet" href="{{ asset('css/bundle.css') }}">
@@ -42,7 +42,7 @@
 
     <div class="container">
 
-      @include('_components.breadcrumbs')
+      @include('_components.breadcrumbs', ['tree' => isset($tree) ? $tree : null])
 
       @yield('content')
 

@@ -1,15 +1,17 @@
-@if(isset($tree))
+@if ($tree && ! $tree->isEmpty())
 
 <ol class="breadcrumb">
   <li><a href="{{ url('/') }}">{{ trans('labels.home') }}</a></li>
 
-  @foreach($tree->parents() as $n)
-    <li><a href="{{ $n->url }}">{{ $n->label }}</a></li>
-  @endforeach
+  @foreach (($_nodes = $tree->all()) as $_i => $_node)
 
-  @if($a = $tree->active())
-  <li class="active">{{ $a->label }}</li>
+  @if ($_i === $_nodes->count() - 1)
+  <li class="active">{{ $_node->label }}</li>
+  @else
+  <li><a href="{{ $_node->url }}">{{ $_node->label }}</a></li>
   @endif
+
+  @endforeach
 
 </ol>
 

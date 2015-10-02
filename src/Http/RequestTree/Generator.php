@@ -227,14 +227,13 @@ class Generator
      *
      * @uses \trans()
      *
-     * @param bool $withPage
      * @return \Illuminate\Support\Collection|Luminous\Http\RequestTree\Node[]
      */
-    public function all($withPage = true)
+    public function all()
     {
         $tree = new Collection($this->tree->all());
 
-        if ($withPage && $this->page > 1) {
+        if ($this->page > 1) {
             $tree->push(new Node(trans('labels.page', ['page' => $this->page]), null));
         }
 
@@ -242,41 +241,12 @@ class Generator
     }
 
     /**
-     * Get the parent nodes.
+     * Determine if the tree is empty or not.
      *
-     * @return \Illuminate\Support\Collection|Luminous\Http\RequestTree\Node[]
+     * @return bool
      */
-    public function parents()
+    public function isEmpty()
     {
-        ($tree = $this->all()) && $tree->pop();
-
-        return $tree;
-    }
-
-    /**
-     * Get the current node.
-     *
-     * @return Luminous\Http\RequestTree\Node
-     */
-    public function active()
-    {
-        return $this->all()->last();
-    }
-
-    /**
-     * Get the title.
-     *
-     * @param bool $reverse
-     * @return string
-     */
-    public function title($sepalator = ' - ', $reverse = true)
-    {
-        if ($reverse) {
-            $tree = $this->all()->reverse();
-        } else {
-            $tree = $this->all();
-        }
-
-        return $tree->implode('label', $sepalator);
+        return $this->tree->isEmpty();
     }
 }

@@ -12,6 +12,8 @@
 <p>No posts.</p>
 @endforelse
 
-{!! $posts->render() !!}
+<nav class="text-center">
+  @include('_components.pagination', ['paginator' => $posts])
+</nav>
 
 @endsection
