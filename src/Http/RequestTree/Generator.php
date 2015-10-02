@@ -4,7 +4,6 @@ namespace Luminous\Http\RequestTree;
 
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Luminous\Bridge\WP;
 use Luminous\Bridge\Post\Type as PostType;
 use Luminous\Bridge\Post\Entity as PostEntity;
 use Luminous\Bridge\Term\Entity as TermEntity;
@@ -148,7 +147,7 @@ class Generator
         $result = array_reduce(array_keys($this->dateTypes), function ($result, $key) use ($date) {
             if (isset($date[$key])) {
                 $result['type'] = $this->dateTypes[$key];
-                $result['params'][$key] = sprintf($key === 'year' ? '%04d' : '%02d', $date[$key]);
+                $result['params'][$key] = (int) $date[$key];
             }
             return $result;
         }, ['type' => null, 'params' => []]);
@@ -168,15 +167,17 @@ class Generator
     /**
      * Create a new DateTime from array.
      *
+     * @uses \app()
+     *
      * @param array $params
      * @return \Carbon\Carbon
      */
     protected function createDate(array $params)
     {
-        $params = array_merge(['year' => '0000', 'month' => '01', 'day' => '01'], $params);
-        $string = implode('-', array_values($params));
+        $params = array_merge(['year' => 1900, 'month' => 1, 'day' => 1], $params);
+        $date = Carbon::createFromDate($params['year'], $params['month'], $params['day'], app('wp')->timezone());
 
-        return Carbon::createFromFormat('Y-m-d', $string, WP::timezone())->startOfDay();
+        return $date->startOfDay();
     }
 
     /**

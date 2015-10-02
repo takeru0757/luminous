@@ -72,6 +72,18 @@ if (! function_exists('archive_url')) {
             $name .= "[{$sub}]";
         }
 
+        $formats = [
+            'year'  => '%04d',
+            'month' => '%02d',
+            'day'   => '%02d',
+        ];
+
+        foreach ($formats as $key => $format) {
+            if (isset($parameters[$key])) {
+                $parameters[$key] = sprintf($format, $parameters[$key]);
+            }
+        }
+
         return route($name, $parameters);
     }
 }
