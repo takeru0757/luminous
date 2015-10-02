@@ -78,7 +78,25 @@ add_filter('term_link', function ($termlink, $term, $taxonomy) {
 // Last Modified
 // -----------------------------------------------------------------------------
 
-foreach (['edit_post', 'deleted_post'] as $_action) {
+foreach (['save_post', 'deleted_post'] as $_action) {
+    add_action($_action, function ($id) {
+        if (wp_is_post_revision($id)) {
+            return;
+        }
+        update_option(WP::OPTION_LAST_MODIFIED, time());
+    });
+}
+
+foreach (['comment_post', 'edit_comment', 'deleted_comment'] as $_action) {
+    add_action($_action, function ($id, $approved = null) {
+        if (! is_null($approved) && in_array($approved, [0, 'spam'])) {
+            return;
+        }
+        update_option(WP::OPTION_LAST_MODIFIED, time());
+    });
+}
+
+foreach (['created_term', 'edited_term', 'delete_term'] as $_action) {
     add_action($_action, function ($id) {
         update_option(WP::OPTION_LAST_MODIFIED, time());
     });

@@ -6,10 +6,6 @@
 // Create The Application
 // -----------------------------------------------------------------------------
 
-// Configure APP_TIMEZONE as "UTC" for WordPress.
-// @link https://github.com/WordPress/WordPress/blob/4.3/wp-settings.php#L43
-putenv('APP_TIMEZONE='.date_default_timezone_get());
-
 $app = new Luminous\Application(
     realpath(__DIR__.'/../')
 );

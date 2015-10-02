@@ -15,6 +15,18 @@ spl_autoload_register(function ($className) use ($themePath) {
 });
 
 // -----------------------------------------------------------------------------
+// Environment Variables
+// -----------------------------------------------------------------------------
+
+// Configure APP_TIMEZONE as "UTC" for WordPress.
+// @link https://github.com/WordPress/WordPress/blob/4.3/wp-settings.php#L43
+putenv('APP_TIMEZONE='.date_default_timezone_get());
+
+if (defined('WP_DEBUG') && WP_DEBUG) {
+    putenv('APP_DEBUG=true');
+}
+
+// -----------------------------------------------------------------------------
 // Create The Application
 // -----------------------------------------------------------------------------
 
