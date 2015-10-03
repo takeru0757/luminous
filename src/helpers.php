@@ -52,13 +52,13 @@ if (! function_exists('archive_url')) {
      * @uses \route()
      *
      * @param \Luminous\Bridge\Post\Type $postType
-     * @param string|array $sub
+     * @param \Luminous\Bridge\Post\Archive $archive
      * @param array $parameters
      * @return string
      *
      * @throws \InvalidArgumentException
      */
-    function archive_url(Luminous\Bridge\Post\Type $postType, $sub = null, $parameters = [])
+    function archive_url(Luminous\Bridge\Post\Type $postType, $archive = null, $parameters = [])
     {
         if (! $postType->hasArchive()) {
             throw new InvalidArgumentException("{$postType->name} does not have archive.");
@@ -66,10 +66,11 @@ if (! function_exists('archive_url')) {
 
         $name = "archive_url@{$postType->name}";
 
-        if (is_array($sub)) {
-            $parameters = $sub;
-        } elseif ($sub) {
-            $name .= "[{$sub}]";
+        if ($archive instanceof \Luminous\Bridge\Post\Archive) {
+            $name .= "[{$archive->type}]";
+            $parameters = array_merge($parameters, $archive->urlParameters());
+        } elseif ($archive) {
+            $parameters = $archive;
         }
 
         $formats = [

@@ -4,9 +4,9 @@ return [
     'home'  => 'Home',
     'post'  => 'Posts',
     'page'  => 'Page: :page',
-    'date'  => [
-        'daily'    => 'F j, Y',
-        'monthly'  => 'F, Y',
+    'archive'  => [
         'yearly'   => 'Y',
+        'monthly'  => 'F, Y',
+        'daily'    => 'F j, Y',
     ],
 ];

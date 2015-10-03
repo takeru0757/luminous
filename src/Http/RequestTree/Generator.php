@@ -5,6 +5,7 @@ namespace Luminous\Http\RequestTree;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Luminous\Bridge\Post\Type as PostType;
+use Luminous\Bridge\Post\Archive;
 use Luminous\Bridge\Post\Entity as PostEntity;
 use Luminous\Bridge\Term\Entity as TermEntity;
 
@@ -36,18 +37,11 @@ class Generator
     public $postType;
 
     /**
-     * The current date type.
+     * The current archive.
      *
-     * @var string
+     * @var \Luminous\Bridge\Post\Archive
      */
-    public $dateType;
-
-    /**
-     * The current date.
-     *
-     * @var \Carbon\Carbon
-     */
-    public $date;
+    public $archive;
 
     /**
      * The current term entity.
@@ -144,21 +138,17 @@ class Generator
             return $this;
         }
 
-        $result = array_reduce(array_keys($this->dateTypes), function ($result, $key) use ($date) {
+        $type = array_reduce(array_keys($this->dateTypes), function ($type, $key) use ($date) {
             if (isset($date[$key])) {
-                $result['type'] = $this->dateTypes[$key];
-                $result['params'][$key] = (int) $date[$key];
+                $type = $this->dateTypes[$key];
             }
-            return $result;
-        }, ['type' => null, 'params' => []]);
+            return $type;
+        }, null);
 
-        if ($result['type']) {
-            $this->dateType = $result['type'];
-            $this->date = $this->createDate($result['params']);
-
-            $dateUrl = archive_url($this->postType, $this->dateType, $result['params']);
-            $format = trans("labels.date.{$this->dateType}");
-            $this->add($this->date->format($format), $dateUrl, $this->date);
+        if ($type) {
+            $this->archive = new Archive($type, $this->createDate($date));
+            $label = $this->archive->format(trans("labels.archive.{$this->archive->type}"));
+            $this->add($label, archive_url($this->postType, $this->archive), $this->archive);
         }
 
         return $this;
@@ -169,13 +159,13 @@ class Generator
      *
      * @uses \app()
      *
-     * @param array $params
+     * @param array $date
      * @return \Carbon\Carbon
      */
-    protected function createDate(array $params)
+    protected function createDate(array $date)
     {
-        $params = array_merge(['year' => 1900, 'month' => 1, 'day' => 1], $params);
-        $date = Carbon::createFromDate($params['year'], $params['month'], $params['day'], app('wp')->timezone());
+        $date = array_merge(['year' => 1900, 'month' => 1, 'day' => 1], array_map('intval', $date));
+        $date = Carbon::createFromDate($date['year'], $date['month'], $date['day'], app('wp')->timezone());
 
         return $date->startOfDay();
     }

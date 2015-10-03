@@ -120,6 +120,10 @@ trait PostParameter
             $value = array_map('intval', (array) $value);
         }
 
+        if ($column === 'path' && strpos($value, '/') === false) {
+            $column = 'slug';
+        }
+
         $this->postWheres[] = compact('column', 'operator', 'value');
 
         return $this;

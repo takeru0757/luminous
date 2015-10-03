@@ -110,7 +110,7 @@ class PostController extends BaseController
     {
         $value = [];
 
-        foreach (['year', 'month', 'week', 'day', 'hour', 'minute', 'second'] as $key) {
+        foreach (['year', 'month', 'day'] as $key) {
             if (isset($query[$key])) {
                 $value[$key] = intval($query[$key], 10);
             }

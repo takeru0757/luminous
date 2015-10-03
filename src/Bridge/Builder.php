@@ -35,6 +35,16 @@ abstract class Builder
     }
 
     /**
+     * Get the timezone.
+     *
+     * @return \DateTimeZone
+     */
+    public function timezone()
+    {
+        return $this->container['wp']->timezone();
+    }
+
+    /**
      * Get an entity instance.
      *
      * @param mixed $id

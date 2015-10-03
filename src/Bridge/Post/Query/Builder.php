@@ -3,15 +3,19 @@
 namespace Luminous\Bridge\Post\Query;
 
 use WP_Query;
+use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Luminous\Bridge\QueryBuilder;
+use Luminous\Bridge\Post\Archive;
 use Luminous\Bridge\Post\Builder as PostBuilder;
 use Luminous\Bridge\Post\Query\Parameters\DateParameter;
 use Luminous\Bridge\Post\Query\Parameters\OrderByParameter;
 use Luminous\Bridge\Post\Query\Parameters\PostParameter;
 use Luminous\Bridge\Post\Query\Parameters\TermParameter;
 
-class Builder
+class Builder extends QueryBuilder
 {
     use DateParameter;
     use OrderByParameter;
@@ -26,20 +30,6 @@ class Builder
     protected $postBuilder;
 
     /**
-     * The maximum number of records to return.
-     *
-     * @var int|null
-     */
-    public $limit;
-
-    /**
-     * The number of records to skip.
-     *
-     * @var int
-     */
-    public $offset = 0;
-
-    /**
      * Create a new post query instance.
      *
      * @param \Luminous\Bridge\Post\Builder $builder
@@ -51,88 +41,13 @@ class Builder
     }
 
     /**
-     * Set the "offset" value of the query.
-     *
-     * @param int $value
-     * @return $this
-     */
-    public function offset($value)
-    {
-        $this->offset = max(0, $value);
-
-        return $this;
-    }
-
-    /**
-     * Alias to set the "offset" value of the query.
-     *
-     * @param int $value
-     * @return \Luminous\Bridge\Post\Query\Builder|static
-     */
-    public function skip($value)
-    {
-        return $this->offset($value);
-    }
-
-    /**
-     * Set the "limit" value of the query.
-     *
-     * @param int|null $value
-     * @return $this
-     */
-    public function limit($value)
-    {
-        if ($value > 0) {
-            $this->limit = $value;
-        } else {
-            $this->limit = null;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Alias to set the "limit" value of the query.
-     *
-     * @param int $value
-     * @return \Luminous\Bridge\Post\Query\Builder|static
-     */
-    public function take($value)
-    {
-        return $this->limit($value);
-    }
-
-    /**
-     * Set the limit and offset for a given page.
-     *
-     * @param int $page
-     * @param int $perPage
-     * @return \Luminous\Bridge\Post\Query\Builder|static
-     */
-    public function forPage($page, $perPage = 10)
-    {
-        return $this->skip(($page - 1) * $perPage)->take($perPage);
-    }
-
-    /**
      * Execute the query.
      *
-     * @return \Illuminate\Support\Collection
+     * @return \Illuminate\Support\Collection|\Luminous\Bridge\Post\Entity[]
      */
     public function get()
     {
-        $result = $this->executeQuery();
-        return $result['items'];
-    }
-
-    /**
-     * Execute the query and get the first result.
-     *
-     * @return \Luminous\Bridge\Post\Entity|null
-     */
-    public function first()
-    {
-        return $this->take(1)->get()->first();
+        return $this->retrievePosts($this->buildQuery());
     }
 
     /**
@@ -146,20 +61,90 @@ class Builder
     public function paginate($perPage, $page = null, $pageName = 'page')
     {
         $page = $page ?: Paginator::resolveCurrentPage($pageName);
-        $result = $this->forPage($page, $perPage)->executeQuery();
 
-        return new LengthAwarePaginator($result['items'], $result['total'], $perPage, $page, [
+        $query = $this->forPage($page, $perPage)->buildQuery();
+        $posts = $this->retrievePosts($query);
+        $total = $this->retrieveTotal($query);
+
+        return new LengthAwarePaginator($posts, $total, $perPage, $page, [
             'path' => Paginator::resolveCurrentPath(),
             'pageName' => $pageName,
         ]);
     }
 
     /**
-     * Execute the query.
+     * Get the archives.
      *
-     * @return array
+     * @link https://developer.wordpress.org/reference/functions/wp_get_archives/
+     *
+     * @uses \add_filter()
+     * @uses \remove_filter()
+     *
+     * @param string $type
+     * @return \Illuminate\Support\Collection|\Luminous\Bridge\Post\Archive[]
      */
-    protected function executeQuery()
+    public function archives($type)
+    {
+        $groupbyFilter = function () use ($type) {
+            $formats = [
+                'yearly'    => 'YEAR(`%1$s`)',
+                'monthly'   => 'YEAR(`%1$s`), MONTH(`%1$s`)',
+                'daily'     => 'YEAR(`%1$s`), MONTH(`%1$s`), DAYOFMONTH(`%1$s`)',
+            ];
+            return sprintf($formats[$type], 'post_date');
+        };
+
+        $fieldsFilter = function () use ($type) {
+            $formats = [
+                'yearly'    => 'DATE_FORMAT(`%1$s`, \'%%Y-01-01\') as `_date`, count(`%2$s`) as `_count`',
+                'monthly'   => 'DATE_FORMAT(`%1$s`, \'%%Y-%%m-01\') as `_date`, count(`%2$s`) as `_count`',
+                'daily'     => 'DATE_FORMAT(`%1$s`, \'%%Y-%%m-%%d\') as `_date`, count(`%2$s`) as `_count`',
+            ];
+            return sprintf($formats[$type], 'post_date', 'ID');
+        };
+
+        add_filter('posts_groupby', $groupbyFilter);
+        add_filter('posts_fields', $fieldsFilter);
+
+        $query = $this->orderBy('created_at', 'desc')->buildQuery();
+
+        remove_filter('posts_groupby', $groupbyFilter);
+        remove_filter('posts_fields', $fieldsFilter);
+
+        return new Collection(array_map(function ($object) use ($type) {
+            $date = Carbon::createFromFormat('Y-m-d', $object->_date, $this->postBuilder->timezone());
+            return new Archive($type, $date->startOfDay(), (int) $object->_count);
+        }, $query->posts));
+    }
+
+    /**
+     * Retrieve posts from WP_Query.
+     *
+     * @param \WP_Query $query
+     * @return \Illuminate\Support\Collection|\Luminous\Bridge\Post\Entity[]
+     */
+    protected function retrievePosts(WP_Query $query)
+    {
+        return $this->postBuilder->makeMany($query->posts);
+    }
+
+    /**
+     * Retrieve number of posts from WP_Query.
+     *
+     * @param \WP_Query $query
+     * @return int
+     */
+    protected function retrieveTotal(WP_Query $query)
+    {
+        return (int) $query->found_posts;
+    }
+
+    /**
+     * Build the original query instance.
+     *
+     * @return \WP_Query
+     */
+    protected function buildQuery()
     {
         $query = [
             'posts_per_page' => $this->limit ?: -1,
@@ -174,11 +159,6 @@ class Builder
             $this->getTermQuery()
         );
 
-        $result = new WP_Query($query);
-
-        return [
-            'total' => intval($result->found_posts),
-            'items' => $this->postBuilder->makeMany($result->get_posts()),
-        ];
+        return new WP_Query($query);
     }
 }

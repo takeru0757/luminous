@@ -89,7 +89,7 @@ foreach (['save_post', 'deleted_post'] as $_action) {
 
 foreach (['comment_post', 'edit_comment', 'deleted_comment'] as $_action) {
     add_action($_action, function ($id, $approved = null) {
-        if (! is_null($approved) && in_array($approved, [0, 'spam'])) {
+        if (! is_null($approved) && $approved !== 1) {
             return;
         }
         update_option(WP::OPTION_LAST_MODIFIED, time());
