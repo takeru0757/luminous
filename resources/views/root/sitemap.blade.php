@@ -1,37 +1,36 @@
-{!! '<?xml version="1.0" encoding="UTF-8"?>' !!}
+<?php echo '<?xml version="1.0" encoding="UTF-8"?>'; ?>
+
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>{{ url('/') }}</loc>
-    <priority>1.0</priority>
-    <changefreq>daily</changefreq>
-    <lastmod>{{ $wp->lastModified()->max($appModified)->toW3cString() }}</lastmod>
-  </url>
-  @foreach ($wp->postTypes() as $type)
+    <url>
+        <loc>{{ url('/') }}</loc>
+        <priority>1.0</priority>
+        <changefreq>daily</changefreq>
+        <lastmod>{{ $wp->lastModified()->max($appModified)->toW3cString() }}</lastmod>
+    </url>
 
-  <?php $posts = $wp->posts($type)->orderBy('modified_at', 'desc')->get(); ?>
+    @foreach ($wp->postTypes() as $_type)
+    @if ($_posts = $wp->posts($_type)->orderBy('modified_at', 'desc')->get())
+    @if ($_type->hasArchive() && $_latest = $_posts->first())
 
-  @if ($type->hasArchive() && $latest = $posts->first())
-  <url>
-    <loc>{{ archive_url($type) }}</loc>
-    <lastmod>{{ $latest->modified_at->max($appModified)->toW3cString() }}</lastmod>
-    <priority>0.8</priority>
-    <changefreq>weekly</changefreq>
-  </url>
-  @endif
+    <url>
+        <loc>{{ archive_url($_type) }}</loc>
+        <lastmod>{{ $_latest->modified_at->max($appModified)->toW3cString() }}</lastmod>
+        <priority>0.8</priority>
+        <changefreq>weekly</changefreq>
+    </url>
 
-  @foreach ($posts as $post)
-  <url>
-    <loc>{{ post_url($post) }}</loc>
-    <lastmod>{{ $post->modified_at->max($appModified)->toW3cString() }}</lastmod>
-    @if ($type->hierarchical)
-    <priority>0.8</priority>
-    <changefreq>weekly</changefreq>
-    @else
-    <priority>0.6</priority>
-    <changefreq>monthly</changefreq>
     @endif
-  </url>
-  @endforeach
+    @foreach ($_posts as $_post)
 
-  @endforeach
+    <url>
+        <loc>{{ post_url($_post) }}</loc>
+        <lastmod>{{ $_post->modified_at->max($appModified)->toW3cString() }}</lastmod>
+        <priority>{{ $_type->hierarchical ? '0.8' : '0.6' }}</priority>
+        <changefreq>{{ $_type->hierarchical ? 'weekly' : 'monthly' }}</changefreq>
+    </url>
+
+    @endforeach
+    @endif
+    @endforeach
+
 </urlset>

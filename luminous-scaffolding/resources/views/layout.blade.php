@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -23,35 +23,34 @@
     <script>window.jQuery.fn.alert || document.write('<script src="{{ asset('vendor/bootstrap/bootstrap.min.js') }}"><\/script>')</script>
 
     <script src="{{ asset('js/bundle.js') }}"></script>
-  </head>
-  <body>
+</head>
+<body>
     <nav class="navbar navbar-light">
-      <div class="container">
-        <a class="navbar-brand" href="{{ route('home') }}">{{ $site->name }}</a>
-        <p class="header-description pull-right text-muted">{{ $site->description }}</p>
-      </div>
+        <div class="container">
+            <a class="navbar-brand" href="{{ route('home') }}">{{ $site->name }}</a>
+            <p class="header-description pull-right text-muted">{{ $site->description }}</p>
+        </div>
     </nav>
 
     <div class="site-header jumbotron">
-      <div class="container">
-        <h1>Luminous</h1>
-        <p class="lead">Luminous is a <a href="https://wordpress.org/">WordPress</a> theme framework based on <a href="http://lumen.laravel.com/">Laravel Lumen</a>.
-          <br>This framework will help you to develop WordPress themes like modern web applications using modern PHP.</p>
-      </div>
+        <div class="container">
+            <h1>Luminous</h1>
+            <p class="lead">Luminous is a <a href="https://wordpress.org/">WordPress</a> theme framework based on <a href="http://lumen.laravel.com/">Laravel Lumen</a>.<br>This framework will help you to develop WordPress themes like modern web applications using modern PHP.</p>
+        </div>
     </div>
 
     <div class="container">
 
-      @include('_components.breadcrumbs', ['tree' => isset($tree) ? $tree : null])
+        @include('_components.breadcrumbs', ['tree' => isset($tree) ? $tree : null])
 
-      @yield('content')
+        @yield('content')
 
     </div>
 
     <nav class="footer navbar navbar-light bg-faded">
-      <div class="container">
-        <address class="footer-address text-muted">{{ $app->version() }}</address>
-      </div>
+        <div class="container">
+            <address class="footer-address text-muted">{{ $app->version() }}</address>
+        </div>
     </nav>
-  </body>
+</body>
 </html>
