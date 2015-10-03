@@ -40,7 +40,7 @@ class PostController extends BaseController
         }
 
         if ($date = $this->getDateQuery($query)) {
-            $postQuery->whereDateAt('created_at', $date);
+            $postQuery->whereDate('created_at', $date);
             $tree->setDate($date);
         }
 

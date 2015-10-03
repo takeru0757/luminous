@@ -8,4 +8,8 @@
     {!! $post->content !!}
 </article>
 
+<nav>
+    @include('_components.pager', ['index' => $post->type, 'newer' => $post->newer, 'older' => $post->older])
+</nav>
+
 @endsection

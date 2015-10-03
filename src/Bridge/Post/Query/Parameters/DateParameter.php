@@ -2,13 +2,14 @@
 
 namespace Luminous\Bridge\Post\Query\Parameters;
 
+use DateTime;
+use Carbon\Carbon;
 use InvalidArgumentException;
 
 /**
  * The date parameter for the post query.
  *
  * @todo Support Comparable value ('=', '!=', '>', '>=', '<', '<=', 'IN', 'NOT IN', 'BETWEEN', 'NOT BETWEEN').
- * @todo Support 'before' amd 'after'.
  * @todo Support 'OR' relation.
  * @todo Support GMT colums.
  *
@@ -36,27 +37,47 @@ trait DateParameter
     /**
      * Add a date parameter to the query.
      *
+     * Available operators: '=', '>', '>=', '<', '<='
+     * Available value types:
+     * - An array has keys: 'year', 'month', 'week', 'day', 'hour', 'minute' and 'second'.
+     * - A DateTime instance
+     *
      * @param string $column
-     * @param array $value An array of date values ('year', 'month', 'week', 'day', 'hour', 'minute' and 'second').
+     * @param string $operator
+     * @param array|\DateTime $value
      * @return $this
      *
      * @throws \InvalidArgumentException
      */
-    public function whereDateAt($column, $value = null)
+    public function whereDate($column, $operator, $value = null)
     {
         if (! in_array($column, array_keys($this->dateWhereColumns))) {
             throw new InvalidArgumentException;
         }
 
-        $type = 'at';
+        if (func_num_args() === 2) {
+            list($operator, $value) = ['=', $operator];
+        }
 
-        $this->dateWheres[] = compact('type', 'column', 'value');
+        if (! in_array($operator, ['=', '>', '>=', '<', '<='])) {
+            throw new InvalidArgumentException;
+        }
+
+        if ($value instanceof DateTime) {
+            $date = $value instanceof Carbon ? $value : Carbon::instance($value);
+            $keys = ['year', 'month', 'day', 'hour', 'minute', 'second'];
+            $value = array_combine($keys, array_map(function ($key) use ($date) {
+                return $date->{$key};
+            }, $keys));
+        }
+
+        $this->dateWheres[] = compact('column', 'operator', 'value');
 
         return $this;
     }
 
     /**
-     * Get date parameter as WordPress query.
+     * Get the date parameter as WordPress query.
      *
      * @var array
      */
@@ -65,12 +86,26 @@ trait DateParameter
         $query = [];
 
         foreach ($this->dateWheres as $where) {
-            $column = $this->dateWhereColumns[$where['column']];
-            switch ($where['type']) {
-                case 'at':
-                    $query[] = array_merge(compact('column'), $where['value']);
+            switch ($operator = $where['operator']) {
+                case '>':
+                case '>=':
+                    $value = ['after' => $where['value']];
+                    $inclusive = $operator === '>=';
+                    break;
+                case '<':
+                case '<=':
+                    $value = ['before' => $where['value']];
+                    $inclusive = $operator === '<=';
+                    break;
+                default:
+                    list($value, $inclusive) = [$where['value'], false];
                     break;
             }
+
+            $query[] = array_merge([
+                'column' => $this->dateWhereColumns[$where['column']],
+                'inclusive' => $inclusive,
+            ], $value);
         }
 
         return $query ? ['date_query' => $query] : [];

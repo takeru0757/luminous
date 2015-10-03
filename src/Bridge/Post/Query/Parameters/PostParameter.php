@@ -111,7 +111,7 @@ trait PostParameter
             throw new InvalidArgumentException;
         }
 
-        if (func_num_args() == 2) {
+        if (func_num_args() === 2) {
             list($operator, $value) = ['=', $operator];
         }
 

@@ -55,7 +55,7 @@ trait OrderByParameter
             throw new InvalidArgumentException;
         }
 
-        $direction = strtolower($direction) == 'asc' ? 'asc' : 'desc';
+        $direction = strtolower($direction) === 'asc' ? 'asc' : 'desc';
         $this->orders[] = compact('column', 'direction');
 
         return $this;
