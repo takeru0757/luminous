@@ -3,8 +3,14 @@
 namespace Luminous\Bridge\Post;
 
 use Carbon\Carbon;
+use Illuminate\Contracts\Routing\UrlRoutable;
 
-class Archive
+/**
+ * @property-read string $type
+ * @property-read \Carbon\Carbon $date
+ * @property-read int|null $count
+ */
+class Archive implements UrlRoutable
 {
     /**
      * The type name.
@@ -16,14 +22,14 @@ class Archive
     /**
      * The date.
      *
-     * @var Carbon\Carbon
+     * @var \Carbon\Carbon
      */
     protected $date;
 
     /**
      * The number of posts.
      *
-     * @var int
+     * @var int|null
      */
     protected $count;
 
@@ -35,7 +41,7 @@ class Archive
      * @param int $count
      * @return void
      */
-    public function __construct($type, Carbon $date, $count = 0)
+    public function __construct($type, Carbon $date, $count = null)
     {
         $this->type = $type;
         $this->date = $date;
@@ -54,21 +60,29 @@ class Archive
     }
 
     /**
-     * Get a URL parameters.
+     * Get the value of the archive route key.
      *
-     * @return array
+     * @return string
      */
-    public function urlParameters()
+    public function getRouteKey()
     {
-        $types = [
-            'yearly'    => ['year'],
-            'monthly'   => ['year', 'month'],
-            'daily'     => ['year', 'month', 'day'],
+        $formats = [
+            'yearly'    => 'Y',
+            'monthly'   => 'Y/m',
+            'daily'     => 'Y/m/d',
         ];
 
-        $keys = $types[$this->type];
+        return $this->format($formats[$this->type]);
+    }
 
-        return array_combine($keys, array_map([$this->date, '__get'], $keys));
+    /**
+     * Get the route key for the archive.
+     *
+     * @return string
+     */
+    public function getRouteKeyName()
+    {
+        //
     }
 
     /**

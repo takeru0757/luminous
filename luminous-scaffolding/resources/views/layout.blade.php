@@ -27,7 +27,7 @@
 <body>
     <nav class="navbar navbar-light">
         <div class="container">
-            <a class="navbar-brand" href="{{ route('home') }}">{{ $site->name }}</a>
+            <a class="navbar-brand" href="{{ url('/') }}">{{ $site->name }}</a>
             <p class="header-description pull-right text-muted">{{ $site->description }}</p>
         </div>
     </nav>

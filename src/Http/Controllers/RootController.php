@@ -88,7 +88,7 @@ class RootController extends BaseController
         }
 
         $view = view('root.sitemap', [
-            'appModified' => app('modified')->setTimezone($wp->timezone())
+            'appModified' => Carbon::createFromTimeStamp(app('modified'), $wp->timezone()),
         ]);
 
         return $this->createResponse($request, $view, ['Content-Type' => 'text/xml']);

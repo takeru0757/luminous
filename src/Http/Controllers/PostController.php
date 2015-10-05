@@ -108,11 +108,16 @@ class PostController extends BaseController
      */
     protected function getDateQuery(array $query)
     {
+        if (! isset($query['date'])) {
+            return;
+        }
+
+        $dates = explode('/', $query['date']);
         $value = [];
 
-        foreach (['year', 'month', 'day'] as $key) {
-            if (isset($query[$key])) {
-                $value[$key] = intval($query[$key], 10);
+        foreach (['year', 'month', 'day'] as $i => $key) {
+            if (isset($dates[$i])) {
+                $value[$key] = intval($dates[$i], 10);
             }
         }
 

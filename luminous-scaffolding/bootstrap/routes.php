@@ -5,10 +5,10 @@
 // -----------------------------------------------------------------------------
 
 if (env('APP_DEBUG', false)) {
-    $app->get('/404', function () {
+    $router->get('/404', function () {
         abort(404);
     });
-    $app->get('/500', function () {
+    $router->get('/500', function () {
         abort(500);
     });
 }
@@ -17,57 +17,34 @@ if (env('APP_DEBUG', false)) {
 // for Root
 // -----------------------------------------------------------------------------
 
-$app->any('/', ['uses' => 'RootController@home', 'as' => 'home']);
+$router->any('/', ['uses' => 'RootController@home', 'as' => 'home']);
 
-$app->get('/sitemap.xml', 'RootController@sitemap');
-$app->get('/robots.txt', 'RootController@robots');
+$router->get('/sitemap.xml', 'RootController@sitemap');
+$router->get('/robots.txt', 'RootController@robots');
 
 // -----------------------------------------------------------------------------
 // for Post
 // -----------------------------------------------------------------------------
 
-$app->group(['prefix' => 'posts', 'namespace' => 'Luminous\Http\Controllers'], function ($app) {
-    $postType = 'post';
-    $limit = 10;
-
-    $app->any('/', [
-        'query' => ['postType' => $postType, 'limit' => $limit],
+$router->scope(['prefix' => 'posts', 'query' => ['postType' => 'post', 'limit' => 10]], function ($router) {
+    $router->any('[/{date:\d{4}(?:/\d{2}(?:/\d{2})?)?}]', [
         'uses' => 'PostController@archive',
         'as' => 'archive_url@post',
     ]);
 
-    $app->any('/{year:\d{4}}/{month:\d{2}}/{day:\d{2}}', [
-        'query' => ['postType' => $postType, 'limit' => $limit],
-        'uses' => 'PostController@archive',
-        'as' => 'archive_url@post[daily]',
-    ]);
-
-    $app->any('/{year:\d{4}}/{month:\d{2}}', [
-        'query' => ['postType' => $postType, 'limit' => $limit],
-        'uses' => 'PostController@archive',
-        'as' => 'archive_url@post[monthly]',
-    ]);
-
-    $app->any('/{year:\d{4}}', [
-        'query' => ['postType' => $postType, 'limit' => $limit],
-        'uses' => 'PostController@archive',
-        'as' => 'archive_url@post[yearly]',
-    ]);
-
-    $app->any('/category/{term:.+}', [
-        'query' => ['postType' => $postType, 'limit' => $limit, 'termType' => 'category'],
+    $router->any('/category/{term:.+}', [
+        'query' => ['termType' => 'category'],
         'uses' => 'PostController@archive',
         'as' => 'term_url@category',
     ]);
 
-    $app->any('/tag/{term}', [
-        'query' => ['postType' => $postType, 'limit' => $limit, 'termType' => 'post_tag'],
+    $router->any('/tag/{term}', [
+        'query' => ['termType' => 'post_tag'],
         'uses' => 'PostController@archive',
         'as' => 'term_url@post_tag',
     ]);
 
-    $app->any('/{year:\d{4}}/{month:\d{2}}/{day:\d{2}}/{path}', [
-        'query' => ['postType' => $postType],
+    $router->any('/{year:\d{4}}/{month:\d{2}}/{day:\d{2}}/{path}', [
         'uses' => 'PostController@post',
         'as' => 'post_url@post',
     ]);
@@ -77,7 +54,7 @@ $app->group(['prefix' => 'posts', 'namespace' => 'Luminous\Http\Controllers'], f
 // for Page
 // -----------------------------------------------------------------------------
 
-$app->any('/{path:.+}', [
+$router->any('/{path:.+}', [
     'query' => ['postType' => 'page'],
     'uses' => 'PostController@post',
     'as' => 'post_url@page',

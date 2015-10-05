@@ -4,10 +4,57 @@ namespace Luminous\Routing;
 
 use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
-use Laravel\Lumen\Routing\Controller as BaseController;
 
-abstract class Controller extends BaseController
+abstract class Controller
 {
+    use DispatchesJobs, ValidatesRequests;
+
+    /**
+     * The middleware defined on the controller.
+     *
+     * @var array
+     */
+    protected $middleware = [];
+
+    /**
+     * Define a middleware on the controller.
+     *
+     * @param  string  $middleware
+     * @param  array  $options
+     * @return void
+     */
+    public function middleware($middleware, array $options = [])
+    {
+        $this->middleware[$middleware] = $options;
+    }
+
+    /**
+     * Get the middleware for a given method.
+     *
+     * @param  Request  $request
+     * @param  string  $method
+     * @return array
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
+    public function getMiddlewareForMethod(Request $request, $method)
+    {
+        $middleware = [];
+
+        foreach ($this->middleware as $name => $options) {
+            if (isset($options['only']) && ! in_array($method, (array) $options['only'])) {
+                continue;
+            }
+
+            if (isset($options['except']) && in_array($method, (array) $options['except'])) {
+                continue;
+            }
+
+            $middleware[] = $name;
+        }
+
+        return $middleware;
+    }
+
     /**
      * Create a new response.
      *
@@ -35,7 +82,7 @@ abstract class Controller extends BaseController
         $response->setEtag(md5($response->getContent()));
         $response->isNotModified($request);
 
-        return $response->prepare($request);
+        return $response;
     }
 
     /**
