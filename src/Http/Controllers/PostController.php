@@ -123,8 +123,8 @@ class PostController extends BaseController
         $value = [];
 
         foreach (['year', 'month', 'day'] as $key) {
-            if (isset($query["date_{$key}"])) {
-                $value[$key] = intval($query["date_{$key}"], 10);
+            if (($queryKey = "archive_{$key}") && isset($query[$queryKey])) {
+                $value[$key] = intval($query[$queryKey], 10);
             }
         }
 

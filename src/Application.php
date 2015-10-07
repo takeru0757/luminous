@@ -488,9 +488,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     protected function registerRequestBindings()
     {
         $this->singleton('Illuminate\Http\Request', function () {
-            Request::enableHttpMethodParameterOverride();
-
-            return $this->getRequestInstance()->setRouteResolver(function () {
+            return $this->prepareRequest(Request::capture())->setRouteResolver(function () {
                 return $this->currentRoute;
             });
         });
@@ -502,22 +500,19 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      * @see \wp_magic_quotes() https://developer.wordpress.org/reference/functions/wp_magic_quotes/
      * @uses \stripslashes_deep()
      *
-     * @return \Illuminate\Http\Request
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     * @return \Symfony\Component\HttpFoundation\Request
      */
-    protected function getRequestInstance()
+    protected function prepareRequest(SymfonyRequest $request)
     {
-        if (! function_exists('wp_magic_quotes')) {
-            return Request::capture();
+        if (function_exists('wp_magic_quotes')) {
+            foreach (['request', 'query', 'cookies', 'server', 'headers'] as $param) {
+                $striped = array_map('stripslashes_deep', $request->{$param}->all());
+                $request->{$param}->replace($striped);
+            }
         }
 
-        $base = SymfonyRequest::createFromGlobals();
-
-        foreach (['request', 'query', 'cookies', 'server', 'headers'] as $param) {
-            $striped = array_map('stripslashes_deep', $base->{$param}->all());
-            $base->{$param}->replace($striped);
-        }
-
-        return Request::createFromBase($base);
+        return $request;
     }
 
     /**

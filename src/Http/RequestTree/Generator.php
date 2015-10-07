@@ -148,7 +148,7 @@ class Generator
         if ($type) {
             $this->archive = new Archive($type, $this->createDate($date));
             $label = $this->archive->format(trans("labels.archive.{$this->archive->type}"));
-            $this->add($label, posts_url($this->postType, ['date' => $this->archive]), $this->archive);
+            $this->add($label, posts_url($this->postType, ['archive' => $this->archive]), $this->archive);
         }
 
         return $this;

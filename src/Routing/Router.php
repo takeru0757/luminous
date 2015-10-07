@@ -219,12 +219,12 @@ class Router
         $uri = $this->buildRouteUrl($this->namedRoutes[$name], function ($key) use (&$parameters) {
             if (isset($parameters[$key])) {
                 return array_pull($parameters, $key);
-            } elseif (preg_match('/^(post|date|term|user)_(.+)$/', $key, $m) && isset($parameters[$m[1]])) {
+            } elseif (preg_match('/^(archive|post|term|user)_(.+)$/', $key, $m) && isset($parameters[$m[1]])) {
                 return $parameters[$m[1]]->urlParameter($m[2]);
             }
         });
 
-        unset($parameters['post'], $parameters['date'], $parameters['term'], $parameters['user']);
+        unset($parameters['archive'], $parameters['post'], $parameters['term'], $parameters['user']);
 
         if (! empty($parameters)) {
             $uri .= '?'.http_build_query($parameters);
@@ -242,14 +242,14 @@ class Router
      */
     public function buildRouteUrl($route, Closure $callback)
     {
-        $pattern = '~(?:\[/)?'.\FastRoute\RouteParser\Std::VARIABLE_REGEX.'~x';
+        $pattern = '~(?:\[/?)?'.\FastRoute\RouteParser\Std::VARIABLE_REGEX.'~x';
         $uri = rtrim($route, ']');
 
         return preg_replace_callback($pattern, function ($m) use ($callback) {
             $segment = $callback($m[1]);
 
             if (strpos($m[0], '[') === 0) {
-                return $segment ? "/{$segment}" : '';
+                return $segment ? (strpos($m[0], '[/') === 0 ? '/' : '').$segment : '';
             } else {
                 return $segment ? $segment : $m[0];
             }

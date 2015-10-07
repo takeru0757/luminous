@@ -27,7 +27,7 @@ $router->get('/robots.txt', 'RootController@robots');
 // -----------------------------------------------------------------------------
 
 $router->scope(['prefix' => 'posts', 'query' => ['post_type' => 'post']], function ($router) {
-    $router->any('[/{date_year:\d{4}}[/{date_month:\d{2}}[/{date_day:\d{2}}]]]', [
+    $router->any('[/{archive_year:\d{4}}[/{archive_month:\d{2}}[/{archive_day:\d{2}}]]]', [
         'query' => ['limit' => 10],
         'uses' => 'PostController@index',
         'as' => 'posts_url[post]',
