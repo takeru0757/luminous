@@ -26,27 +26,28 @@ $router->get('/robots.txt', 'RootController@robots');
 // for Post
 // -----------------------------------------------------------------------------
 
-$router->scope(['prefix' => 'posts', 'query' => ['postType' => 'post', 'limit' => 10]], function ($router) {
+$router->scope(['prefix' => 'posts', 'query' => ['postType' => 'post']], function ($router) {
     $router->any('[/{date:\d{4}(?:/\d{2}(?:/\d{2})?)?}]', [
-        'uses' => 'PostController@archive',
-        'as' => 'archive_url@post',
+        'query' => ['limit' => 10],
+        'uses' => 'PostController@index',
+        'as' => 'posts_url[post]',
     ]);
 
     $router->any('/category/{term:.+}', [
-        'query' => ['termType' => 'category'],
-        'uses' => 'PostController@archive',
-        'as' => 'term_url@category',
+        'query' => ['limit' => 10, 'termType' => 'category'],
+        'uses' => 'PostController@index',
+        'as' => 'term_url[category]',
     ]);
 
     $router->any('/tag/{term}', [
-        'query' => ['termType' => 'post_tag'],
-        'uses' => 'PostController@archive',
-        'as' => 'term_url@post_tag',
+        'query' => ['limit' => 10, 'termType' => 'post_tag'],
+        'uses' => 'PostController@index',
+        'as' => 'term_url[post_tag]',
     ]);
 
-    $router->any('/{year:\d{4}}/{month:\d{2}}/{day:\d{2}}/{path}', [
-        'uses' => 'PostController@post',
-        'as' => 'post_url@post',
+    $router->any('/{post:.+}', [
+        'uses' => 'PostController@show',
+        'as' => 'post_url[post]',
     ]);
 });
 
@@ -54,8 +55,8 @@ $router->scope(['prefix' => 'posts', 'query' => ['postType' => 'post', 'limit' =
 // for Page
 // -----------------------------------------------------------------------------
 
-$router->any('/{path:.+}', [
+$router->any('/{post:.+}', [
     'query' => ['postType' => 'page'],
-    'uses' => 'PostController@post',
-    'as' => 'post_url@page',
+    'uses' => 'PostController@show',
+    'as' => 'post_url[page]',
 ]);

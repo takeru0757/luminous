@@ -106,7 +106,7 @@ class Generator
      * Set the current post type.
      *
      * @uses \trans()
-     * @uses \archive_url()
+     * @uses \posts_url()
      *
      * @param \Luminous\Bridge\Post\Type $postType
      * @return $this
@@ -117,7 +117,7 @@ class Generator
 
         if ($this->postType->hasArchive()) {
             $label = $this->postType->name === 'post' ? trans('labels.post') : $this->postType->label;
-            $this->add($label, archive_url($this->postType), $this->postType);
+            $this->add($label, posts_url($this->postType), $this->postType);
         }
 
         return $this;
@@ -127,7 +127,7 @@ class Generator
      * Set the current date.
      *
      * @uses \trans()
-     * @uses \archive_url()
+     * @uses \posts_url()
      *
      * @param array $date
      * @return $this
@@ -148,7 +148,7 @@ class Generator
         if ($type) {
             $this->archive = new Archive($type, $this->createDate($date));
             $label = $this->archive->format(trans("labels.archive.{$this->archive->type}"));
-            $this->add($label, archive_url($this->postType, ['date' => $this->archive]), $this->archive);
+            $this->add($label, posts_url($this->postType, ['date' => $this->archive]), $this->archive);
         }
 
         return $this;

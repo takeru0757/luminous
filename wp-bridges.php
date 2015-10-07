@@ -48,7 +48,7 @@ add_filter('post_link', function ($permalink, $post, $leavename) {
         return $permalink;
     }
     $placeholder = $leavename ? '%postname%' : null;
-    return luminous_post_url(app('wp')->post($post), $placeholder);
+    return post_url(app('wp')->post($post), $placeholder ? ['post' => $placeholder] : [], home_url());
 }, 10, 3);
 
 // @link https://developer.wordpress.org/reference/functions/_get_page_link/
@@ -57,7 +57,7 @@ add_filter('_get_page_link', function ($permalink, $postId) {
         return $permalink;
     }
     $placeholder = strpos($permalink, '%pagename%') !== false ? '%pagename%' : null;
-    return luminous_post_url(app('wp')->post($postId), $placeholder);
+    return post_url(app('wp')->post($post), $placeholder ? ['post' => $placeholder] : [], home_url());
 }, 10, 2);
 
 // @link https://developer.wordpress.org/reference/functions/get_post_permalink/
@@ -66,12 +66,12 @@ add_filter('post_type_link', function ($permalink, $post, $leavename) {
         return $permalink;
     }
     $placeholder = $leavename ? "%{$post->post_type}%" : null;
-    return luminous_post_url(app('wp')->post($post), $placeholder);
+    return post_url(app('wp')->post($post), $placeholder ? ['post' => $placeholder] : [], home_url());
 }, 10, 3);
 
 // @link https://developer.wordpress.org/reference/functions/get_term_link/
 add_filter('term_link', function ($termlink, $term, $taxonomy) {
-    return luminous_term_url(app('wp')->term($term, $taxonomy));
+    return term_url(app('wp')->term($term, $taxonomy), [], home_url());
 }, 10, 3);
 
 // -----------------------------------------------------------------------------

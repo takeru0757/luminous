@@ -457,25 +457,27 @@ if (! function_exists('route')) {
     }
 }
 
-if (! function_exists('archive_url')) {
+if (! function_exists('posts_url')) {
     /**
-     * Generate a URL to archive.
+     * Generate a URL to posts.
      *
      * @uses \route()
      *
      * @param \Luminous\Bridge\Post\Type $postType
      * @param array $parameters
+     * @param bool|string $full
+     * @param null|bool $secure
      * @return string
      *
      * @throws \InvalidArgumentException
      */
-    function archive_url(Luminous\Bridge\Post\Type $postType, array $parameters = [])
+    function posts_url(Luminous\Bridge\Post\Type $postType, array $parameters = [], $full = false, $secure = null)
     {
         if (! $postType->hasArchive()) {
             throw new InvalidArgumentException("{$postType->name} does not have archive.");
         }
 
-        return route("archive_url@{$postType->name}", $parameters);
+        return route("posts_url[{$postType->name}]", $parameters, $full, $secure);
     }
 }
 
@@ -484,19 +486,17 @@ if (! function_exists('post_url')) {
      * Generate a URL to the post.
      *
      * @uses \route()
-     * @uses \app()
      *
      * @param \Luminous\Bridge\Post\Entity $post
      * @param array $parameters
+     * @param bool|string $full
+     * @param null|bool $secure
      * @return string
      */
-    function post_url(Luminous\Bridge\Post\Entity $post, array $parameters = [])
+    function post_url(Luminous\Bridge\Post\Entity $post, array $parameters = [], $full = false, $secure = null)
     {
-        $uri = route("post_url@{$post->type->name}", $parameters);
-
-        return app('router')->buildRouteUrl($uri, function ($key) use ($post) {
-            return $post->urlParameter($key);
-        });
+        $parameters = array_merge(['post' => $post], $parameters);
+        return route("post_url[{$post->type->name}]", $parameters, $full, $secure);
     }
 }
 
@@ -508,12 +508,14 @@ if (! function_exists('term_url')) {
      *
      * @param \Luminous\Bridge\Term\Entity $term
      * @param array $parameters
+     * @param bool|string $full
+     * @param null|bool $secure
      * @return string
      */
-    function term_url(Luminous\Bridge\Term\Entity $term, array $parameters = [])
+    function term_url(Luminous\Bridge\Term\Entity $term, array $parameters = [], $full = false, $secure = null)
     {
-        $parameters['term'] = $term;
-        return route("term_url@{$term->type->name}", $parameters);
+        $parameters = array_merge(['term' => $term], $parameters);
+        return route("term_url[{$term->type->name}]", $parameters, $full, $secure);
     }
 }
 
@@ -522,7 +524,7 @@ if (! function_exists('asset')) {
      * Get the path to a versioned file.
      *
      * @uses \config()
-     * @uses \app()
+     * @uses \url()
      *
      * @param string $file
      * @param bool|string $full

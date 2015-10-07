@@ -11,7 +11,7 @@ use Luminous\Http\RequestTree\Generator as Tree;
 class PostController extends BaseController
 {
     /**
-     * Handle requests for archive.
+     * Handle requests to posts.
      *
      * @uses \app()
      * @uses \abort()
@@ -23,7 +23,7 @@ class PostController extends BaseController
      *
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
-    public function archive(Request $request, $query)
+    public function index(Request $request, $query)
     {
         $wp = app('wp');
 
@@ -31,7 +31,6 @@ class PostController extends BaseController
         $postQuery = $wp->posts($postType);
 
         $tree = (new Tree())->setPostType($postType);
-        $tree->setPage($page = $request->query('page', 1));
 
         if (isset($query['order'])) {
             $postQuery->orderBy($query['order']['column'], $query['order']['direction']);
@@ -50,6 +49,7 @@ class PostController extends BaseController
         }
 
         $posts = $postQuery->paginate(isset($query['limit']) ? $query['limit'] : 10);
+        $tree->setPage($page = $posts->currentPage());
 
         if ($posts->isEmpty() && $page > 1) {
             abort(404);
@@ -61,7 +61,7 @@ class PostController extends BaseController
     }
 
     /**
-     * Handle requests for the post.
+     * Handle requests to the post.
      *
      * @uses \app()
      * @uses \abort()
@@ -73,28 +73,18 @@ class PostController extends BaseController
      *
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
-    public function post(Request $request, $query)
+    public function show(Request $request, $query)
     {
         $wp = app('wp');
 
         $postType = $wp->postType($query['postType']);
-        $postQuery = $wp->posts($postType);
-
-        $tree = (new Tree())->setPostType($postType);
-
-        foreach (['id', 'path'] as $key) {
-            if (isset($query[$key])) {
-                $postQuery->wherePost($key, $query[$key]);
-                break;
-            }
-        }
+        $postQuery = $wp->posts($postType)->wherePost('path', $query['post']);
 
         if (! $post = $postQuery->first()) {
             abort(404);
         }
 
-        $tree->setPost($post);
-
+        $tree = (new Tree())->setPostType($postType)->setPost($post);
         $view = view($this->getTemplateName($postType, $post), compact('tree', 'post'));
 
         return $this->createResponse($request, $view);
@@ -145,9 +135,10 @@ class PostController extends BaseController
                 array_push($files, "{$file}.base", $file);
                 array_pop($paths);
             }
+        } else {
+            $files[] = $post ? 'show' : 'index';
         }
 
-        $files[] = $post ? 'post' : 'archive';
         $files[] = 'base';
 
         foreach ($files as $file) {
