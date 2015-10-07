@@ -243,15 +243,15 @@ abstract class Entity extends BaseEntity
     public function urlParameter($key)
     {
         $dateFormats = [
-            'year'  => 'Y',
-            'month' => 'm',
-            'day'   => 'd',
+            'date_year'     => 'Y',
+            'date_month'    => 'm',
+            'date_day'      => 'd',
         ];
 
         if (array_key_exists($key, $dateFormats)) {
             return $this->date($dateFormats[$key]);
         }
 
-        return $this->{$key};
+        return parent::urlParameter($key);
     }
 }

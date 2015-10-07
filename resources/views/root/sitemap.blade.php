@@ -13,7 +13,7 @@
     @if ($_type->hasArchive() && $_latest = $_posts->first())
 
     <url>
-        <loc>{{ archive_url($_type) }}</loc>
+        <loc>{{ posts_url($_type) }}</loc>
         <lastmod>{{ $_latest->modified_at->max($appModified)->toW3cString() }}</lastmod>
         <priority>0.8</priority>
         <changefreq>weekly</changefreq>

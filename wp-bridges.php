@@ -48,7 +48,7 @@ add_filter('post_link', function ($permalink, $post, $leavename) {
         return $permalink;
     }
     $placeholder = $leavename ? '%postname%' : null;
-    return post_url(app('wp')->post($post), $placeholder ? ['post' => $placeholder] : [], home_url());
+    return post_url(app('wp')->post($post), $placeholder ? ['post_path' => $placeholder] : [], home_url());
 }, 10, 3);
 
 // @link https://developer.wordpress.org/reference/functions/_get_page_link/
@@ -57,7 +57,7 @@ add_filter('_get_page_link', function ($permalink, $postId) {
         return $permalink;
     }
     $placeholder = strpos($permalink, '%pagename%') !== false ? '%pagename%' : null;
-    return post_url(app('wp')->post($post), $placeholder ? ['post' => $placeholder] : [], home_url());
+    return post_url(app('wp')->post($post), $placeholder ? ['post_path' => $placeholder] : [], home_url());
 }, 10, 2);
 
 // @link https://developer.wordpress.org/reference/functions/get_post_permalink/
@@ -66,7 +66,7 @@ add_filter('post_type_link', function ($permalink, $post, $leavename) {
         return $permalink;
     }
     $placeholder = $leavename ? "%{$post->post_type}%" : null;
-    return post_url(app('wp')->post($post), $placeholder ? ['post' => $placeholder] : [], home_url());
+    return post_url(app('wp')->post($post), $placeholder ? ['post_path' => $placeholder] : [], home_url());
 }, 10, 3);
 
 // @link https://developer.wordpress.org/reference/functions/get_term_link/

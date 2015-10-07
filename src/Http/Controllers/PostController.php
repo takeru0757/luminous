@@ -27,7 +27,7 @@ class PostController extends BaseController
     {
         $wp = app('wp');
 
-        $postType = $wp->postType($query['postType']);
+        $postType = $wp->postType($query['post_type']);
         $postQuery = $wp->posts($postType);
 
         $tree = (new Tree())->setPostType($postType);
@@ -43,8 +43,19 @@ class PostController extends BaseController
             $tree->setDate($date);
         }
 
-        if (isset($query['termType'], $query['term'])) {
-            $postQuery->whereTerm($term = $wp->term($query['term'], $query['termType']));
+        if (isset($query['term_type'])) {
+            switch (true) {
+                case isset($query['term_id']):
+                    $term = $wp->term((int) $query['term_id'], $query['term_type']);
+                    break;
+                case isset($query['term_path']):
+                    $term = $wp->term($query['term_path'], $query['term_type']);
+                    break;
+                default:
+                    abort(404);
+            }
+
+            $postQuery->whereTerm($term);
             $tree->setTerm($term);
         }
 
@@ -77,8 +88,19 @@ class PostController extends BaseController
     {
         $wp = app('wp');
 
-        $postType = $wp->postType($query['postType']);
-        $postQuery = $wp->posts($postType)->wherePost('path', $query['post']);
+        $postType = $wp->postType($query['post_type']);
+        $postQuery = $wp->posts($postType);
+
+        switch (true) {
+            case isset($query['post_id']):
+                $postQuery->wherePost('id', $query['post_id']);
+                break;
+            case isset($query['post_path']):
+                $postQuery->wherePost('path', $query['post_path']);
+                break;
+            default:
+                abort(404);
+        }
 
         if (! $post = $postQuery->first()) {
             abort(404);
@@ -98,16 +120,11 @@ class PostController extends BaseController
      */
     protected function getDateQuery(array $query)
     {
-        if (! isset($query['date'])) {
-            return;
-        }
-
-        $dates = explode('/', $query['date']);
         $value = [];
 
-        foreach (['year', 'month', 'day'] as $i => $key) {
-            if (isset($dates[$i])) {
-                $value[$key] = intval($dates[$i], 10);
+        foreach (['year', 'month', 'day'] as $key) {
+            if (isset($query["date_{$key}"])) {
+                $value[$key] = intval($query["date_{$key}"], 10);
             }
         }
 

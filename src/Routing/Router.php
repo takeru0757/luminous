@@ -5,7 +5,6 @@ namespace Luminous\Routing;
 use BadMethodCallException;
 use Closure;
 use InvalidArgumentException;
-use Illuminate\Contracts\Routing\UrlRoutable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Luminous\Application;
@@ -217,16 +216,15 @@ class Router
             throw new InvalidArgumentException("Route [{$name}] not defined.");
         }
 
-        foreach ($parameters as $key => $parameter) {
-            if ($parameter instanceof UrlRoutable) {
-                // TODO: rawurlencode()
-                $parameters[$key] = $parameter->getRouteKey();
-            }
-        }
-
         $uri = $this->buildRouteUrl($this->namedRoutes[$name], function ($key) use (&$parameters) {
-            return isset($parameters[$key]) ? array_pull($parameters, $key) : null;
+            if (isset($parameters[$key])) {
+                return array_pull($parameters, $key);
+            } elseif (preg_match('/^(post|date|term|user)_(.+)$/', $key, $m) && isset($parameters[$m[1]])) {
+                return $parameters[$m[1]]->urlParameter($m[2]);
+            }
         });
+
+        unset($parameters['post'], $parameters['date'], $parameters['term'], $parameters['user']);
 
         if (! empty($parameters)) {
             $uri .= '?'.http_build_query($parameters);
