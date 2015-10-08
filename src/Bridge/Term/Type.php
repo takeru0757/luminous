@@ -6,4 +6,14 @@ use Luminous\Bridge\Type as BaseType;
 
 class Type extends BaseType
 {
+    /**
+     * Get the post type.
+     *
+     * @return \Luminous\Bridge\Post\Type
+     */
+    protected function getPostTypeAttribute()
+    {
+        $postType = $this->original->object_type[0];
+        return $this->wp->postType($postType);
+    }
 }

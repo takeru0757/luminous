@@ -45,11 +45,14 @@ class PostController extends BaseController
 
         if (isset($query['term_type'])) {
             switch (true) {
-                case isset($query['term_id']):
-                    $term = $wp->term((int) $query['term_id'], $query['term_type']);
+                case isset($query['term__id']):
+                    $term = $wp->term((int) $query['term__id'], $query['term_type']);
                     break;
-                case isset($query['term_path']):
-                    $term = $wp->term($query['term_path'], $query['term_type']);
+                case isset($query['term__path']):
+                    $term = $wp->term($query['term__path'], $query['term_type']);
+                    break;
+                case isset($query['term__slug']):
+                    $term = $wp->term($query['term__slug'], $query['term_type']);
                     break;
                 default:
                     abort(404);
@@ -92,11 +95,14 @@ class PostController extends BaseController
         $postQuery = $wp->posts($postType);
 
         switch (true) {
-            case isset($query['post_id']):
-                $postQuery->wherePost('id', $query['post_id']);
+            case isset($query['post__id']):
+                $postQuery->wherePost('id', (int) $query['post__id']);
                 break;
-            case isset($query['post_path']):
-                $postQuery->wherePost('path', $query['post_path']);
+            case isset($query['post__path']):
+                $postQuery->wherePost('path', $query['post__path']);
+                break;
+            case isset($query['post__slug']):
+                $postQuery->wherePost('slug', $query['post__slug']);
                 break;
             default:
                 abort(404);
@@ -120,12 +126,18 @@ class PostController extends BaseController
      */
     protected function getDateQuery(array $query)
     {
+        if (! isset($query['archive__path'])) {
+            return;
+        }
+
+        $parts = explode('/', $query['archive__path']);
         $value = [];
 
-        foreach (['year', 'month', 'day'] as $key) {
-            if (($queryKey = "archive_{$key}") && isset($query[$queryKey])) {
-                $value[$key] = intval($query[$queryKey], 10);
+        foreach (['year', 'month', 'day'] as $i => $key) {
+            if (! isset($parts[$i])) {
+                break;
             }
+            $value[$key] = intval($parts[$i], 10);
         }
 
         return $value;

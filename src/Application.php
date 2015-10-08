@@ -839,7 +839,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
         return \FastRoute\simpleDispatcher(function ($r) {
             $router = $this->make('router');
             foreach ($router->routes() as $route) {
-                $r->addRoute($route['methods'], $route['uri'], $route['action']);
+                $r->addRoute($route['via'], $route['uri'], $route['action']);
             }
         });
     }

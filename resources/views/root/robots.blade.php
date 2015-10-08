@@ -1,4 +1,4 @@
-Sitemap: {{ url('sitemap.xml') }}
+Sitemap: {{ url('sitemap.xml', true) }}
 
 User-agent: *
 Disallow: {{ parse_url(admin_url('/'), PHP_URL_PATH) }}

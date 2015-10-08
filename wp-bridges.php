@@ -48,7 +48,8 @@ add_filter('post_link', function ($permalink, $post, $leavename) {
         return $permalink;
     }
     $placeholder = $leavename ? '%postname%' : null;
-    return post_url(app('wp')->post($post), $placeholder ? ['post_path' => $placeholder] : [], home_url());
+    $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
+    return post_url(app('wp')->post($post), $parameters, home_url());
 }, 10, 3);
 
 // @link https://developer.wordpress.org/reference/functions/_get_page_link/
@@ -57,7 +58,8 @@ add_filter('_get_page_link', function ($permalink, $postId) {
         return $permalink;
     }
     $placeholder = strpos($permalink, '%pagename%') !== false ? '%pagename%' : null;
-    return post_url(app('wp')->post($post), $placeholder ? ['post_path' => $placeholder] : [], home_url());
+    $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
+    return post_url(app('wp')->post($postId), $parameters, home_url());
 }, 10, 2);
 
 // @link https://developer.wordpress.org/reference/functions/get_post_permalink/
@@ -66,12 +68,14 @@ add_filter('post_type_link', function ($permalink, $post, $leavename) {
         return $permalink;
     }
     $placeholder = $leavename ? "%{$post->post_type}%" : null;
-    return post_url(app('wp')->post($post), $placeholder ? ['post_path' => $placeholder] : [], home_url());
+    $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
+    return post_url(app('wp')->post($post), $parameters, home_url());
 }, 10, 3);
 
 // @link https://developer.wordpress.org/reference/functions/get_term_link/
 add_filter('term_link', function ($termlink, $term, $taxonomy) {
-    return term_url(app('wp')->term($term, $taxonomy), [], home_url());
+    $term = app('wp')->term($term, $taxonomy);
+    return posts_url($term->type->post_type, compact('term'), home_url());
 }, 10, 3);
 
 // -----------------------------------------------------------------------------

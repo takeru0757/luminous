@@ -61,20 +61,17 @@ class Archive
     /**
      * Get the value of the archive route key.
      *
-     * @param string $key
      * @return string
      */
-    public function urlParameter($key)
+    public function urlParameter()
     {
-        $parameters = [
-            'yearly'    => ['year' => 'Y'],
-            'monthly'   => ['year' => 'Y', 'month' => 'm'],
-            'daily'     => ['year' => 'Y', 'month' => 'm', 'day' => 'd'],
+        $formats = [
+            'yearly'    => 'Y',
+            'monthly'   => 'Y/m',
+            'daily'     => 'Y/m/d',
         ];
 
-        $formats = $parameters[$this->type];
-
-        return isset($formats[$key]) ? $this->format($formats[$key]) : null;
+        return $this->format($formats[$this->type]);
     }
 
     /**

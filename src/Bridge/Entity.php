@@ -14,7 +14,7 @@ abstract class Entity implements ArrayAccess
      *
      * @var \Luminous\Bridge\WP
      */
-    protected $wp = [];
+    protected $wp;
 
     /**
      * The accessors map for original instance.

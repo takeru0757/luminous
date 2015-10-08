@@ -70,7 +70,7 @@ class Builder extends BaseBuilder
      */
     protected function makeType($original)
     {
-        return new Type($original);
+        return new Type($this->container['wp'], $original);
     }
 
     /**

@@ -17,7 +17,7 @@ if (env('APP_DEBUG', false)) {
 // for Root
 // -----------------------------------------------------------------------------
 
-$router->any('/', ['uses' => 'RootController@home', 'as' => 'home']);
+$router->get('/', 'RootController@home');
 
 $router->get('/sitemap.xml', 'RootController@sitemap');
 $router->get('/robots.txt', 'RootController@robots');
@@ -27,27 +27,29 @@ $router->get('/robots.txt', 'RootController@robots');
 // -----------------------------------------------------------------------------
 
 $router->scope(['prefix' => 'posts', 'query' => ['post_type' => 'post']], function ($router) {
-    $router->any('[/{archive_year:\d{4}}[/{archive_month:\d{2}}[/{archive_day:\d{2}}]]]', [
+    $router->any('/', [
         'query' => ['limit' => 10],
         'uses' => 'PostController@index',
-        'as' => 'posts_url[post]',
     ]);
 
-    $router->any('/category/{term_path:.+}', [
+    $router->any('/{post}', [
+        'query' => ['post' => '{date_year:\d{4}}/{date_month:\d{2}}/{date_day:\d{2}}/{slug}'],
+        'uses' => 'PostController@show',
+    ]);
+
+    $router->any('/{archive}', [
+        'query' => ['limit' => 10],
+        'uses' => 'PostController@index',
+    ]);
+
+    $router->any('/category/{term}', [
         'query' => ['limit' => 10, 'term_type' => 'category'],
         'uses' => 'PostController@index',
-        'as' => 'term_url[category]',
     ]);
 
-    $router->any('/tag/{term_path}', [
+    $router->any('/tag/{term}', [
         'query' => ['limit' => 10, 'term_type' => 'post_tag'],
         'uses' => 'PostController@index',
-        'as' => 'term_url[post_tag]',
-    ]);
-
-    $router->any('/{post_date_year:\d{4}}/{post_date_month:\d{2}}/{post_date_day:\d{2}}/{post_path}', [
-        'uses' => 'PostController@show',
-        'as' => 'post_url[post]',
     ]);
 });
 
@@ -55,8 +57,7 @@ $router->scope(['prefix' => 'posts', 'query' => ['post_type' => 'post']], functi
 // for Page
 // -----------------------------------------------------------------------------
 
-$router->any('/{post_path:.+}', [
+$router->any('/{post}', [
     'query' => ['post_type' => 'page'],
     'uses' => 'PostController@show',
-    'as' => 'post_url[page]',
 ]);

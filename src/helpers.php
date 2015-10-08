@@ -445,7 +445,7 @@ if (! function_exists('route')) {
      *
      * @uses \app()
      *
-     * @param string $path
+     * @param string $name
      * @param array $parameters
      * @param bool|string $full
      * @param null|bool $secure
@@ -468,16 +468,11 @@ if (! function_exists('posts_url')) {
      * @param bool|string $full
      * @param null|bool $secure
      * @return string
-     *
-     * @throws \InvalidArgumentException
      */
     function posts_url(Luminous\Bridge\Post\Type $postType, array $parameters = [], $full = false, $secure = null)
     {
-        if (! $postType->hasArchive()) {
-            throw new InvalidArgumentException("{$postType->name} does not have archive.");
-        }
-
-        return route("posts_url[{$postType->name}]", $parameters, $full, $secure);
+        $parameters['post_type'] = $postType;
+        return url($parameters, $full, $secure);
     }
 }
 
@@ -495,27 +490,8 @@ if (! function_exists('post_url')) {
      */
     function post_url(Luminous\Bridge\Post\Entity $post, array $parameters = [], $full = false, $secure = null)
     {
-        $parameters = array_merge(['post' => $post], $parameters);
-        return route("post_url[{$post->type->name}]", $parameters, $full, $secure);
-    }
-}
-
-if (! function_exists('term_url')) {
-    /**
-     * Generate a URL to the term.
-     *
-     * @uses \route()
-     *
-     * @param \Luminous\Bridge\Term\Entity $term
-     * @param array $parameters
-     * @param bool|string $full
-     * @param null|bool $secure
-     * @return string
-     */
-    function term_url(Luminous\Bridge\Term\Entity $term, array $parameters = [], $full = false, $secure = null)
-    {
-        $parameters = array_merge(['term' => $term], $parameters);
-        return route("term_url[{$term->type->name}]", $parameters, $full, $secure);
+        $parameters['post'] = $post;
+        return url($parameters, $full, $secure);
     }
 }
 

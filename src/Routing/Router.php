@@ -8,6 +8,10 @@ use InvalidArgumentException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use Luminous\Application;
+use Luminous\Bridge\Type;
+use Luminous\Bridge\Entity;
+use Luminous\Bridge\Post\Type as PostType;
+use Luminous\Bridge\Post\Entity as PostEntity;
 
 /**
  * @method void get(string $uri, mixed $action) Add a route to the collection via GET method.
@@ -92,7 +96,7 @@ class Router
      */
     public function add($methods, $uri, $action)
     {
-        $methods = array_map('strtoupper', (array) $methods);
+        $via = array_map('strtoupper', (array) $methods);
 
         if (isset($this->currentScope['prefix'])) {
             $uri = strpos($uri, '[') === 0 ? $uri : '/'.trim($uri, '/');
@@ -103,23 +107,40 @@ class Router
 
         if (is_string($action)) {
             $action = ['uses' => $action];
-        } elseif (! is_array($action)) {
+        }
+
+        if (is_array($action)) {
+            $query = array_merge(Arr::get($this->currentScope, 'query', []), Arr::get($action, 'query', []));
+            $params = array_intersect_key($query, array_flip(['post_type', 'term_type']));
+
+            $uri = preg_replace_callback('/\{(archive|post|term|user)\}/', function ($m) use (&$query, &$params) {
+                $params[$key = $m[1]] = null;
+                if ($value = Arr::pull($query, $key)) {
+                    return preg_replace('/\{([a-z][a-z\d_]*)/i', "{{$key}__$1", $value);
+                } else {
+                    $regex = $key === 'archive' ? '\d{4}(?:/\d{2}(?:/\d{2})?)?' : '.+';
+                    return "{{$key}__path:{$regex}}";
+                }
+            }, $uri);
+
+            $action['query'] = $query;
+
+            if ($name = $this->buildName($params)) {
+                $this->namedRoutes[$name] = $uri;
+            }
+
+            if (isset($action['uses'], $this->currentScope['namespace'])) {
+                $action['uses'] = $this->currentScope['namespace'].'\\'.$action['uses'];
+            }
+
+            if (isset($action['as'])) {
+                $this->namedRoutes[$action['as']] = $uri;
+            }
+        } else {
             $action = [$action];
         }
 
-        if (isset($this->currentScope['query'])) {
-            $action['query'] = array_merge($this->currentScope['query'], Arr::get($action, 'query', []));
-        }
-
-        if (isset($action['uses'], $this->currentScope['namespace'])) {
-            $action['uses'] = $this->currentScope['namespace'].'\\'.$action['uses'];
-        }
-
-        if (isset($action['as'])) {
-            $this->namedRoutes[$action['as']] = $uri;
-        }
-
-        $this->routes[] = compact('methods', 'uri', 'action');
+        $this->routes[] = compact('via', 'uri', 'action');
     }
 
     /**
@@ -183,14 +204,18 @@ class Router
     /**
      * Get the URL.
      *
-     * @param string $path
+     * @param string|mixed $path
      * @param bool|string $full
      * @param null|bool $secure
      * @return string
      */
     public function url($path = '', $full = false, $secure = null)
     {
-        if ($this->isValidUrl($path)) {
+        if (! is_string($path)) {
+            $parameters = $this->normalizeParameters($path);
+            $name = $this->buildName($parameters);
+            return $this->route($name, $parameters, $full, $secure);
+        } elseif ($this->isValidUrl($path)) {
             return $path;
         }
 
@@ -200,9 +225,34 @@ class Router
     }
 
     /**
+     * Normalize parameters.
+     *
+     * @param mixed $parameters
+     * @return array
+     */
+    protected function normalizeParameters($parameters)
+    {
+        if ($parameters instanceof PostType) {
+            $parameters = ['post_type' => $parameters];
+        } elseif ($parameters instanceof PostEntity) {
+            $parameters = ['post' => $parameters];
+        }
+
+        foreach (['post', 'term'] as $key) {
+            if (isset($parameters["{$key}_type"]) && $parameters["{$key}_type"] instanceof Type) {
+                $parameters["{$key}_type"] = $parameters["{$key}_type"]->name;
+            } elseif (isset($parameters[$key]) && $parameters[$key] instanceof Entity) {
+                $parameters["{$key}_type"] = $parameters[$key]->type->name;
+            }
+        }
+
+        return $parameters;
+    }
+
+    /**
      * Get the URL to a named route.
      *
-     * @param string $path
+     * @param string $name
      * @param array $parameters
      * @param bool|string $full
      * @param null|bool $secure
@@ -216,15 +266,35 @@ class Router
             throw new InvalidArgumentException("Route [{$name}] not defined.");
         }
 
-        $uri = $this->buildRouteUrl($this->namedRoutes[$name], function ($key) use (&$parameters) {
-            if (isset($parameters[$key])) {
-                return array_pull($parameters, $key);
-            } elseif (preg_match('/^(archive|post|term|user)_(.+)$/', $key, $m) && isset($parameters[$m[1]])) {
-                return $parameters[$m[1]]->urlParameter($m[2]);
-            }
-        });
+        $pattern = '~'.\FastRoute\RouteParser\Std::VARIABLE_REGEX.'~x';
+        $parts = explode('[', rtrim($this->namedRoutes[$name], ']'));
+        $uri = '';
 
-        unset($parameters['archive'], $parameters['post'], $parameters['term'], $parameters['user']);
+        foreach ($parts as $part) {
+            $replaced = preg_replace_callback($pattern, function ($m) use (&$parameters) {
+                if ($value = Arr::pull($parameters, $key = $m[1])) {
+                    return $value;
+                } elseif (preg_match('/^(archive|post|term|user)__(.+)$/', $key, $s) && isset($parameters[$s[1]])) {
+                    return $parameters[$s[1]]->urlParameter($s[2]);
+                } else {
+                    return $m[0];
+                }
+            }, $part);
+
+            if (strpos($replaced, '{') !== false) {
+                break;
+            }
+
+            $uri .= $replaced;
+        }
+
+        $rejectKeys = ['archive', 'post_type', 'post', 'term_type', 'term', 'user'];
+
+        foreach ($parameters as $key => $value) {
+            if (in_array($key, $rejectKeys) || preg_match('/^(?:archive|post|term|user)__.+$/', $key)) {
+                unset($parameters[$key]);
+            }
+        }
 
         if (! empty($parameters)) {
             $uri .= '?'.http_build_query($parameters);
@@ -234,26 +304,27 @@ class Router
     }
 
     /**
-     * Build the URL.
+     * Build the route name from parameters.
      *
-     * @param string $route
-     * @param Closure $callback
-     * @return string
+     * @param array $parameters
+     * @return string|null
      */
-    public function buildRouteUrl($route, Closure $callback)
+    protected function buildName(array $parameters)
     {
-        $pattern = '~(?:\[/?)?'.\FastRoute\RouteParser\Std::VARIABLE_REGEX.'~x';
-        $uri = rtrim($route, ']');
+        ksort($parameters);
 
-        return preg_replace_callback($pattern, function ($m) use ($callback) {
-            $segment = $callback($m[1]);
+        $type = array_key_exists('post', $parameters) ? 'show' : 'index';
+        $names = [];
 
-            if (strpos($m[0], '[') === 0) {
-                return $segment ? (strpos($m[0], '[/') === 0 ? '/' : '').$segment : '';
-            } else {
-                return $segment ? $segment : $m[0];
+        foreach ($parameters as $key => $value) {
+            if (in_array($key, ['post_type', 'term_type'])) {
+                $names[] = "{$key}:{$value}";
+            } elseif (in_array($key, ['archive', 'user'])) {
+                $names[] = $key;
             }
-        }, $uri);
+        }
+
+        return $names ? "{$type}[".implode('|', $names).']' : null;
     }
 
     /**
