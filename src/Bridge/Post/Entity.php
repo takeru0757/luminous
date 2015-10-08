@@ -6,6 +6,7 @@ use WP_Post;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Luminous\Bridge\WP;
+use Luminous\Bridge\Term\Type as TermType;
 use Luminous\Bridge\Entity as BaseEntity;
 
 abstract class Entity extends BaseEntity
@@ -232,6 +233,29 @@ abstract class Entity extends BaseEntity
     public function date($format, $modified = false)
     {
         return $this->{$modified ? 'modified_at' : 'created_at'}->format($format);
+    }
+
+    /**
+     * Get the terms.
+     *
+     * @uses \get_the_terms()
+     * @uses \is_wp_error()
+     *
+     * @param string|\Luminous\Bridge\Term\Type $termType
+     * @return \Illuminate\Support\Collection|\Luminous\Bridge\Term\Entity[]
+     */
+    public function terms($type)
+    {
+        $type = $this->wp->termType($type);
+
+        $originals = get_the_terms($this->original->ID, $type->name);
+        $originals = $originals && ! is_wp_error($originals) ? $originals : [];
+
+        $terms = array_map(function ($original) {
+            return $this->wp->term($original);
+        }, $originals);
+
+        return new Collection($terms);
     }
 
     /**

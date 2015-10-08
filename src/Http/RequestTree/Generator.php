@@ -173,7 +173,7 @@ class Generator
     /**
      * Set the current term entity.
      *
-     * @uses \term_url()
+     * @uses \posts_url()
      *
      * @param \Luminous\Bridge\Term\Entity $term
      * @return $this
@@ -183,10 +183,10 @@ class Generator
         $this->term = $term;
 
         foreach ($this->term->ancestors->reverse() as $ancestor) {
-            $this->add($ancestor->name, term_url($ancestor), $ancestor);
+            $this->add($ancestor->name, posts_url($this->postType, ['term' => $ancestor]), $ancestor);
         }
 
-        $this->add($this->term->name, term_url($this->term), $this->term);
+        $this->add($this->term->name, posts_url($this->postType, ['term' => $this->term]), $this->term);
 
         return $this;
     }

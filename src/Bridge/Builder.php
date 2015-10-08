@@ -93,13 +93,17 @@ abstract class Builder
     /**
      * Get a type instance.
      *
-     * @param string $name
+     * @param string|\Luminous\Bridge\Type $name
      * @return \Luminous\Bridge\Type
      *
      * @throws \Luminous\Bridge\Exceptions\EntityTypeNotExistException
      */
     public function getType($name)
     {
+        if ($name instanceof Type) {
+            $name = $name->name;
+        }
+
         if (array_key_exists($name, $this->types)) {
             return $this->types[$name];
         }
