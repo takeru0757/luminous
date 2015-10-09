@@ -4,8 +4,6 @@ namespace Luminous;
 
 use Closure;
 use Exception;
-use ErrorException;
-use RuntimeException;
 use Throwable;
 use FastRoute\Dispatcher;
 use Illuminate\Config\Repository as ConfigRepository;
@@ -16,18 +14,15 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Str;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
-use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\Debug\Exception\FatalErrorException;
-use Symfony\Component\Debug\Exception\FatalThrowableError;
 
 /**
  * Application Class
@@ -71,7 +66,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Create a new Lumen application instance.
      *
-     * @param  string|null  $basePath
+     * @param string|null $basePath
      * @return void
      */
     public function __construct($basePath = null)
@@ -98,6 +93,17 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     }
 
     /**
+     * Set the error handling for the application.
+     *
+     * @return void
+     */
+    protected function registerErrorHandling()
+    {
+        $handler = $this->make('Luminous\Exceptions\Handler');
+        $handler->register();
+    }
+
+    /**
      * Get the version number of the application.
      *
      * @return string
@@ -118,12 +124,24 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Get or check the current application environment.
      *
-     * @param  mixed
-     * @return string
+     * @param array|string,... $patterns
+     * @return string|bool
      */
-    public function environment()
+    public function environment($patterns = null)
     {
-        return env('APP_ENV', 'production');
+        $env = env('APP_ENV', 'production');
+
+        if (func_num_args() > 0) {
+            $patterns = is_array($patterns) ? $patterns : func_get_args();
+            foreach ($patterns as $pattern) {
+                if (Str::is($pattern, $env)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        return $env;
     }
 
     /**
@@ -133,7 +151,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      */
     public function runningInConsole()
     {
-        return php_sapi_name() == 'cli';
+        return php_sapi_name() === 'cli';
     }
 
     /**
@@ -161,7 +179,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Get the base path for the application.
      *
-     * @param  string  $path
+     * @param string $path
      * @return string
      */
     public function basePath($path = null)
@@ -193,7 +211,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Get the storage path for the application.
      *
-     * @param  string  $path
+     * @param string $path
      * @return string
      */
     public function storagePath($path = null)
@@ -204,7 +222,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Get the resource path for the application.
      *
-     * @param  string  $path
+     * @param string $path
      * @return string
      */
     public function resourcePath($path = null)
@@ -217,9 +235,9 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Register a service provider with the application.
      *
-     * @param  \Illuminate\Support\ServiceProvider|string  $provider
-     * @param  array  $options
-     * @param  bool   $force
+     * @param \Illuminate\Support\ServiceProvider|string  $provider
+     * @param array $options
+     * @param bool $force
      * @return \Illuminate\Support\ServiceProvider
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
@@ -242,8 +260,8 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Register a deferred provider and service.
      *
-     * @param  string  $provider
-     * @param  string  $service
+     * @param string $provider
+     * @param string $service
      * @return void
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
@@ -255,8 +273,8 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Resolve the given type from the container.
      *
-     * @param  string  $abstract
-     * @param  array   $parameters
+     * @param string $abstract
+     * @param array $parameters
      * @return mixed
      */
     public function make($abstract, array $parameters = [])
@@ -274,9 +292,9 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Configure and load the given component and provider.
      *
-     * @param  string  $config
-     * @param  array|string  $providers
-     * @param  string|null  $return
+     * @param string $config
+     * @param array|string $providers
+     * @param string|null $return
      * @return mixed
      */
     protected function loadComponent($config, $providers, $return = null)
@@ -313,7 +331,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Get the path to the given configuration file.
      *
-     * @param  string  $name
+     * @param string $name
      * @return string
      */
     protected function getConfigurationPath($name)
@@ -425,7 +443,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      */
     protected function registerExceptionHandlerBindings()
     {
-        $this->singleton('Illuminate\Contracts\Debug\ExceptionHandler', 'Luminous\Exceptions\Handler');
+        $this->singleton('Luminous\Exceptions\Handler');
     }
 
     /**
@@ -621,7 +639,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Add new middleware to the application.
      *
-     * @param  array  $middleware
+     * @param array $middleware
      * @return $this
      */
     public function middleware(array $middleware)
@@ -634,7 +652,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Define the route middleware for the application.
      *
-     * @param  array  $middleware
+     * @param array $middleware
      * @return $this
      */
     public function routeMiddleware(array $middleware)
@@ -642,94 +660,6 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
         $this->routeMiddleware = array_merge($this->routeMiddleware, $middleware);
 
         return $this;
-    }
-
-    // Error Handring ==========================================================
-
-    /**
-     * Set the error handling for the application.
-     *
-     * @return void
-     */
-    protected function registerErrorHandling()
-    {
-        error_reporting(-1);
-
-        set_error_handler(function ($level, $message, $file = '', $line = 0) {
-            if (error_reporting() & $level) {
-                throw new ErrorException($message, 0, $level, $file, $line);
-            }
-        });
-
-        set_exception_handler(function ($e) {
-            $this->handleUncaughtException($e);
-        });
-
-        register_shutdown_function(function () {
-            if (! is_null($error = error_get_last()) && $this->isFatalError($error['type'])) {
-                $e = new FatalErrorException($error['message'], $error['type'], 0, $error['file'], $error['line']);
-                $this->handleUncaughtException($e);
-            }
-        });
-    }
-
-    /**
-     * Determine if the error type is fatal.
-     *
-     * @param  int  $type
-     * @return bool
-     */
-    protected function isFatalError($type)
-    {
-        $errorCodes = [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE];
-
-        if (defined('FATAL_ERROR')) {
-            $errorCodes[] = FATAL_ERROR;
-        }
-
-        return in_array($type, $errorCodes);
-    }
-
-    /**
-     * Send the exception to the handler and return the response.
-     *
-     * @param  \Throwable  $e
-     * @return Response
-     */
-    protected function sendExceptionToHandler($e)
-    {
-        $handler = $this->make('Illuminate\Contracts\Debug\ExceptionHandler');
-
-        if ($e instanceof Error) {
-            $e = new FatalThrowableError($e);
-        }
-
-        $handler->report($e);
-
-        return $handler->render($this->make('request'), $e);
-    }
-
-    /**
-     * Handle an uncaught exception instance.
-     *
-     * @param  \Throwable  $e
-     * @return void
-     */
-    protected function handleUncaughtException($e)
-    {
-        $handler = $this->make('Illuminate\Contracts\Debug\ExceptionHandler');
-
-        if ($e instanceof Error) {
-            $e = new FatalThrowableError($e);
-        }
-
-        $handler->report($e);
-
-        if ($this->runningInConsole()) {
-            $handler->renderForConsole(new ConsoleOutput, $e);
-        } else {
-            $handler->render($this->make('request'), $e)->send();
-        }
     }
 
     // Request Handring ========================================================
@@ -1055,6 +985,25 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
         return $response->prepare($this->make('request'));
     }
 
+    /**
+     * Send the exception to the handler and return the response.
+     *
+     * @param \Throwable $e
+     * @return Response
+     */
+    protected function sendExceptionToHandler($e)
+    {
+        $handler = $this->make('Luminous\Exceptions\Handler');
+
+        if ($e instanceof Error) {
+            $e = new FatalThrowableError($e);
+        }
+
+        $handler->report($e);
+
+        return $handler->render($this->make('request'), $e);
+    }
+
     // Others ==================================================================
 
     /**
@@ -1177,7 +1126,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
         'events' => 'registerEventBindings',
         'Illuminate\Contracts\Events\Dispatcher' => 'registerEventBindings',
         'Illuminate\Contracts\Encryption\Encrypter' => 'registerEncrypterBindings',
-        'Illuminate\Contracts\Debug\ExceptionHandler' => 'registerExceptionHandlerBindings',
+        'Luminous\Exceptions\Handler' => 'registerExceptionHandlerBindings',
         'files' => 'registerFilesBindings',
         'filesystem' => 'registerFilesBindings',
         'Illuminate\Contracts\Filesystem\Factory' => 'registerFilesBindings',
