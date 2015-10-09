@@ -5,6 +5,7 @@ namespace Luminous\Bridge\Term;
 use InvalidArgumentException;
 use Luminous\Bridge\Exceptions\MissingEntityException;
 use Luminous\Bridge\Builder as BaseBuilder;
+use Luminous\Bridge\Term\Query\Builder as QueryBuilder;
 
 /**
  * @method \Luminous\Bridge\Term\Entity get(int|string|\stdClass $id, string $type = null)
@@ -91,5 +92,15 @@ class Builder extends BaseBuilder
     protected function makeType($original)
     {
         return new Type($this->container['wp'], $original);
+    }
+
+    /**
+     * Create a new query instance.
+     *
+     * @return \Luminous\Bridge\Term\Query\Builder
+     */
+    public function query()
+    {
+        return new QueryBuilder($this);
     }
 }

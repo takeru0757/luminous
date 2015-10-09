@@ -8,4 +8,15 @@
     {!! $post->content !!}
 </article>
 
+@if (($_children = $post->children->get()) && !$_children->isEmpty())
+<nav class="m-b-lg">
+    <h1 class="h3">Child Pages</h1>
+    <ul class="nav">
+        @foreach ($_children as $_child)
+        <li class="nav-item"><a class="nav-link" href="{{ post_url($_child) }}">{{ $_child->title }}</a></li>
+        @endforeach
+    </ul>
+</nav>
+@endif
+
 @endsection

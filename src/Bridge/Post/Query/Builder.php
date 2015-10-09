@@ -23,21 +23,14 @@ class Builder extends QueryBuilder
     use TermParameter;
 
     /**
-     * The post builder instance.
+     * Create a new post query builder instance.
      *
-     * @var \Luminous\Bridge\Post\Builder
-     */
-    protected $postBuilder;
-
-    /**
-     * Create a new post query instance.
-     *
-     * @param \Luminous\Bridge\Post\Builder $builder
+     * @param \Luminous\Bridge\Post\Builder $entityBuilder
      * @return void
      */
-    public function __construct(PostBuilder $postBuilder)
+    public function __construct(PostBuilder $entityBuilder)
     {
-        $this->postBuilder = $postBuilder;
+        parent::__construct($entityBuilder);
     }
 
     /**
@@ -112,7 +105,7 @@ class Builder extends QueryBuilder
         remove_filter('posts_fields', $fieldsFilter);
 
         return new Collection(array_map(function ($object) use ($type) {
-            $date = Carbon::createFromFormat('Y-m-d', $object->_date, $this->postBuilder->timezone());
+            $date = Carbon::createFromFormat('Y-m-d', $object->_date, $this->entityBuilder->timezone());
             return new Archive($type, $date->startOfDay(), (int) $object->_count);
         }, $query->posts));
     }
@@ -125,7 +118,7 @@ class Builder extends QueryBuilder
      */
     protected function retrievePosts(WP_Query $query)
     {
-        return $this->postBuilder->makeMany($query->posts);
+        return $this->entityBuilder->makeMany($query->posts);
     }
 
     /**

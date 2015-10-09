@@ -461,17 +461,17 @@ if (! function_exists('posts_url')) {
     /**
      * Generate a URL to posts.
      *
-     * @uses \route()
+     * @uses \url()
      *
-     * @param \Luminous\Bridge\Post\Type $postType
+     * @param string|\Luminous\Bridge\Post\Type $type
      * @param array $parameters
      * @param bool|string $full
      * @param null|bool $secure
      * @return string
      */
-    function posts_url(Luminous\Bridge\Post\Type $postType, array $parameters = [], $full = false, $secure = null)
+    function posts_url($type, array $parameters = [], $full = false, $secure = null)
     {
-        $parameters['post_type'] = $postType;
+        $parameters['post_type'] = $type;
         return url($parameters, $full, $secure);
     }
 }
@@ -480,7 +480,7 @@ if (! function_exists('post_url')) {
     /**
      * Generate a URL to the post.
      *
-     * @uses \route()
+     * @uses \url()
      *
      * @param \Luminous\Bridge\Post\Entity $post
      * @param array $parameters

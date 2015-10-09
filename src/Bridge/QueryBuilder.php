@@ -5,6 +5,13 @@ namespace Luminous\Bridge;
 abstract class QueryBuilder
 {
     /**
+     * The entity builder instance.
+     *
+     * @var \Luminous\Bridge\Builder
+     */
+    protected $entityBuilder;
+    
+    /**
      * The maximum number of records to return.
      *
      * @var int|null
@@ -17,6 +24,17 @@ abstract class QueryBuilder
      * @var int
      */
     public $offset = 0;
+
+    /**
+     * Create a new query builder instance.
+     *
+     * @param \Luminous\Bridge\Builder $entityBuilder
+     * @return void
+     */
+    public function __construct(Builder $entityBuilder)
+    {
+        $this->entityBuilder = $entityBuilder;
+    }
 
     /**
      * Set the "offset" value of the query.
