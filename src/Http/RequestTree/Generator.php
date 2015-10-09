@@ -4,9 +4,9 @@ namespace Luminous\Http\RequestTree;
 
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Luminous\Bridge\Post\Type as PostType;
 use Luminous\Bridge\Post\Archive;
 use Luminous\Bridge\Post\Entity as PostEntity;
+use Luminous\Bridge\Post\Type as PostType;
 use Luminous\Bridge\Term\Entity as TermEntity;
 
 class Generator
@@ -105,9 +105,6 @@ class Generator
     /**
      * Set the current post type.
      *
-     * @uses \trans()
-     * @uses \posts_url()
-     *
      * @param \Luminous\Bridge\Post\Type $postType
      * @return $this
      */
@@ -125,9 +122,6 @@ class Generator
 
     /**
      * Set the current date.
-     *
-     * @uses \trans()
-     * @uses \posts_url()
      *
      * @param array $date
      * @return $this
@@ -157,8 +151,6 @@ class Generator
     /**
      * Create a new DateTime from array.
      *
-     * @uses \app()
-     *
      * @param array $date
      * @return \Carbon\Carbon
      */
@@ -172,8 +164,6 @@ class Generator
 
     /**
      * Set the current term entity.
-     *
-     * @uses \posts_url()
      *
      * @param \Luminous\Bridge\Term\Entity $term
      * @return $this
@@ -194,8 +184,6 @@ class Generator
     /**
      * Set the current post entity.
      *
-     * @uses \post_url()
-     *
      * @param \Luminous\Bridge\Post\Entity $post
      * @return $this
      */
@@ -214,8 +202,6 @@ class Generator
 
     /**
      * Get the tree.
-     *
-     * @uses \trans()
      *
      * @return \Illuminate\Support\Collection|Luminous\Http\RequestTree\Node[]
      */

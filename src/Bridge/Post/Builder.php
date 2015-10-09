@@ -2,8 +2,8 @@
 
 namespace Luminous\Bridge\Post;
 
-use Luminous\Bridge\Exceptions\MissingEntityException;
 use Luminous\Bridge\Builder as BaseBuilder;
+use Luminous\Bridge\Exceptions\MissingEntityException;
 use Luminous\Bridge\Post\Query\Builder as QueryBuilder;
 
 /**

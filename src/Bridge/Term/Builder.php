@@ -3,8 +3,8 @@
 namespace Luminous\Bridge\Term;
 
 use InvalidArgumentException;
-use Luminous\Bridge\Exceptions\MissingEntityException;
 use Luminous\Bridge\Builder as BaseBuilder;
+use Luminous\Bridge\Exceptions\MissingEntityException;
 use Luminous\Bridge\Term\Query\Builder as QueryBuilder;
 
 /**

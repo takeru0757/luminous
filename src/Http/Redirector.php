@@ -2,22 +2,31 @@
 
 namespace Luminous\Http;
 
-use Luminous\Application;
 use Illuminate\Http\RedirectResponse;
+use Luminous\Application;
 
+/**
+ * Redirector Class
+ *
+ * This class is based on Laravel Lumen:
+ *
+ * - Copyright (c) Taylor Otwell
+ * - Licensed under the MIT license
+ * - {@link https://github.com/laravel/lumen-framework/blob/5.1/src/Http/Redirector.php}
+ */
 class Redirector
 {
     /**
      * The application instance.
      *
-     * @var Application
+     * @var \Luminous\Application
      */
     protected $app;
 
     /**
      * Create a new redirector instance.
      *
-     * @param  Application  $app
+     * @param \Luminous\Application $app
      * @return void
      */
     public function __construct(Application $app)
@@ -28,10 +37,10 @@ class Redirector
     /**
      * Create a new redirect response to the given path.
      *
-     * @param  string  $path
-     * @param  int     $status
-     * @param  array   $headers
-     * @param  bool    $secure
+     * @param string $path
+     * @param int $status
+     * @param array $headers
+     * @param bool $secure
      * @return \Illuminate\Http\RedirectResponse
      */
     public function to($path, $status = 302, $headers = [], $secure = null)
@@ -44,10 +53,10 @@ class Redirector
     /**
      * Create a new redirect response to a named route.
      *
-     * @param  string  $route
-     * @param  array   $parameters
-     * @param  int     $status
-     * @param  array   $headers
+     * @param string $route
+     * @param array $parameters
+     * @param int $status
+     * @param array $headers
      * @return \Illuminate\Http\RedirectResponse
      */
     public function route($route, $parameters = [], $status = 302, $headers = [])
@@ -60,8 +69,8 @@ class Redirector
     /**
      * Create a new redirect response to the previous location.
      *
-     * @param  int    $status
-     * @param  array  $headers
+     * @param int $status
+     * @param array $headers
      * @return \Illuminate\Http\RedirectResponse
      */
     public function back($status = 302, $headers = [])
@@ -78,9 +87,9 @@ class Redirector
     /**
      * Create a new redirect response.
      *
-     * @param  string  $path
-     * @param  int     $status
-     * @param  array   $headers
+     * @param string $path
+     * @param int $status
+     * @param array $headers
      * @return \Illuminate\Http\RedirectResponse
      */
     protected function createRedirect($path, $status, $headers)

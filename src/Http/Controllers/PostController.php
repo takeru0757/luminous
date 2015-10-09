@@ -3,19 +3,15 @@
 namespace Luminous\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Luminous\Routing\Controller as BaseController;
 use Luminous\Bridge\Post\Type;
 use Luminous\Bridge\Post\Entity;
 use Luminous\Http\RequestTree\Generator as Tree;
+use Luminous\Routing\Controller as BaseController;
 
 class PostController extends BaseController
 {
     /**
      * Handle requests to posts.
-     *
-     * @uses \app()
-     * @uses \abort()
-     * @uses \view()
      *
      * @param \Illuminate\Http\Request $request
      * @param array $query
@@ -76,10 +72,6 @@ class PostController extends BaseController
 
     /**
      * Handle requests to the post.
-     *
-     * @uses \app()
-     * @uses \abort()
-     * @uses \view()
      *
      * @param \Illuminate\Http\Request $request
      * @param array $query
@@ -145,8 +137,6 @@ class PostController extends BaseController
 
     /**
      * Determine the template name.
-     *
-     * @uses \view()
      *
      * @param \Luminous\Bridge\Post\Type $postType
      * @param \Luminous\Bridge\Post\Entity $post

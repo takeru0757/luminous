@@ -2,21 +2,30 @@
 
 namespace Luminous\Http;
 
-use Illuminate\Support\Str;
+use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Contracts\Support\Arrayable;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
+/**
+ * ResponseFactory Class
+ *
+ * This class is based on Laravel Lumen:
+ *
+ * - Copyright (c) Taylor Otwell
+ * - Licensed under the MIT license
+ * - {@link https://github.com/laravel/lumen-framework/blob/5.1/src/Http/ResponseFactory.php}
+ */
 class ResponseFactory
 {
     /**
      * Return a new response from the application.
      *
-     * @param  string  $content
-     * @param  int     $status
-     * @param  array   $headers
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param string $content
+     * @param int $status
+     * @param array $headers
+     * @return \Illuminate\Http\Response
      */
     public function make($content = '', $status = 200, array $headers = [])
     {
@@ -26,11 +35,11 @@ class ResponseFactory
     /**
      * Return a new JSON response from the application.
      *
-     * @param  string|array  $data
-     * @param  int    $status
-     * @param  array  $headers
-     * @param  int    $options
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param string|array $data
+     * @param int $status
+     * @param array $headers
+     * @param int $options
+     * @return \Illuminate\Http\JsonResponse
      */
     public function json($data = [], $status = 200, array $headers = [], $options = 0)
     {
@@ -44,10 +53,10 @@ class ResponseFactory
     /**
      * Create a new file download response.
      *
-     * @param  \SplFileInfo|string  $file
-     * @param  string  $name
-     * @param  array   $headers
-     * @param  null|string  $disposition
+     * @param \SplFileInfo|string $file
+     * @param string $name
+     * @param array $headers
+     * @param null|string $disposition
      * @return \Symfony\Component\HttpFoundation\BinaryFileResponse
      */
     public function download($file, $name = null, array $headers = [], $disposition = 'attachment')

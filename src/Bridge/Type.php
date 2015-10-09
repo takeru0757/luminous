@@ -2,8 +2,8 @@
 
 namespace Luminous\Bridge;
 
-use stdClass;
 use ArrayAccess;
+use stdClass;
 
 abstract class Type implements ArrayAccess, UrlResource
 {

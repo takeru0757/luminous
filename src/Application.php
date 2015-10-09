@@ -30,12 +30,13 @@ use Symfony\Component\Debug\Exception\FatalErrorException;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
 
 /**
- * Application class
+ * Application Class
  *
- * This class is based on Laravel Lumen Application class.
- * (c) Taylor Otwell, licensed under the MIT license.
- * @link https://github.com/laravel/lumen-framework/blob/5.1/composer.json
+ * This class is based on Laravel Lumen:
  *
+ * - Copyright (c) Taylor Otwell
+ * - Licensed under the MIT license
+ * - {@link https://github.com/laravel/lumen-framework/blob/5.1/src/Application.php}
  */
 class Application extends Container implements ApplicationContract, HttpKernelInterface
 {

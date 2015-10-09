@@ -4,18 +4,27 @@ namespace Luminous\Routing;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Validation\Validator;
 use Illuminate\Http\Exception\HttpResponseException;
+use Illuminate\Validation\Validator;
 
+/**
+ * ValidatesRequests Trait
+ *
+ * This trait is based on Laravel Lumen:
+ *
+ * - Copyright (c) Taylor Otwell
+ * - Licensed under the MIT license
+ * - {@link https://github.com/laravel/lumen-framework/blob/5.1/src/Routing/ValidatesRequests.php}
+ */
 trait ValidatesRequests
 {
     /**
      * Validate the given request with the given rules.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  array  $rules
-     * @param  array  $messages
-     * @param  array  $customAttributes
+     * @param \Illuminate\Http\Request $request
+     * @param array $rules
+     * @param array $messages
+     * @param array $customAttributes
      * @return void
      */
     public function validate(Request $request, array $rules, array $messages = [], array $customAttributes = [])
@@ -30,22 +39,23 @@ trait ValidatesRequests
     /**
      * Throw the failed validation exception.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Illuminate\Contracts\Validation\Validator  $validator
+     * @param \Illuminate\Http\Request $request
+     * @param \Illuminate\Contracts\Validation\Validator $validator
      * @return void
+     *
+     * @throws \Illuminate\Http\Exception\HttpResponseException
      */
     protected function throwValidationException(Request $request, $validator)
     {
-        throw new HttpResponseException($this->buildFailedValidationResponse(
-            $request, $this->formatValidationErrors($validator)
-        ));
+        $response = $this->buildFailedValidationResponse($request, $this->formatValidationErrors($validator));
+        throw new HttpResponseException($response);
     }
 
     /**
      * Create the response for when a request fails validation.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  array  $errors
+     * @param \Illuminate\Http\Request $request
+     * @param array $errors
      * @return \Illuminate\Http\Response
      */
     protected function buildFailedValidationResponse(Request $request, array $errors)
@@ -62,7 +72,7 @@ trait ValidatesRequests
     /**
      * Format the validation errors to be returned.
      *
-     * @param  \Illuminate\Validation\Validator  $validator
+     * @param \Illuminate\Validation\Validator $validator
      * @return array
      */
     protected function formatValidationErrors(Validator $validator)

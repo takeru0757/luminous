@@ -12,8 +12,6 @@ class RootController extends BaseController
     /**
      * Handle requests for home (and shortlinks).
      *
-     * @uses \view()
-     *
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
@@ -30,10 +28,6 @@ class RootController extends BaseController
      * Handle requests for shortlinks.
      *
      * @link https://developer.wordpress.org/reference/functions/wp_get_shortlink/
-     *
-     * @uses \app()
-     * @uses \abort()
-     * @uses \post_url()
      *
      * @param int $id
      * @return \Illuminate\Http\RedirectResponse
@@ -54,9 +48,6 @@ class RootController extends BaseController
     /**
      * Handle requests for '/robots.txt'.
      *
-     * @uses \app()
-     * @uses \view()
-     *
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
@@ -69,10 +60,6 @@ class RootController extends BaseController
 
     /**
      * Handle requests for '/sitemap.xml'.
-     *
-     * @uses \app()
-     * @uses \abort()
-     * @uses \view()
      *
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response

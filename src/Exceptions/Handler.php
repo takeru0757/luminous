@@ -8,6 +8,15 @@ use Symfony\Component\Console\Application as ConsoleApplication;
 use Symfony\Component\Debug\ExceptionHandler as SymfonyExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
+/**
+ * Exception Handler Class
+ *
+ * This class is based on Laravel Lumen:
+ *
+ * - Copyright (c) Taylor Otwell
+ * - Licensed under the MIT license
+ * - {@link https://github.com/laravel/lumen-framework/blob/5.1/src/Exceptions/Handler.php}
+ */
 class Handler implements ExceptionHandler
 {
     /**
@@ -21,8 +30,6 @@ class Handler implements ExceptionHandler
 
     /**
      * Report or log an exception.
-     *
-     * @uses \app()
      *
      * @param \Exception $e
      * @return void
@@ -67,8 +74,6 @@ class Handler implements ExceptionHandler
     /**
      * Render an exception into a response.
      *
-     * @uses \env()
-     *
      * @param \Illuminate\Http\Request $request
      * @param \Exception $e
      * @return \Illuminate\Http\Response
@@ -100,10 +105,7 @@ class Handler implements ExceptionHandler
     /**
      * Get the error view if exists.
      *
-     * @uses \view()
-     * @uses \env()
-     *
-     * @param Exception $e
+     * @param \Exception $e
      * @return \Illuminate\View\View
      */
     protected function getErrorView(Exception $e)

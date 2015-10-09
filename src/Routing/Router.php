@@ -14,6 +14,8 @@ use Luminous\Bridge\UrlResource;
 use Luminous\Support\Url;
 
 /**
+ * Router Class
+ *
  * @method void get(string $uri, mixed $action) Add a route to the collection via GET method.
  * @method void head(string $uri, mixed $action) Add a route to the collection via HEAD method.
  * @method void post(string $uri, mixed $action) Add a route to the collection via POST method.
@@ -148,6 +150,7 @@ class Router
      * Register a set of routes with a set of shared attributes.
      *
      * The attributes array accepts:
+     *
      * - prefix: (string) The value is combined with current value.
      * - namespace: (string) The value REPLACEs with current value.
      * - query: (array) The value is merged with current value.
@@ -198,6 +201,7 @@ class Router
      * Get the URL.
      *
      * The options array accepts:
+     *
      * - scheme: (string)
      * - host: (string)
      * - port: (int)

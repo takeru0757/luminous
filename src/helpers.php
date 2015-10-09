@@ -11,6 +11,10 @@ if (! function_exists('app')) {
     /**
      * Get the available container instance.
      *
+     * @copyright Copyright (c) Taylor Otwell
+     * @license http://opensource.org/licenses/MIT MIT license
+     * @link https://github.com/laravel/lumen-framework/blob/5.1/src/helpers.php
+     *
      * @param string $make
      * @param array $parameters
      * @return mixed|\Luminous\Application
@@ -28,6 +32,10 @@ if (! function_exists('app')) {
 if (! function_exists('base_path')) {
     /**
      * Get the path to the base of the install.
+     *
+     * @copyright Copyright (c) Taylor Otwell
+     * @license http://opensource.org/licenses/MIT MIT license
+     * @link https://github.com/laravel/lumen-framework/blob/5.1/src/helpers.php
      *
      * @uses \app()
      *
@@ -59,6 +67,10 @@ if (! function_exists('storage_path')) {
     /**
      * Get the path to the storage folder.
      *
+     * @copyright Copyright (c) Taylor Otwell
+     * @license http://opensource.org/licenses/MIT MIT license
+     * @link https://github.com/laravel/lumen-framework/blob/5.1/src/helpers.php
+     *
      * @uses \app()
      *
      * @param string $path
@@ -77,8 +89,8 @@ if (! function_exists('is_wp')) {
      * Determine if the request should be handled by WordPress.
      *
      * @uses $pagenow
-     * @uses \WP_INSTALLING
      * @uses \is_admin()
+     * @uses \WP_INSTALLING
      *
      * @return bool
      */
@@ -98,7 +110,7 @@ if (! function_exists('is_wp')) {
             'xmlrpc.php',
         ];
 
-        return defined('WP_INSTALLING') || in_array($pagenow, $scripts) || is_admin();
+        return is_admin() || in_array($pagenow, $scripts) || (defined('WP_INSTALLING') && WP_INSTALLING);
     }
 }
 
@@ -107,6 +119,10 @@ if (! function_exists('config')) {
      * Get / set the specified configuration value.
      *
      * If an array is passed as the key, we will assume you want to set an array of values.
+     *
+     * @copyright Copyright (c) Taylor Otwell
+     * @license http://opensource.org/licenses/MIT MIT license
+     * @link https://github.com/laravel/lumen-framework/blob/5.1/src/helpers.php
      *
      * @uses \app()
      *
@@ -131,6 +147,10 @@ if (! function_exists('config')) {
 if (! function_exists('env')) {
     /**
      * Gets the value of an environment variable. Supports boolean, empty and null.
+     *
+     * @copyright Copyright (c) Taylor Otwell
+     * @license http://opensource.org/licenses/MIT MIT license
+     * @link https://github.com/laravel/lumen-framework/blob/5.1/src/helpers.php
      *
      * @uses \value()
      *
@@ -176,6 +196,10 @@ if (! function_exists('info')) {
     /**
      * Write some information to the log.
      *
+     * @copyright Copyright (c) Taylor Otwell
+     * @license http://opensource.org/licenses/MIT MIT license
+     * @link https://github.com/laravel/lumen-framework/blob/5.1/src/helpers.php
+     *
      * @uses \app()
      *
      * @param string $message
@@ -191,6 +215,10 @@ if (! function_exists('info')) {
 if (! function_exists('trans')) {
     /**
      * Translate the given message.
+     *
+     * @copyright Copyright (c) Taylor Otwell
+     * @license http://opensource.org/licenses/MIT MIT license
+     * @link https://github.com/laravel/lumen-framework/blob/5.1/src/helpers.php
      *
      * @uses \app()
      *
@@ -214,6 +242,10 @@ if (! function_exists('trans_choice')) {
     /**
      * Translates the given message based on a count.
      *
+     * @copyright Copyright (c) Taylor Otwell
+     * @license http://opensource.org/licenses/MIT MIT license
+     * @link https://github.com/laravel/lumen-framework/blob/5.1/src/helpers.php
+     *
      * @uses \app()
      *
      * @param string $id
@@ -232,6 +264,10 @@ if (! function_exists('trans_choice')) {
 if (! function_exists('view')) {
     /**
      * Get the evaluated view contents for the given view.
+     *
+     * @copyright Copyright (c) Taylor Otwell
+     * @license http://opensource.org/licenses/MIT MIT license
+     * @link https://github.com/laravel/lumen-framework/blob/5.1/src/helpers.php
      *
      * @uses \app()
      *
@@ -252,11 +288,15 @@ if (! function_exists('view')) {
     }
 }
 
-// HTTP ========================================================================
+// HTTP Helpers ================================================================
 
 if (! function_exists('abort')) {
     /**
      * Throw an HttpException with the given data.
+     *
+     * @copyright Copyright (c) Taylor Otwell
+     * @license http://opensource.org/licenses/MIT MIT license
+     * @link https://github.com/laravel/lumen-framework/blob/5.1/src/helpers.php
      *
      * @uses \app()
      *
@@ -329,6 +369,10 @@ if (! function_exists('cookie')) {
     /**
      * Create a new cookie instance.
      *
+     * @copyright Copyright (c) Taylor Otwell
+     * @license http://opensource.org/licenses/MIT MIT license
+     * @link https://github.com/laravel/lumen-framework/blob/5.1/src/helpers.php
+     *
      * @uses \app()
      *
      * @param string $name
@@ -365,6 +409,10 @@ if (! function_exists('session')) {
      *
      * If an array is passed as the key, we will assume you want to set an array of values.
      *
+     * @copyright Copyright (c) Taylor Otwell
+     * @license http://opensource.org/licenses/MIT MIT license
+     * @link https://github.com/laravel/lumen-framework/blob/5.1/src/helpers.php
+     *
      * @uses \app()
      *
      * @param array|string $key
@@ -388,9 +436,13 @@ if (! function_exists('csrf_token')) {
     /**
      * Get the CSRF token value.
      *
-     * @return string
+     * @copyright Copyright (c) Taylor Otwell
+     * @license http://opensource.org/licenses/MIT MIT license
+     * @link https://github.com/laravel/lumen-framework/blob/5.1/src/helpers.php
      *
      * @uses \app()
+     *
+     * @return string
      *
      * @throws RuntimeException
      */
@@ -407,6 +459,10 @@ if (! function_exists('csrf_token')) {
 if (! function_exists('old')) {
     /**
      * Retrieve an old input item.
+     *
+     * @copyright Copyright (c) Taylor Otwell
+     * @license http://opensource.org/licenses/MIT MIT license
+     * @link https://github.com/laravel/lumen-framework/blob/5.1/src/helpers.php
      *
      * @uses \app()
      *

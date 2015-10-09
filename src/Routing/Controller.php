@@ -2,9 +2,18 @@
 
 namespace Luminous\Routing;
 
-use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Request;
 
+/**
+ * Abstract Controller Class
+ *
+ * This class is based on Laravel Lumen:
+ *
+ * - Copyright (c) Taylor Otwell
+ * - Licensed under the MIT license
+ * - {@link https://github.com/laravel/lumen-framework/blob/5.1/src/Routing/Controller.php}
+ */
 abstract class Controller
 {
     use DispatchesJobs, ValidatesRequests;
@@ -19,8 +28,8 @@ abstract class Controller
     /**
      * Define a middleware on the controller.
      *
-     * @param  string  $middleware
-     * @param  array  $options
+     * @param string $middleware
+     * @param array $options
      * @return void
      */
     public function middleware($middleware, array $options = [])
@@ -31,8 +40,8 @@ abstract class Controller
     /**
      * Get the middleware for a given method.
      *
-     * @param  Request  $request
-     * @param  string  $method
+     * @param \Illuminate\Http\Request $request
+     * @param string $method
      * @return array
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
@@ -62,8 +71,6 @@ abstract class Controller
      * - Set `Etag` header and set 304 status code if not modified.
      * - Fix `Content-Type` header (add the charset) and protocol version.
      *
-     * @uses \response()
-     *
      * @param \Illuminate\Http\Request $request
      * @param \Illuminate\Contracts\View\View $view
      * @param array $headers
@@ -87,8 +94,6 @@ abstract class Controller
 
     /**
      * Get the `max-age`.
-     *
-     * @uses \env()
      *
      * @return int Returns `600` (`0` when debug).
      */

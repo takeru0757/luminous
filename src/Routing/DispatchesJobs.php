@@ -4,6 +4,15 @@ namespace Luminous\Routing;
 
 use ArrayAccess;
 
+/**
+ * DispatchesJobs Trait
+ *
+ * This trait is based on Laravel Lumen:
+ *
+ * - Copyright (c) Taylor Otwell
+ * - Licensed under the MIT license
+ * - {@link https://github.com/laravel/lumen-framework/blob/5.1/src/Routing/DispatchesJobs.php}
+ */
 trait DispatchesJobs
 {
     /**

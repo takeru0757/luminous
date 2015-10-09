@@ -28,12 +28,12 @@ class Url
     /**
      * Join paths.
      *
-     * @param string ...$paths
+     * @param array|string,... $paths
      * @return string
      */
-    public static function join()
+    public static function join($paths)
     {
-        $paths = func_get_args();
+        $paths = is_array($paths) ? $paths : func_get_args();
 
         $paths = array_map(function ($path) {
             return trim($path, '/');

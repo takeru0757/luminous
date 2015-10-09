@@ -6,6 +6,15 @@ use Closure as BaseClosure;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Validator;
 
+/**
+ * Closure Class
+ *
+ * This class is based on Laravel Lumen:
+ *
+ * - Copyright (c) Taylor Otwell
+ * - Licensed under the MIT license
+ * - {@link https://github.com/laravel/lumen-framework/blob/5.1/src/Routing/Closure.php}
+ */
 class Closure
 {
     use DispatchesJobs, ValidatesRequests {
@@ -30,7 +39,7 @@ class Closure
     /**
      * Set the response builder callback.
      *
-     * @param  \Closure  $callback
+     * @param \Closure $callback
      * @return void
      */
     public static function buildResponseUsing(BaseClosure $callback)
@@ -41,7 +50,7 @@ class Closure
     /**
      * Set the error formatter callback.
      *
-     * @param  \Closure  $callback
+     * @param \Closure $callback
      * @return void
      */
     public static function formatErrorsUsing(BaseClosure $callback)

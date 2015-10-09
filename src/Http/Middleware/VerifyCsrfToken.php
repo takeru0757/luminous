@@ -3,11 +3,20 @@
 namespace Luminous\Http\Middleware;
 
 use Closure;
-use Symfony\Component\HttpFoundation\Cookie;
 use Illuminate\Contracts\Encryption\Encrypter;
 use Illuminate\Session\TokenMismatchException;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\Security\Core\Util\StringUtils;
 
+/**
+ * VerifyCsrfToken Class
+ *
+ * This class is based on Laravel Lumen:
+ *
+ * - Copyright (c) Taylor Otwell
+ * - Licensed under the MIT license
+ * - {@link https://github.com/laravel/lumen-framework/blob/5.1/src/Http/Middleware/VerifyCsrfToken.php}
+ */
 class VerifyCsrfToken
 {
     /**
@@ -20,7 +29,7 @@ class VerifyCsrfToken
     /**
      * Create a new middleware instance.
      *
-     * @param  \Illuminate\Contracts\Encryption\Encrypter  $encrypter
+     * @param \Illuminate\Contracts\Encryption\Encrypter $encrypter
      * @return void
      */
     public function __construct(Encrypter $encrypter)
@@ -31,8 +40,8 @@ class VerifyCsrfToken
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param \Illuminate\Http\Request $request
+     * @param \Closure  $next
      * @return mixed
      *
      * @throws \Illuminate\Session\TokenMismatchException
@@ -49,7 +58,7 @@ class VerifyCsrfToken
     /**
      * Determine if the session and input CSRF tokens match.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return bool
      */
     protected function tokensMatch($request)
@@ -66,8 +75,8 @@ class VerifyCsrfToken
     /**
      * Add the CSRF token to the response cookies.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Illuminate\Http\Response  $response
+     * @param \Illuminate\Http\Request $request
+     * @param \Illuminate\Http\Response $response
      * @return \Illuminate\Http\Response
      */
     protected function addCookieToResponse($request, $response)
@@ -82,7 +91,7 @@ class VerifyCsrfToken
     /**
      * Determine if the HTTP request uses a ‘read’ verb.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return bool
      */
     protected function isReading($request)
