@@ -469,13 +469,17 @@ if (! function_exists('post_url')) {
      *
      * @uses \url()
      *
-     * @param \Luminous\Bridge\Post\Entity $post
+     * @param \Luminous\Bridge\Post\Entity|int|string $post
      * @param array|bool $options
      * @param bool $full
      * @return string
      */
-    function post_url(Luminous\Bridge\Post\Entity $post, $options = [], $full = false)
+    function post_url($post, $options = [], $full = false)
     {
+        if (!($post instanceof Luminous\Bridge\Post\Entity)) {
+            $post = app('wp')->post($post, isset($options['post_type']) ? $options['post_type'] : null);
+        }
+
         if (is_bool($options)) {
             list($options, $full) = [[], $options];
         }

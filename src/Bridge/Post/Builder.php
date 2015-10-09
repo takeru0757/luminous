@@ -16,12 +16,19 @@ class Builder extends BaseBuilder
      * Get an original object.
      *
      * @uses \get_post()
+     * @uses \get_page_by_path()
+     * @uses \OBJECT
      *
-     * @param int|\WP_Post $id
+     * @param int|string|\WP_Post $id
+     * @param string $type
      * @return \WP_Post|null
      */
-    protected function getOriginal($id)
+    protected function getOriginal($id, $type = null)
     {
+        if (is_string($id)) {
+            return get_page_by_path($id, \OBJECT, $type ?: 'page');
+        }
+
         // WordPress uses global $post when $id is null.
         return $id && ($original = get_post($id)) ? $original : null;
     }
