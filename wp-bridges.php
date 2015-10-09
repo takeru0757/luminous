@@ -48,8 +48,9 @@ add_filter('post_link', function ($permalink, $post, $leavename) {
         return $permalink;
     }
     $placeholder = $leavename ? '%postname%' : null;
-    $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
-    return post_url(app('wp')->post($post), $parameters, home_url());
+    $options = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
+    $options['host'] = home_url('/');
+    return post_url(app('wp')->post($post), $options, true);
 }, 10, 3);
 
 // @link https://developer.wordpress.org/reference/functions/_get_page_link/
@@ -58,8 +59,9 @@ add_filter('_get_page_link', function ($permalink, $postId) {
         return $permalink;
     }
     $placeholder = strpos($permalink, '%pagename%') !== false ? '%pagename%' : null;
-    $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
-    return post_url(app('wp')->post($postId), $parameters, home_url());
+    $options = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
+    $options['host'] = home_url('/');
+    return post_url(app('wp')->post($postId), $options, true);
 }, 10, 2);
 
 // @link https://developer.wordpress.org/reference/functions/get_post_permalink/
@@ -68,14 +70,16 @@ add_filter('post_type_link', function ($permalink, $post, $leavename) {
         return $permalink;
     }
     $placeholder = $leavename ? "%{$post->post_type}%" : null;
-    $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
-    return post_url(app('wp')->post($post), $parameters, home_url());
+    $options = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
+    $options['host'] = home_url('/');
+    return post_url(app('wp')->post($post), $options, true);
 }, 10, 3);
 
 // @link https://developer.wordpress.org/reference/functions/get_term_link/
 add_filter('term_link', function ($termlink, $term, $taxonomy) {
     $term = app('wp')->term($term, $taxonomy);
-    return posts_url($term->type->post_type, compact('term'), home_url());
+    $options = $term->forUrl() + ['host' => home_url('/')];
+    return posts_url($term->type->post_type, $options, true);
 }, 10, 3);
 
 // -----------------------------------------------------------------------------

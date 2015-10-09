@@ -22,7 +22,7 @@
                 $_formatter = function ($term) use (&$_formatter) {
                     ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ posts_url('post', ['term' => $term]) }}"><span class="fa fa-folder"></span> {{ $term->name }} ({{ $term->count }})</a>
+                        <a class="nav-link" href="{{ posts_url('post', $term) }}"><span class="fa fa-folder"></span> {{ $term->name }} ({{ $term->count }})</a>
                         @if (($children = $term->children->get()) && !$children->isEmpty())
                         <ul class="nav p-l">
                             @foreach ($children as $child)
@@ -44,7 +44,7 @@
             <h1 class="h4">Tags</h1>
             <ul class="nav">
                 @foreach ($wp->terms('post_tag')->get() as $_term)
-                <li class="nav-item"><a class="nav-link" href="{{ posts_url('post', ['term' => $_term]) }}"><span class="fa fa-tag"></span> {{ $_term->name }} ({{ $_term->count }})</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ posts_url('post', $_term) }}"><span class="fa fa-tag"></span> {{ $_term->name }} ({{ $_term->count }})</a></li>
                 @endforeach
             </ul>
         </nav>
@@ -53,7 +53,7 @@
             <select class="c-select" style="width:100%" onchange="if (this.value) location.href=this.value;">
                 <option value="">Select an Archive</option>
                 @foreach ($wp->posts('post')->archives('monthly') as $_archive)
-                <option value="{{ posts_url('post', ['archive' => $_archive]) }}">{{ $_archive->format(trans("labels.archive.{$_archive->type}"))." ({$_archive->count})" }}</option>
+                <option value="{{ posts_url('post', $_archive) }}">{{ $_archive->format(trans("labels.archive.{$_archive->type}"))." ({$_archive->count})" }}</option>
                 @endforeach
             </select>
         </nav>

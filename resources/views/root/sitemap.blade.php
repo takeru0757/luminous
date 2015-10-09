@@ -13,7 +13,7 @@
     @if ($_type->hasArchive() && $_latest = $_posts->first())
 
     <url>
-        <loc>{{ posts_url($_type, [], true) }}</loc>
+        <loc>{{ posts_url($_type, true) }}</loc>
         <lastmod>{{ $_latest->modified_at->max($appModified)->toW3cString() }}</lastmod>
         <priority>0.8</priority>
         <changefreq>weekly</changefreq>
@@ -23,7 +23,7 @@
     @foreach ($_posts as $_post)
 
     <url>
-        <loc>{{ post_url($_post, [], true) }}</loc>
+        <loc>{{ post_url($_post, true) }}</loc>
         <lastmod>{{ $_post->modified_at->max($appModified)->toW3cString() }}</lastmod>
         <priority>{{ $_type->hierarchical ? '0.8' : '0.6' }}</priority>
         <changefreq>{{ $_type->hierarchical ? 'weekly' : 'monthly' }}</changefreq>

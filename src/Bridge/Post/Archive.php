@@ -3,14 +3,20 @@
 namespace Luminous\Bridge\Post;
 
 use Carbon\Carbon;
+use Luminous\Bridge\UrlPathTrait;
+use Luminous\Bridge\UrlResource;
 
 /**
  * @property-read string $type
  * @property-read \Carbon\Carbon $date
  * @property-read int|null $count
  */
-class Archive
+class Archive implements UrlResource
 {
+    use UrlPathTrait {
+        urlPath as protected originalUrlPath;
+    }
+
     /**
      * The type name.
      *
@@ -59,19 +65,34 @@ class Archive
     }
 
     /**
-     * Get the value of the archive route key.
+     * Get the URL apth.
      *
+     * @param string $key
      * @return string
      */
-    public function urlParameter()
+    public function urlPath($key)
     {
-        $formats = [
-            'yearly'    => 'Y',
-            'monthly'   => 'Y/m',
-            'daily'     => 'Y/m/d',
-        ];
+        if ($key === 'path') {
+            $formats = [
+                'yearly'    => 'Y',
+                'monthly'   => 'Y/m',
+                'daily'     => 'Y/m/d',
+            ];
 
-        return $this->format($formats[$this->type]);
+            return $this->format($formats[$this->type]);
+        }
+
+        return $this->originalUrlPath($key);
+    }
+
+    /**
+     * Get the array to build URL.
+     *
+     * @return array
+     */
+    public function forUrl()
+    {
+        return ['archive' => $this];
     }
 
     /**

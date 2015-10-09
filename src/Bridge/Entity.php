@@ -3,11 +3,11 @@
 namespace Luminous\Bridge;
 
 use ArrayAccess;
-use InvalidArgumentException;
 
-abstract class Entity implements ArrayAccess
+abstract class Entity implements ArrayAccess, UrlResource
 {
     use DecoratorTrait;
+    use UrlPathTrait;
 
     /**
      * The WP.
@@ -47,13 +47,14 @@ abstract class Entity implements ArrayAccess
     }
 
     /**
-     * Get a URL parameter.
+     * Get the array to build URL.
      *
-     * @param string $key
-     * @return string
+     * @return array
      */
-    public function urlParameter($key)
+    public function forUrl()
     {
-        return $this->{$key};
+        $type = $this->type->type();
+
+        return array_merge($this->type->forUrl(), [$type => $this]);
     }
 }

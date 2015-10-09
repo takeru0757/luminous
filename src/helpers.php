@@ -428,32 +428,13 @@ if (! function_exists('url')) {
      *
      * @uses \app()
      *
-     * @param string $path
-     * @param bool|string $full
-     * @param null|bool $secure
+     * @param array|string|mixed $options
+     * @param bool $full
      * @return string
      */
-    function url($path = '', $full = false, $secure = null)
+    function url($options = '', $full = false)
     {
-        return app('router')->url($path, $full, $secure);
-    }
-}
-
-if (! function_exists('route')) {
-    /**
-     * Get the URL to a named route.
-     *
-     * @uses \app()
-     *
-     * @param string $name
-     * @param array $parameters
-     * @param bool|string $full
-     * @param null|bool $secure
-     * @return string
-     */
-    function route($name, array $parameters = [], $full = false, $secure = null)
-    {
-        return app('router')->route($name, $parameters, $full, $secure);
+        return app('router')->url($options, $full);
     }
 }
 
@@ -464,15 +445,21 @@ if (! function_exists('posts_url')) {
      * @uses \url()
      *
      * @param string|\Luminous\Bridge\Post\Type $type
-     * @param array $parameters
-     * @param bool|string $full
-     * @param null|bool $secure
+     * @param array|bool|mixed $options
+     * @param bool $full
      * @return string
      */
-    function posts_url($type, array $parameters = [], $full = false, $secure = null)
+    function posts_url($type, $options = [], $full = false)
     {
-        $parameters['post_type'] = $type;
-        return url($parameters, $full, $secure);
+        if (is_bool($options)) {
+            list($options, $full) = [[], $options];
+        } elseif (! is_array($options)) {
+            $options = [$options];
+        }
+
+        $options['post_type'] = $type;
+
+        return url($options, $full);
     }
 }
 
@@ -483,15 +470,19 @@ if (! function_exists('post_url')) {
      * @uses \url()
      *
      * @param \Luminous\Bridge\Post\Entity $post
-     * @param array $parameters
-     * @param bool|string $full
-     * @param null|bool $secure
+     * @param array|bool $options
+     * @param bool $full
      * @return string
      */
-    function post_url(Luminous\Bridge\Post\Entity $post, array $parameters = [], $full = false, $secure = null)
+    function post_url(Luminous\Bridge\Post\Entity $post, $options = [], $full = false)
     {
-        $parameters['post'] = $post;
-        return url($parameters, $full, $secure);
+        if (is_bool($options)) {
+            list($options, $full) = [[], $options];
+        }
+
+        $options['post'] = $post;
+
+        return url($options, $full);
     }
 }
 
@@ -503,13 +494,13 @@ if (! function_exists('asset')) {
      * @uses \url()
      *
      * @param string $file
-     * @param bool|string $full
-     * @param null|bool $secure
+     * @param array|bool $options
+     * @param bool $full
      * @return string
      *
      * @throws \InvalidArgumentException
      */
-    function asset($file, $full = false, $secure = null)
+    function asset($file, $options = [], $full = false)
     {
         static $manifest = null;
         static $prefix = null;
@@ -520,8 +511,13 @@ if (! function_exists('asset')) {
             $prefix = trim(config('assets.prefix'), '/').'/';
         }
 
+        if (is_bool($options)) {
+            list($options, $full) = [[], $options];
+        }
+
         if (isset($manifest[$file])) {
-            return url($prefix.$manifest[$file], $full, $secure);
+            $options['path'] = $prefix.$manifest[$file];
+            return url($options, $full);
         }
 
         throw new InvalidArgumentException("File {$file} not defined in asset manifest.");

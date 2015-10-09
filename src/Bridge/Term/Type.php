@@ -7,6 +7,16 @@ use Luminous\Bridge\Type as BaseType;
 class Type extends BaseType
 {
     /**
+     * Get the type of type.
+     *
+     * @return string
+     */
+    public function type()
+    {
+        return 'term';
+    }
+
+    /**
      * Get the post type.
      *
      * @return \Luminous\Bridge\Post\Type

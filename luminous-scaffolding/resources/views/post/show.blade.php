@@ -11,7 +11,7 @@
         <li>
             <ul class="list-inline" style="display:inline-block">
                 @foreach ($_terms as $_term)
-                <li><a href="{{ posts_url($post->type, ['term' => $_term]) }}"><span class="fa fa-folder"></span> {{ $_term->name }}</a></li>
+                <li><a href="{{ posts_url($post->type, $_term) }}"><span class="fa fa-folder"></span> {{ $_term->name }}</a></li>
                 @endforeach
             </ul>
         </li>
@@ -21,7 +21,7 @@
         <li>
             <ul class="list-inline" style="display:inline-block">
                 @foreach ($_terms as $_term)
-                <li><a href="{{ posts_url($post->type, ['term' => $_term]) }}"><span class="fa fa-tag"></span> {{ $_term->name }}</a></li>
+                <li><a href="{{ posts_url($post->type, $_term) }}"><span class="fa fa-tag"></span> {{ $_term->name }}</a></li>
                 @endforeach
             </ul>
         </li>

@@ -483,6 +483,8 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Register container bindings for the application.
      *
+     * @todo Fix Request::setRouteResolver()
+     *
      * @return void
      */
     protected function registerRequestBindings()

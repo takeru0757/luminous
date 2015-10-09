@@ -38,17 +38,17 @@ $router->scope(['prefix' => 'posts', 'query' => ['post_type' => 'post']], functi
     ]);
 
     $router->any('/{archive}', [
-        'query' => ['limit' => 10],
+        'query' => ['limit' => 10, 'archive' => '{path:\d{4}(?:/\d{2}(?:/\d{2})?)?}'],
         'uses' => 'PostController@index',
     ]);
 
     $router->any('/category/{term}', [
-        'query' => ['limit' => 10, 'term_type' => 'category'],
+        'query' => ['limit' => 10, 'term_type' => 'category', 'term' => '{path:.+}'],
         'uses' => 'PostController@index',
     ]);
 
     $router->any('/tag/{term}', [
-        'query' => ['limit' => 10, 'term_type' => 'post_tag'],
+        'query' => ['limit' => 10, 'term_type' => 'post_tag', 'term' => '{slug}'],
         'uses' => 'PostController@index',
     ]);
 });
@@ -58,6 +58,6 @@ $router->scope(['prefix' => 'posts', 'query' => ['post_type' => 'post']], functi
 // -----------------------------------------------------------------------------
 
 $router->any('/{post}', [
-    'query' => ['post_type' => 'page'],
+    'query' => ['post_type' => 'page', 'post' => '{path:.+}'],
     'uses' => 'PostController@show',
 ]);

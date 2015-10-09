@@ -257,14 +257,16 @@ abstract class Entity extends BaseEntity
 
         return new Collection($terms);
     }
-
+    
     /**
-     * Get a URL parameter.
+     * Get the URL apth.
      *
      * @param string $key
      * @return string
+     *
+     * @throws \InvalidArgumentException
      */
-    public function urlParameter($key)
+    public function urlPath($key)
     {
         $dateFormats = [
             'date_year'     => 'Y',
@@ -276,6 +278,6 @@ abstract class Entity extends BaseEntity
             return $this->date($dateFormats[$key]);
         }
 
-        return parent::urlParameter($key);
+        return parent::urlPath($key);
     }
 }

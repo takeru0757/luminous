@@ -43,7 +43,7 @@ class RootController extends BaseController
     public function shortlink($id)
     {
         try {
-            $post = app('wp')->post($id);
+            $post = app('wp')->post((int) $id);
         } catch (EntityNotFoundException $e) {
             abort(404);
         }
