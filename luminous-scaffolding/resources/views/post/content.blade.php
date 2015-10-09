@@ -10,7 +10,7 @@
         <nav>
             <h1 class="h4">Recent Posts</h1>
             <ul class="nav">
-                @foreach ($wp->posts('post')->orderBy('created_at', 'desc')->take(5)->get() as $_post)
+                @foreach ($wp->posts('post')->orderBy('created_at', 'desc')->take(5) as $_post)
                 <li class="nav-item"><a class="nav-link" href="{{ post_url($_post) }}">{{ $_post->title }}</a></li>
                 @endforeach
             </ul>
@@ -23,7 +23,7 @@
                     ?>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ posts_url('post', $term) }}"><span class="fa fa-folder"></span> {{ $term->name }} ({{ $term->count }})</a>
-                        @if (($children = $term->children->get()) && !$children->isEmpty())
+                        @if ($children = $term->children->getOrNull())
                         <ul class="nav p-l">
                             @foreach ($children as $child)
                             {!! $_formatter($child) !!}
@@ -35,7 +35,7 @@
                 };
                 ?>
 
-                @foreach ($wp->terms('category')->whereTerm('parent_id', 0)->get() as $_term)
+                @foreach ($wp->terms('category')->root() as $_term)
                 {!! $_formatter($_term) !!}
                 @endforeach
             </ul>
@@ -43,7 +43,7 @@
         <nav>
             <h1 class="h4">Tags</h1>
             <ul class="nav">
-                @foreach ($wp->terms('post_tag')->get() as $_term)
+                @foreach ($wp->terms('post_tag') as $_term)
                 <li class="nav-item"><a class="nav-link" href="{{ posts_url('post', $_term) }}"><span class="fa fa-tag"></span> {{ $_term->name }} ({{ $_term->count }})</a></li>
                 @endforeach
             </ul>

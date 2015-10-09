@@ -8,7 +8,7 @@
     {!! $post->content !!}
 </article>
 
-@if (($_children = $post->children->get()) && !$_children->isEmpty())
+@if ($_children = $post->children->getOrNull())
 <nav class="m-b-lg">
     <h1 class="h3">Child Pages</h1>
     <ul class="nav">

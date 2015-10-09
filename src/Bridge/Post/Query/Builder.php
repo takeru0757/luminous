@@ -44,6 +44,19 @@ class Builder extends QueryBuilder
     }
 
     /**
+     * Implementation for Countable.
+     *
+     * @return int
+     */
+    public function count()
+    {
+        $args = $this->buildArgs();
+        $args['fields'] = 'ids';
+
+        return count($this->buildQuery($args)->posts);
+    }
+
+    /**
      * Paginate the given query.
      *
      * @param int $perPage
@@ -135,23 +148,32 @@ class Builder extends QueryBuilder
     /**
      * Build the original query instance.
      *
+     * @param array $args
      * @return \WP_Query
      */
-    protected function buildQuery()
+    protected function buildQuery(array $args = [])
+    {
+        return new WP_Query($args ?: $this->buildArgs());
+    }
+
+    /**
+     * Build the argumants for `get_terms()`.
+     *
+     * @return array
+     */
+    protected function buildArgs()
     {
         $query = [
             'posts_per_page' => $this->limit ?: -1,
             'offset' => $this->offset,
         ];
 
-        $query = array_merge(
+        return array_merge(
             $query,
             $this->getDateQuery(),
             $this->getOrderByQuery(),
             $this->getPostQuery(),
             $this->getTermQuery()
         );
-
-        return new WP_Query($query);
     }
 }

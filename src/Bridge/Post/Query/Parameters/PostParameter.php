@@ -96,6 +96,18 @@ trait PostParameter
     }
 
     /**
+     * Set to get only root entities.
+     *
+     * @return $this
+     */
+    public function root()
+    {
+        $this->wherePost('parent_id', 0);
+
+        return $this;
+    }
+
+    /**
      * Add a post parameter to the query.
      *
      * @param string $column

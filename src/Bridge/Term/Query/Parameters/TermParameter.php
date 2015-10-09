@@ -51,6 +51,18 @@ trait TermParameter
     }
 
     /**
+     * Set to get only root entities.
+     *
+     * @return $this
+     */
+    public function root()
+    {
+        $this->whereTerm('parent_id', 0);
+
+        return $this;
+    }
+
+    /**
      * Add a term parameter to the query.
      *
      * @param string $column

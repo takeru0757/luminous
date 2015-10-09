@@ -15,7 +15,7 @@
                     ?>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ post_url($post) }}">{{ $post->title }}</a>
-                        @if (($children = $post->children->get()) && !$children->isEmpty())
+                        @if ($children = $post->children->getOrNull())
                         <ul class="nav p-l">
                             @foreach ($children as $child)
                             {!! $_formatter($child) !!}
@@ -27,7 +27,7 @@
                 };
                 ?>
 
-                @foreach ($wp->posts('page')->wherePost('parent_id', 0)->get() as $_post)
+                @foreach ($wp->posts('page')->root() as $_post)
                 {!! $_formatter($_post) !!}
                 @endforeach
             </ul>

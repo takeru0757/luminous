@@ -62,19 +62,50 @@ class Builder extends QueryBuilder
     }
 
     /**
-     * Build the original objects.
+     * Implementation for Countable.
+     *
+     * @return int
+     */
+    public function count()
+    {
+        $args = $this->buildArgs();
+        $args['fields'] = 'count';
+
+        return (int) ($this->executeQuery($args) ?: 0);
+    }
+
+    /**
+     * Execute the query.
      *
      * @uses \get_terms()
+     * @uses \is_wp_error()
+     *
+     * @param array $args
+     * @return array
+     */
+    protected function executeQuery(array $args = [])
+    {
+        $result = get_terms($this->type, $args ?: $this->buildArgs());
+
+        return ! is_wp_error($result) ? $result : [];
+    }
+
+    /**
+     * Build the argumants for `get_terms()`.
      *
      * @return array
      */
-    protected function executeQuery()
+    protected function buildArgs()
     {
-        $query = array_merge(
+        $query = [
+            'number' => $this->limit ?: null,
+            'offset' => $this->offset,
+        ];
+
+        return array_merge(
+            $query,
             $this->getOrderByQuery(),
             $this->getTermQuery()
         );
-
-        return get_terms($this->type, $query);
     }
 }
