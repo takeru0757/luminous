@@ -13,7 +13,7 @@ class RootController extends BaseController
      * Handle requests for home (and shortlinks).
      *
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
+     * @return \Illuminate\View\View
      */
     public function home(Request $request)
     {
@@ -21,7 +21,7 @@ class RootController extends BaseController
             return $this->shortlink($id);
         }
 
-        return $this->createResponse($request, view('root.home'));
+        return view('root.home');
     }
 
     /**
@@ -48,25 +48,23 @@ class RootController extends BaseController
     /**
      * Handle requests for '/robots.txt'.
      *
-     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function robots(Request $request)
+    public function robots()
     {
         $view = view(app('wp')->isPublic() ? 'root.robots' : 'root.robots-noindex');
 
-        return $this->createResponse($request, $view, ['Content-Type' => 'text/plain']);
+        return response($view, 200, ['content-type' => 'text/plain']);
     }
 
     /**
      * Handle requests for '/sitemap.xml'.
      *
-     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      *
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
-    public function sitemap(Request $request)
+    public function sitemap()
     {
         $wp = app('wp');
 
@@ -78,6 +76,6 @@ class RootController extends BaseController
             'appModified' => Carbon::createFromTimeStamp(app('modified'), $wp->timezone()),
         ]);
 
-        return $this->createResponse($request, $view, ['Content-Type' => 'text/xml']);
+        return response($view, 200, ['content-type' => 'text/xml']);
     }
 }

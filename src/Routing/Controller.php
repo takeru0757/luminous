@@ -43,6 +43,7 @@ abstract class Controller
      * @param \Illuminate\Http\Request $request
      * @param string $method
      * @return array
+     *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function getMiddlewareForMethod(Request $request, $method)
@@ -65,39 +66,15 @@ abstract class Controller
     }
 
     /**
-     * Create a new response.
-     *
-     * - Set `Cache-Control` header.
-     * - Set `Etag` header and set 304 status code if not modified.
-     * - Fix `Content-Type` header (add the charset) and protocol version.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param \Illuminate\Contracts\View\View $view
-     * @param array $headers
-     * @return \Illuminate\Http\Response
-     */
-    protected function createResponse(Request $request, View $view, array $headers = [])
-    {
-        $response = response($view->render(), 200, $headers);
-
-        if ($maxAge = $this->maxAge()) {
-            $response->setCache(['private' => true, 'max_age' => $maxAge]);
-        }
-
-        // The method `Request::isNotModified()` contains `Request::setNotModified()`.
-        // https://github.com/symfony/symfony/issues/13678
-        $response->setEtag(md5($response->getContent()));
-        $response->isNotModified($request);
-
-        return $response;
-    }
-
-    /**
      * Get the `max-age`.
      *
+     * @param \Illuminate\Http\Request $request
+     * @param string $method
      * @return int Returns `600` (`0` when debug).
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function maxAge()
+    public function maxAge(Request $request, $method)
     {
         return env('APP_DEBUG', false) ? 0 : 600;
     }

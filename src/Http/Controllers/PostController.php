@@ -14,90 +14,78 @@ class PostController extends BaseController
      * Handle requests to posts.
      *
      * @param \Illuminate\Http\Request $request
-     * @param array $query
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      *
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
-    public function index(Request $request, $query)
+    public function index(Request $request)
     {
         $wp = app('wp');
 
-        $postType = $wp->postType($query['post_type']);
+        $postType = $wp->postType($request->route('post_type'));
         $postQuery = $wp->posts($postType);
 
         $tree = (new Tree())->setPostType($postType);
 
-        if (isset($query['order'])) {
-            $postQuery->orderBy($query['order']['column'], $query['order']['direction']);
+        if ($order = $request->route('order')) {
+            $postQuery->orderBy($order['column'], $order['direction']);
         } else {
             $postQuery->orderBy('created_at', 'desc');
         }
 
-        if ($date = $this->getDateQuery($query)) {
+        if ($date = $this->getDateQuery($request)) {
             $postQuery->whereDate('created_at', $date);
             $tree->setDate($date);
         }
 
-        if (isset($query['term_type'])) {
-            switch (true) {
-                case isset($query['term__id']):
-                    $term = $wp->term((int) $query['term__id'], $query['term_type']);
-                    break;
-                case isset($query['term__path']):
-                    $term = $wp->term($query['term__path'], $query['term_type']);
-                    break;
-                case isset($query['term__slug']):
-                    $term = $wp->term($query['term__slug'], $query['term_type']);
-                    break;
-                default:
-                    abort(404);
+        if ($termType = $request->route('term_type')) {
+            if ($termId = $request->route('term__id')) {
+                $term = $wp->term((int) $termId, $termType);
+            } elseif ($termSlug = $request->route('term__slug')) {
+                $term = $wp->term($termSlug, $termType);
+            } elseif ($termPath = $request->route('term__path')) {
+                $term = $wp->term($termPath, $termType);
+            } else {
+                abort(404);
             }
 
             $postQuery->whereTerm($term);
             $tree->setTerm($term);
         }
 
-        $posts = $postQuery->paginate(isset($query['limit']) ? $query['limit'] : 10);
+        $posts = $postQuery->paginate($request->route('limit') ?: 10);
         $tree->setPage($page = $posts->currentPage());
 
         if ($posts->isEmpty() && $page > 1) {
             abort(404);
         }
 
-        $view = view($this->getTemplateName($postType), compact('tree', 'posts'));
-
-        return $this->createResponse($request, $view);
+        return view($this->getTemplateName($postType), compact('tree', 'posts'));
     }
 
     /**
      * Handle requests to the post.
      *
      * @param \Illuminate\Http\Request $request
-     * @param array $query
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\View\View
      *
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
-    public function show(Request $request, $query)
+    public function show(Request $request)
     {
         $wp = app('wp');
 
-        $postType = $wp->postType($query['post_type']);
+        $postType = $wp->postType($request->route('post_type'));
         $postQuery = $wp->posts($postType);
 
-        switch (true) {
-            case isset($query['post__id']):
-                $postQuery->wherePost('id', (int) $query['post__id']);
-                break;
-            case isset($query['post__path']):
-                $postQuery->wherePost('path', $query['post__path']);
-                break;
-            case isset($query['post__slug']):
-                $postQuery->wherePost('slug', $query['post__slug']);
-                break;
-            default:
-                abort(404);
+        if ($postId = $request->route('post__id')) {
+            $postQuery->wherePost('id', (int) $postId);
+        } elseif ($postSlug = $request->route('post__slug')) {
+            $postQuery->wherePost('slug', $postSlug);
+        } elseif ($postPath = $request->route('post__path')) {
+            $postQuery->wherePost('path', $postPath);
+        } else {
+            abort(404);
         }
 
         if (! $post = $postQuery->first()) {
@@ -105,24 +93,23 @@ class PostController extends BaseController
         }
 
         $tree = (new Tree())->setPostType($postType)->setPost($post);
-        $view = view($this->getTemplateName($postType, $post), compact('tree', 'post'));
 
-        return $this->createResponse($request, $view);
+        return view($this->getTemplateName($postType, $post), compact('tree', 'post'));
     }
 
     /**
-     * Get the date parameter from the query.
+     * Get the date parameter from the request.
      *
-     * @param array $query
-     * @return array
+     * @param \Illuminate\Http\Request $request
+     * @return array|null
      */
-    protected function getDateQuery(array $query)
+    protected function getDateQuery(Request $request)
     {
-        if (! isset($query['archive__path'])) {
-            return;
+        if (! $parameter = $request->route('archive__path')) {
+            return null;
         }
 
-        $parts = explode('/', $query['archive__path']);
+        $parts = explode('/', $parameter);
         $value = [];
 
         foreach (['year', 'month', 'day'] as $i => $key) {

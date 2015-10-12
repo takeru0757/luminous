@@ -484,13 +484,13 @@ if (! function_exists('url')) {
      *
      * @uses \app()
      *
-     * @param array|string|mixed $options
+     * @param array|string|mixed $parameters
      * @param bool $full
      * @return string
      */
-    function url($options = '', $full = false)
+    function url($parameters = '', $full = false)
     {
-        return app('router')->url($options, $full);
+        return app('router')->url($parameters, $full);
     }
 }
 
@@ -501,21 +501,21 @@ if (! function_exists('posts_url')) {
      * @uses \url()
      *
      * @param string|\Luminous\Bridge\Post\Type $type
-     * @param array|bool|mixed $options
+     * @param array|bool|mixed $parameters
      * @param bool $full
      * @return string
      */
-    function posts_url($type, $options = [], $full = false)
+    function posts_url($type, $parameters = [], $full = false)
     {
-        if (is_bool($options)) {
-            list($options, $full) = [[], $options];
-        } elseif (! is_array($options)) {
-            $options = [$options];
+        if (is_bool($parameters)) {
+            list($parameters, $full) = [[], $parameters];
+        } elseif (! is_array($parameters)) {
+            $parameters = [$parameters];
         }
 
-        $options['post_type'] = $type;
+        $parameters['post_type'] = $type;
 
-        return url($options, $full);
+        return url($parameters, $full);
     }
 }
 
@@ -526,23 +526,23 @@ if (! function_exists('post_url')) {
      * @uses \url()
      *
      * @param \Luminous\Bridge\Post\Entity|int|string $post
-     * @param array|bool $options
+     * @param array|bool $parameters
      * @param bool $full
      * @return string
      */
-    function post_url($post, $options = [], $full = false)
+    function post_url($post, $parameters = [], $full = false)
     {
         if (!($post instanceof Luminous\Bridge\Post\Entity)) {
-            $post = app('wp')->post($post, isset($options['post_type']) ? $options['post_type'] : null);
+            $post = app('wp')->post($post, isset($parameters['post_type']) ? $parameters['post_type'] : null);
         }
 
-        if (is_bool($options)) {
-            list($options, $full) = [[], $options];
+        if (is_bool($parameters)) {
+            list($parameters, $full) = [[], $parameters];
         }
 
-        $options['post'] = $post;
+        $parameters['post'] = $post;
 
-        return url($options, $full);
+        return url($parameters, $full);
     }
 }
 
@@ -554,13 +554,13 @@ if (! function_exists('asset')) {
      * @uses \url()
      *
      * @param string $file
-     * @param array|bool $options
+     * @param array|bool $parameters
      * @param bool $full
      * @return string
      *
      * @throws \InvalidArgumentException
      */
-    function asset($file, $options = [], $full = false)
+    function asset($file, $parameters = [], $full = false)
     {
         static $manifest = null;
         static $prefix = null;
@@ -571,13 +571,13 @@ if (! function_exists('asset')) {
             $prefix = trim(config('assets.prefix'), '/').'/';
         }
 
-        if (is_bool($options)) {
-            list($options, $full) = [[], $options];
+        if (is_bool($parameters)) {
+            list($parameters, $full) = [[], $parameters];
         }
 
         if (isset($manifest[$file])) {
-            $options['path'] = $prefix.$manifest[$file];
-            return url($options, $full);
+            $parameters['path'] = $prefix.$manifest[$file];
+            return url($parameters, $full);
         }
 
         throw new InvalidArgumentException("File {$file} not defined in asset manifest.");

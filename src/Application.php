@@ -2,27 +2,19 @@
 
 namespace Luminous;
 
-use Closure;
 use Exception;
-use Throwable;
-use FastRoute\Dispatcher;
 use Illuminate\Config\Repository as ConfigRepository;
 use Illuminate\Container\Container;
 use Illuminate\Contracts\Foundation\Application as ApplicationContract;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Application Class
@@ -73,7 +65,8 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     {
         $this->basePath = $basePath;
         $this->bootstrapContainer();
-        $this->registerErrorHandling();
+
+        $this->make('Luminous\Exceptions\Bootstrap')->register($this);
     }
 
     /**
@@ -90,17 +83,6 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
         $this->instance('modified', @filemtime($this->basePath('style.css')) ?: 0);
 
         $this->registerContainerAliases();
-    }
-
-    /**
-     * Set the error handling for the application.
-     *
-     * @return void
-     */
-    protected function registerErrorHandling()
-    {
-        $handler = $this->make('Luminous\Exceptions\Handler');
-        $handler->register();
     }
 
     /**
@@ -239,6 +221,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      * @param array $options
      * @param bool $force
      * @return \Illuminate\Support\ServiceProvider
+     *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function register($provider, $options = [], $force = false)
@@ -263,6 +246,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      * @param string $provider
      * @param string $service
      * @return void
+     *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function registerDeferredProvider($provider, $service = null)
@@ -362,6 +346,26 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      *
      * @return void
      */
+    protected function registerDispatcherBindings()
+    {
+        $this->singleton('Luminous\Routing\Dispatcher');
+    }
+
+    /**
+     * Register container bindings for the application.
+     *
+     * @return void
+     */
+    protected function registerRouterBindings()
+    {
+        $this->singleton('Luminous\Routing\Router');
+    }
+
+    /**
+     * Register container bindings for the application.
+     *
+     * @return void
+     */
     protected function registerBusBindings()
     {
         $this->singleton('Illuminate\Contracts\Bus\Dispatcher', function () {
@@ -443,7 +447,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      */
     protected function registerExceptionHandlerBindings()
     {
-        $this->singleton('Luminous\Exceptions\Handler');
+        $this->singleton('Illuminate\Contracts\Debug\ExceptionHandler', 'Luminous\Exceptions\Handler');
     }
 
     /**
@@ -502,15 +506,13 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     /**
      * Register container bindings for the application.
      *
-     * @todo Fix Request::setRouteResolver()
-     *
      * @return void
      */
     protected function registerRequestBindings()
     {
         $this->singleton('Illuminate\Http\Request', function () {
             return $this->prepareRequest(Request::capture())->setRouteResolver(function () {
-                return $this->currentRoute;
+                return $this->make('dispatcher')->currentRoute();
             });
         });
     }
@@ -534,16 +536,6 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
         }
 
         return $request;
-    }
-
-    /**
-     * Register container bindings for the application.
-     *
-     * @return void
-     */
-    protected function registerRouterBindings()
-    {
-        $this->singleton('router', 'Luminous\Routing\Router');
     }
 
     /**
@@ -620,21 +612,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
         });
     }
 
-    // Middleware ==============================================================
-
-    /**
-     * All of the global middleware for the application.
-     *
-     * @var array
-     */
-    protected $middleware = [];
-
-    /**
-     * All of the route specific middleware short-hands.
-     *
-     * @var array
-     */
-    protected $routeMiddleware = [];
+    // Request Handring ========================================================
 
     /**
      * Add new middleware to the application.
@@ -644,7 +622,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      */
     public function middleware(array $middleware)
     {
-        $this->middleware = array_unique(array_merge($this->middleware, $middleware));
+        $this->make('dispatcher')->middleware($middleware);
 
         return $this;
     }
@@ -657,86 +635,27 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      */
     public function routeMiddleware(array $middleware)
     {
-        $this->routeMiddleware = array_merge($this->routeMiddleware, $middleware);
+        $this->make('dispatcher')->routeMiddleware($middleware);
 
         return $this;
     }
-
-    // Request Handring ========================================================
-
-    /**
-     * The current route being dispatched.
-     *
-     * @var array
-     */
-    protected $currentRoute;
-
-    /**
-     * The FastRoute dispatcher.
-     *
-     * @var \FastRoute\Dispatcher
-     */
-    protected $dispatcher;
 
     /**
      * {@inheritdoc}
      */
     public function handle(SymfonyRequest $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
     {
-        return $this->dispatch($request);
+        return $this->dispatch(Request::createFromBase($request));
     }
 
     /**
      * Run the application and send the response.
      *
-     * @param  SymfonyRequest|null  $request
+     * @param \Illuminate\Http\Request|null $request
      * @return void
      */
-    public function run($request = null)
+    public function run(Request $request = null)
     {
-        $response = $this->dispatch($request);
-
-        if ($response instanceof SymfonyResponse) {
-            $response->send();
-        } else {
-            echo (string) $response;
-        }
-
-        if (count($this->middleware) > 0) {
-            $this->callTerminableMiddleware($response);
-        }
-    }
-
-    /**
-     * Call the terminable middleware.
-     *
-     * @param  mixed  $response
-     * @return void
-     */
-    protected function callTerminableMiddleware($response)
-    {
-        $response = $this->prepareResponse($response);
-
-        foreach ($this->middleware as $middleware) {
-            $instance = $this->make($middleware);
-
-            if (method_exists($instance, 'terminate')) {
-                $instance->terminate($this->make('request'), $response);
-            }
-        }
-    }
-
-    /**
-     * Dispatch the incoming request.
-     *
-     * @param  SymfonyRequest|null  $request
-     * @return Response
-     */
-    public function dispatch($request = null)
-    {
-        $this->configure('assets');
-        $this->make('wp');
-
         if ($request) {
             $this->instance('Illuminate\Http\Request', $request);
             $this->ranServiceBinders['registerRequestBindings'] = true;
@@ -744,267 +663,27 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
             $request = $this->make('request');
         }
 
-        $method = $request->getMethod();
-        $pathInfo = $request->getPathInfo();
+        $response = $this->dispatch($request);
+        $response->send();
 
-        try {
-            return $this->sendThroughPipeline($this->middleware, function () use ($method, $pathInfo) {
-                return $this->handleDispatcherResponse(
-                    $this->createDispatcher()->dispatch($method, $pathInfo)
-                );
-            });
-        } catch (Exception $e) {
-            return $this->sendExceptionToHandler($e);
-        } catch (Throwable $e) {
-            return $this->sendExceptionToHandler($e);
-        }
+        $this->make('dispatcher')->terminate($request, $response);
     }
 
     /**
-     * Create a FastRoute dispatcher instance for the application.
+     * Dispatch the incoming request.
      *
-     * @uses \FastRoute\simpleDispatcher()
-     *
-     * @return Dispatcher
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\Response
      */
-    protected function createDispatcher()
+    public function dispatch(Request $request)
     {
-        return \FastRoute\simpleDispatcher(function ($r) {
-            $router = $this->make('router');
-            foreach ($router->routes() as $route) {
-                $r->addRoute($route['via'], $route['uri'], $route['action']);
-            }
-        });
+        $this->configure('assets');
+        $this->make('wp');
+
+        return $this->make('dispatcher')->dispatch($request);
     }
 
-    /**
-     * Handle the response from the FastRoute dispatcher.
-     *
-     * @param  array  $routeInfo
-     * @return mixed
-     */
-    protected function handleDispatcherResponse($routeInfo)
-    {
-        switch ($routeInfo[0]) {
-            case Dispatcher::NOT_FOUND:
-                throw new NotFoundHttpException;
-
-            case Dispatcher::METHOD_NOT_ALLOWED:
-                throw new MethodNotAllowedHttpException($routeInfo[1]);
-
-            case Dispatcher::FOUND:
-                return $this->handleFoundRoute($routeInfo);
-        }
-    }
-
-    /**
-     * Handle a route found by the dispatcher.
-     *
-     * @param  array  $routeInfo
-     * @return mixed
-     */
-    protected function handleFoundRoute($routeInfo)
-    {
-        if (isset($routeInfo[1]['query'])) {
-            $routeInfo[2] = ['query' => array_merge($routeInfo[1]['query'], $routeInfo[2])];
-        }
-
-        $this->currentRoute = $routeInfo;
-
-        $action = $routeInfo[1];
-
-        // Pipe through route middleware...
-        if (isset($action['middleware'])) {
-            $middleware = $this->gatherMiddlewareClassNames($action['middleware']);
-
-            return $this->prepareResponse($this->sendThroughPipeline($middleware, function () use ($routeInfo) {
-                return $this->callActionOnArrayBasedRoute($routeInfo);
-            }));
-        }
-
-        return $this->prepareResponse(
-            $this->callActionOnArrayBasedRoute($routeInfo)
-        );
-    }
-
-    /**
-     * Call the Closure on the array based route.
-     *
-     * @param  array  $routeInfo
-     * @return mixed
-     */
-    protected function callActionOnArrayBasedRoute($routeInfo)
-    {
-        $action = $routeInfo[1];
-
-        if (isset($action['uses'])) {
-            return $this->prepareResponse($this->callControllerAction($routeInfo));
-        }
-
-        foreach ($action as $value) {
-            if ($value instanceof Closure) {
-                $closure = $value->bindTo(new Routing\Closure);
-                break;
-            }
-        }
-
-        try {
-            return $this->prepareResponse($this->call($closure, $routeInfo[2]));
-        } catch (HttpResponseException $e) {
-            return $e->getResponse();
-        }
-    }
-
-    /**
-     * Call a controller based route.
-     *
-     * @param  array  $routeInfo
-     * @return mixed
-     */
-    protected function callControllerAction($routeInfo)
-    {
-        list($controller, $method) = explode('@', $routeInfo[1]['uses']);
-
-        if (! method_exists($instance = $this->make($controller), $method)) {
-            throw new NotFoundHttpException;
-        }
-
-        if ($instance instanceof Routing\Controller) {
-            return $this->callLumenController($instance, $method, $routeInfo);
-        } else {
-            return $this->callControllerCallable([$instance, $method], $routeInfo[2]);
-        }
-    }
-
-    /**
-     * Send the request through a Lumen controller.
-     *
-     * @param  mixed  $instance
-     * @param  string  $method
-     * @param  array  $routeInfo
-     * @return mixed
-     */
-    protected function callLumenController($instance, $method, $routeInfo)
-    {
-        $middleware = $instance->getMiddlewareForMethod($this->make('request'), $method);
-
-        if (count($middleware) > 0) {
-            return $this->callLumenControllerWithMiddleware($instance, $method, $routeInfo, $middleware);
-        } else {
-            return $this->callControllerCallable([$instance, $method], $routeInfo[2]);
-        }
-    }
-
-    /**
-     * Send the request through a set of controller middleware.
-     *
-     * @param  mixed  $instance
-     * @param  string  $method
-     * @param  array  $routeInfo
-     * @param  array  $middleware
-     * @return mixed
-     */
-    protected function callLumenControllerWithMiddleware($instance, $method, $routeInfo, $middleware)
-    {
-        $middleware = $this->gatherMiddlewareClassNames($middleware);
-
-        return $this->sendThroughPipeline($middleware, function () use ($instance, $method, $routeInfo) {
-            return $this->callControllerCallable([$instance, $method], $routeInfo[2]);
-        });
-    }
-
-    /**
-     * Call the callable for a controller action with the given parameters.
-     *
-     * @param  array  $callable
-     * @param  array $parameters
-     * @return mixed
-     */
-    protected function callControllerCallable(array $callable, array $parameters)
-    {
-        try {
-            return $this->prepareResponse(
-                $this->call($callable, $parameters)
-            );
-        } catch (HttpResponseException $e) {
-            return $e->getResponse();
-        }
-    }
-
-    /**
-     * Gather the full class names for the middleware short-cut string.
-     *
-     * @param  string  $middleware
-     * @return array
-     */
-    protected function gatherMiddlewareClassNames($middleware)
-    {
-        $middleware = is_string($middleware) ? explode('|', $middleware) : (array) $middleware;
-
-        return array_map(function ($name) {
-            list($name, $parameters) = array_pad(explode(':', $name, 2), 2, null);
-
-            return array_get($this->routeMiddleware, $name, $name).($parameters ? ':'.$parameters : '');
-        }, $middleware);
-    }
-
-    /**
-     * Send the request through the pipeline with the given callback.
-     *
-     * @param  array  $middleware
-     * @param  Closure  $then
-     * @return mixed
-     */
-    protected function sendThroughPipeline(array $middleware, Closure $then)
-    {
-        $shouldSkipMiddleware = $this->bound('middleware.disable') &&
-                                        $this->make('middleware.disable') === true;
-
-        if (count($middleware) > 0 && ! $shouldSkipMiddleware) {
-            return (new Pipeline($this))
-                ->send($this->make('request'))
-                ->through($middleware)
-                ->then($then);
-        }
-
-        return $then();
-    }
-
-    /**
-     * Prepare the response for sending.
-     *
-     * @param  mixed  $response
-     * @return Response
-     */
-    public function prepareResponse($response)
-    {
-        if (! $response instanceof SymfonyResponse) {
-            $response = new Response($response);
-        }
-
-        return $response->prepare($this->make('request'));
-    }
-
-    /**
-     * Send the exception to the handler and return the response.
-     *
-     * @param \Throwable $e
-     * @return Response
-     */
-    protected function sendExceptionToHandler($e)
-    {
-        $handler = $this->make('Luminous\Exceptions\Handler');
-
-        if ($e instanceof Error) {
-            $e = new FatalThrowableError($e);
-        }
-
-        $handler->report($e);
-
-        return $handler->render($this->make('request'), $e);
-    }
-
-    // Others ==================================================================
+    // Implementations for \Illuminate\Contracts\Foundation\Application ========
 
     /**
      * Determine if the application is currently down for maintenance.
@@ -1041,6 +720,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      *
      * @param mixed $callback
      * @return void
+     *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function booting($callback)
@@ -1053,6 +733,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      *
      * @param mixed $callback
      * @return void
+     *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function booted($callback)
@@ -1080,6 +761,8 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
         throw new Exception(__FUNCTION__.' is not implemented by Luminous.');
     }
 
+    // Bindings ================================================================
+
     /**
      * Register the core container aliases.
      *
@@ -1089,6 +772,8 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     {
         $this->aliases = [
             'Luminous\Application' => 'app',
+            'dispatcher' => 'Luminous\Routing\Dispatcher',
+            'router' => 'Luminous\Routing\Router',
             'Illuminate\Contracts\Foundation\Application' => 'app',
             'Illuminate\Contracts\Cache\Factory' => 'cache',
             'Illuminate\Contracts\Cache\Repository' => 'cache.store',
@@ -1114,6 +799,11 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      * @var array
      */
     protected $availableBindings = [
+        'wp' => 'registerBridgeBindings',
+        'dispatcher' => 'registerDispatcherBindings',
+        'Luminous\Routing\Dispatcher' => 'registerDispatcherBindings',
+        'router' => 'registerRouterBindings',
+        'Luminous\Routing\Router' => 'registerRouterBindings',
         'Illuminate\Contracts\Bus\Dispatcher' => 'registerBusBindings',
         'cache' => 'registerCacheBindings',
         'Illuminate\Contracts\Cache\Factory' => 'registerCacheBindings',
@@ -1126,7 +816,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
         'events' => 'registerEventBindings',
         'Illuminate\Contracts\Events\Dispatcher' => 'registerEventBindings',
         'Illuminate\Contracts\Encryption\Encrypter' => 'registerEncrypterBindings',
-        'Luminous\Exceptions\Handler' => 'registerExceptionHandlerBindings',
+        'Illuminate\Contracts\Debug\ExceptionHandler' => 'registerExceptionHandlerBindings',
         'files' => 'registerFilesBindings',
         'filesystem' => 'registerFilesBindings',
         'Illuminate\Contracts\Filesystem\Factory' => 'registerFilesBindings',
@@ -1135,7 +825,6 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
         'mailer' => 'registerMailBindings',
         'Illuminate\Contracts\Mail\Mailer' => 'registerMailBindings',
         'request' => 'registerRequestBindings',
-        'router' => 'registerRouterBindings',
         'Illuminate\Http\Request' => 'registerRequestBindings',
         'session' => 'registerSessionBindings',
         'session.store' => 'registerSessionBindings',
@@ -1144,6 +833,5 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
         'validator' => 'registerValidatorBindings',
         'view' => 'registerViewBindings',
         'Illuminate\Contracts\View\Factory' => 'registerViewBindings',
-        'wp' => 'registerBridgeBindings',
     ];
 }

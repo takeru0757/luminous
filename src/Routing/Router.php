@@ -42,14 +42,14 @@ class Router
     /**
      * The route collection.
      *
-     * @var array
+     * @var \Luminous\Routing\Route[]
      */
     protected $routes = [];
 
     /**
      * The named route collection.
      *
-     * @var array
+     * @var \Luminous\Routing\Route[]
      */
     protected $namedRoutes = [];
 
@@ -81,7 +81,7 @@ class Router
     /**
      * Get the route collection.
      *
-     * @return array
+     * @return \Luminous\Routing\Route[]
      */
     public function routes()
     {
@@ -91,47 +91,46 @@ class Router
     /**
      * Add a route to the collection.
      *
-     * @param array|string $via HTTP verbs
+     * @param array|string $methods HTTP verbs
      * @param string $uri
-     * @param mixed $action
+     * @param mixed $options
      * @return void
      */
-    public function add($via, $uri, $action)
+    public function add($methods, $uri, $options)
     {
-        $via = array_map('strtoupper', (array) $via);
+        $names = [];
         $uri = '/'.Url::join(Arr::get($this->currentScope, 'prefix', ''), $uri);
 
-        if (is_string($action)) {
-            $action = ['uses' => $action];
+        if (is_string($options)) {
+            $options = ['uses' => $options];
         }
 
-        if (is_array($action)) {
-            $action['query'] = array_merge(Arr::get($this->currentScope, 'query', []), Arr::get($action, 'query', []));
+        if (is_array($options)) {
+            $options['parameters'] = array_merge(
+                Arr::get($this->currentScope, 'parameters', []),
+                Arr::get($options, 'parameters', [])
+            );
 
-            foreach ($action['query'] as $key => $value) {
-                if (strpos($value, '{') === false) {
-                    continue;
-                }
-                $replacement = preg_replace('/\{([a-z][a-z\d_]*)/i', "{{$key}__$1", $value);
-                $uri = preg_replace("/\{{$key}\}/", $replacement, $uri);
+            if ($name = $this->buildName($options['parameters'])) {
+                $names[] = $name;
             }
 
-            if ($name = $this->buildName($action['query'])) {
-                $this->namedRoutes[$name] = $uri;
+            if (isset($options['uses'], $this->currentScope['namespace'])) {
+                $options['uses'] = $this->currentScope['namespace'].'\\'.$options['uses'];
             }
 
-            if (isset($action['uses'], $this->currentScope['namespace'])) {
-                $action['uses'] = $this->currentScope['namespace'].'\\'.$action['uses'];
+            if (isset($options['as'])) {
+                $names[] = $options['as'];
             }
-
-            if (isset($action['as'])) {
-                $this->namedRoutes[$action['as']] = $uri;
-            }
-        } else {
-            $action = [$action];
         }
 
-        $this->routes[] = compact('via', 'uri', 'action');
+        $route = new Route($methods, $uri, $options);
+
+        foreach ($names as $name) {
+            $this->namedRoutes[$name] = $route;
+        }
+
+        $this->routes[] = $route;
     }
 
     /**
@@ -153,7 +152,7 @@ class Router
      *
      * - prefix: (string) The value is combined with current value.
      * - namespace: (string) The value REPLACEs with current value.
-     * - query: (array) The value is merged with current value.
+     * - parameters: (array) The value is merged with current value.
      *
      * @param array|string $attributes If string, used as `prefix`;
      * @param Closure $callback The collback receives $this.
@@ -190,8 +189,8 @@ class Router
             $current['namespace'] = $attributes['namespace'];
         }
 
-        if (isset($attributes['query'])) {
-            $current['query'] = array_merge(Arr::get($current, 'query', []), $attributes['query']);
+        if (isset($attributes['parameters'])) {
+            $current['parameters'] = array_merge(Arr::get($current, 'parameters', []), $attributes['parameters']);
         }
 
         return $current;
@@ -200,80 +199,76 @@ class Router
     /**
      * Get the URL.
      *
-     * The options array accepts:
+     * The parameters array accepts:
      *
      * - scheme: (string)
      * - host: (string)
      * - port: (int)
+     * - base: (string)
      * - path: (string)
      * - ?: (array)
      * - #: (string)
      *
      * @todo Support userinfo.
      *
-     * @param array|string|mixed $options
+     * @param array|string|mixed $parameters
      * @param bool $full
      * @return string
      */
-    public function url($options = '', $full = false)
+    public function url($parameters = '', $full = false)
     {
-        if (Url::valid($options)) {
-            return $options;
+        if (Url::valid($parameters)) {
+            return $parameters;
         }
 
-        $options = $this->normalizeUrlOptions($options);
         $context = $this->getContext();
+        $parameters = $this->normalizeParameters($parameters) + $context;
 
-        $defaults = ['port' => null, 'path' => '', '?' => [], '#' => null, '_base' => null];
-        $defaults += Arr::only($context, ['scheme', 'host']);
-        $options = array_merge($defaults, $options);
-
-        if ($name = $this->buildName($options)) {
-            $options['path'] = $this->buildPath($name, $options);
+        if ($name = $this->buildName($parameters)) {
+            $parameters['path'] = $this->buildPath($name, $parameters);
         }
 
-        $base = $options['_base'] ?: $context['base'];
-        $path = '/'.Url::join($base, $options['path']);
+        $path = '/'.Url::join($parameters['base'], $parameters['path']);
 
-        if ($options['?']) {
-            $path .= '?'.http_build_query($options['?']);
+        if ($parameters['?']) {
+            $path .= '?'.http_build_query($parameters['?']);
         }
 
-        if ($options['#']) {
-            $path .= '#'.$options['#'];
+        if ($parameters['#']) {
+            $path .= '#'.$parameters['#'];
         }
 
         if (! $full) {
             return $path;
         }
 
-        $host = "{$options['scheme']}://{$options['host']}";
+        $host = "{$parameters['scheme']}://{$parameters['host']}";
 
         // Use `!=` (Inequality)
-        if ($options['port'] && $options['port'] != $context['port']) {
-            $host .= ":{$options['port']}";
+        if ($parameters['port'] && $parameters['port'] != $context['port']) {
+            $host .= ":{$parameters['port']}";
         }
 
         return $host.$path;
     }
 
     /**
-     * Normalize url options.
+     * Normalize url parameters.
      *
-     * @param mixed $options
+     * @param mixed $parameters
      * @return array
      */
-    protected function normalizeUrlOptions($options)
+    protected function normalizeParameters($parameters)
     {
-        if (is_string($options)) {
-            return ['path' => $options];
-        } elseif (! is_array($options)) {
-            $options = [$options];
+        if (is_string($parameters)) {
+            $parameters = ['path' => $parameters];
+        } elseif (! is_array($parameters)) {
+            $parameters = [$parameters];
         }
 
         $normalized = [];
 
-        foreach ($options as $key => $value) {
+        foreach ($parameters as $key => $value) {
             if (is_int($key) && ($value instanceof UrlResource)) {
                 $normalized = array_merge($normalized, $value->forUrl());
             } elseif ($value instanceof Type) {
@@ -288,53 +283,29 @@ class Router
 
         if (isset($normalized['host']) && ($parsed = parse_url($normalized['host']))) {
             $normalized['host'] = $parsed['host'];
-            $normalized['_base'] = Arr::get($parsed, 'path');
+            $normalized['base'] = Arr::get($parsed, 'path', '/');
             $normalized += Arr::only($parsed, ['scheme', 'port']);
         }
 
-        return $normalized;
+        return $normalized + ['path' => '', '?' => [], '#' => null];
     }
 
     /**
      * Build the URL path of the named route.
      *
      * @param string $name
-     * @param array $options
+     * @param array $parameters
      * @return string
      *
      * @throws \InvalidArgumentException
      */
-    protected function buildPath($name, array $options = [])
+    protected function buildPath($name, array $parameters = [])
     {
         if (! isset($this->namedRoutes[$name])) {
             throw new InvalidArgumentException("Route [{$name}] not defined.");
         }
 
-        $pattern = '~'.\FastRoute\RouteParser\Std::VARIABLE_REGEX.'~x';
-        $parts = explode('[', rtrim($this->namedRoutes[$name], ']'));
-        $path = '';
-
-        foreach ($parts as $part) {
-            $replaced = preg_replace_callback($pattern, function ($m) use ($options) {
-                if ($value = Arr::get($options, $key = $m[1])) {
-                    return $value;
-                } elseif (preg_match('/^([^_]+)__([^_].*)$/', $key, $s) &&
-                    ($object = Arr::get($options, $s[1])) && ($object instanceof UrlResource)
-                ) {
-                    return $object->urlPath($s[2]);
-                } else {
-                    return '__FAIL__';
-                }
-            }, $part);
-
-            if (strpos($replaced, '__FAIL__') !== false) {
-                break;
-            }
-
-            $path .= $replaced;
-        }
-
-        return $path;
+        return $this->namedRoutes[$name]->getUri($parameters);
     }
 
     /**
@@ -342,15 +313,15 @@ class Router
      *
      * @todo Treat optional path.
      *
-     * @param array $options
+     * @param array $parameters
      * @return string|null
      */
-    protected function buildName(array $options)
+    protected function buildName(array $parameters)
     {
-        ksort($options);
+        ksort($parameters);
         $names = [];
 
-        foreach ($options as $key => $value) {
+        foreach ($parameters as $key => $value) {
             if (in_array($key, ['post_type', 'term_type'])) {
                 $names[] = "{$key}:{$value}";
             } elseif (in_array($key, ['archive', 'post', 'term', 'user'])) {

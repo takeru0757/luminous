@@ -48,20 +48,20 @@ add_filter('post_link', function ($permalink, $post, $leavename) {
         return $permalink;
     }
     $placeholder = $leavename ? '%postname%' : null;
-    $options = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
-    $options['host'] = home_url('/');
-    return post_url(app('wp')->post($post), $options, true);
+    $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
+    $parameters['host'] = home_url();
+    return post_url(app('wp')->post($post), $parameters, true);
 }, 10, 3);
 
 // @link https://developer.wordpress.org/reference/functions/_get_page_link/
 add_filter('_get_page_link', function ($permalink, $postId) {
-    if ($permalink === home_url('/') || strpos($permalink, '?page_id=') !== false) {
+    if ($permalink === home_url() || strpos($permalink, '?page_id=') !== false) {
         return $permalink;
     }
     $placeholder = strpos($permalink, '%pagename%') !== false ? '%pagename%' : null;
-    $options = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
-    $options['host'] = home_url('/');
-    return post_url(app('wp')->post($postId), $options, true);
+    $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
+    $parameters['host'] = home_url();
+    return post_url(app('wp')->post($postId), $parameters, true);
 }, 10, 2);
 
 // @link https://developer.wordpress.org/reference/functions/get_post_permalink/
@@ -70,16 +70,16 @@ add_filter('post_type_link', function ($permalink, $post, $leavename) {
         return $permalink;
     }
     $placeholder = $leavename ? "%{$post->post_type}%" : null;
-    $options = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
-    $options['host'] = home_url('/');
-    return post_url(app('wp')->post($post), $options, true);
+    $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
+    $parameters['host'] = home_url();
+    return post_url(app('wp')->post($post), $parameters, true);
 }, 10, 3);
 
 // @link https://developer.wordpress.org/reference/functions/get_term_link/
 add_filter('term_link', function ($termlink, $term, $taxonomy) {
     $term = app('wp')->term($term, $taxonomy);
-    $options = $term->forUrl() + ['host' => home_url('/')];
-    return posts_url($term->type->post_type, $options, true);
+    $parameters = $term->forUrl() + ['host' => home_url()];
+    return posts_url($term->type->post_type, $parameters, true);
 }, 10, 3);
 
 // -----------------------------------------------------------------------------
