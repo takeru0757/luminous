@@ -366,20 +366,6 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      *
      * @return void
      */
-    protected function registerBusBindings()
-    {
-        $this->singleton('Illuminate\Contracts\Bus\Dispatcher', function () {
-            $this->register('Illuminate\Bus\BusServiceProvider');
-
-            return $this->make('Illuminate\Contracts\Bus\Dispatcher');
-        });
-    }
-
-    /**
-     * Register container bindings for the application.
-     *
-     * @return void
-     */
     protected function registerCacheBindings()
     {
         $this->singleton('cache', function () {
@@ -804,7 +790,6 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
         'Luminous\Routing\Dispatcher' => 'registerDispatcherBindings',
         'router' => 'registerRouterBindings',
         'Luminous\Routing\Router' => 'registerRouterBindings',
-        'Illuminate\Contracts\Bus\Dispatcher' => 'registerBusBindings',
         'cache' => 'registerCacheBindings',
         'Illuminate\Contracts\Cache\Factory' => 'registerCacheBindings',
         'Illuminate\Contracts\Cache\Repository' => 'registerCacheBindings',

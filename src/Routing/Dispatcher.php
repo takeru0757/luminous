@@ -107,7 +107,7 @@ class Dispatcher
     public function dispatch(Request $request)
     {
         try {
-            $response = $this->dispatchRequest($request);
+            $response = $this->handleRequestWithMiddleware($request);
         } catch (Exception $e) {
             $response = $this->handleException($request, $e);
         } catch (Throwable $e) {
@@ -140,12 +140,12 @@ class Dispatcher
     }
 
     /**
-     * Dispatch the request.
+     * Handle the request with middleware.
      *
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    protected function dispatchRequest(Request $request)
+    protected function handleRequestWithMiddleware(Request $request)
     {
         try {
             return $this->sendThroughPipeline($this->middleware, $request, function () use ($request) {
@@ -164,7 +164,7 @@ class Dispatcher
      * @uses \FastRoute\simpleDispatcher()
      *
      * @param \Illuminate\Http\Request $request
-     * @return mixed
+     * @return \Illuminate\Http\Response
      *
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      * @throws \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException
@@ -185,56 +185,69 @@ class Dispatcher
             case \FastRoute\Dispatcher::METHOD_NOT_ALLOWED:
                 throw new MethodNotAllowedHttpException($routeInfo[1]);
             case \FastRoute\Dispatcher::FOUND:
-                return $this->callAction($request, $routeInfo[1], $routeInfo[2]);
+                $this->setCurrentRoute($routeInfo[1], $routeInfo[2]);
+                return $this->handleRouteWithMiddleware($request, $routeInfo[1], $routeInfo[2]);
         }
     }
 
     /**
-     * Call the action.
+     * Set the current route.
+     *
+     * @param \Luminous\Routing\Route $route
+     * @param array $parameters
+     * @return void
+     */
+    protected function setCurrentRoute(Route $route, array $parameters = [])
+    {
+        $this->currentRoute = $route;
+        $this->currentRoute->setParameters($parameters);
+    }
+
+    /**
+     * Handle the route with middleware.
      *
      * @param \Illuminate\Http\Request $request
      * @param \Luminous\Routing\Route $route
      * @param array $parameters
-     * @return mixed
+     * @return \Illuminate\Http\Response
      */
-    protected function callAction(Request $request, Route $route, array $parameters)
+    protected function handleRouteWithMiddleware(Request $request, Route $route, array $parameters)
     {
-        $route->setParameters($parameters);
-        $this->currentRoute = $route;
-
         $middleware = $this->gatherMiddlewareClassNames($route->getMiddleware());
 
         return $this->sendThroughPipeline($middleware, $request, function () use ($request, $route, $parameters) {
-            if (is_array($action = $route->getAction())) {
-                return $this->callControllerMethod($request, $action[0], $action[1], $parameters);
-            }
-
-            return $this->call($action, $parameters);
+            return $this->handleRoute($request, $route, $parameters);
         });
     }
 
     /**
-     * Call the controller method.
+     * Handle the route.
      *
      * @param \Illuminate\Http\Request $request
-     * @param string $controller
-     * @param string $method
+     * @param \Luminous\Routing\Route $route
      * @param array $parameters
-     * @return mixed
+     * @return \Illuminate\Http\Response
      *
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
-    protected function callControllerMethod(Request $request, $controller, $method, array $parameters)
+    protected function handleRoute(Request $request, Route $route, array $parameters)
     {
-        if (! method_exists($instance = $this->app->make($controller), $method)) {
+        $controller = $route->getController();
+        $method = $route->getControllerMethod();
+
+        if (is_string($controller) && ! ($controller = $this->app->make($controller))) {
             throw new NotFoundHttpException;
         }
 
-        $callback = [$instance, $method];
+        if (! method_exists($controller, $method)) {
+            throw new NotFoundHttpException;
+        }
 
-        if ($instance instanceof Controller) {
-            $middleware = $this->gatherMiddlewareClassNames($instance->getMiddlewareForMethod($request, $method));
-            $maxAge = $instance->maxAge($request, $method);
+        $callback = [$controller, $method];
+
+        if ($controller instanceof Controller) {
+            $middleware = $this->gatherMiddlewareClassNames($controller->getMiddlewareForMethod($request, $method));
+            $maxAge = $controller->maxAge($request, $method);
 
             return $this->sendThroughPipeline($middleware, $request, function () use ($callback, $parameters, $maxAge) {
                 return $this->call($callback, $parameters, $maxAge);
@@ -320,7 +333,7 @@ class Dispatcher
         $statusCode = $exception->getStatusCode();
         $headers = $exception->getHeaders();
 
-        return new Response($view->render(), $statusCode, $headers);
+        return new Response($view, $statusCode, $headers);
     }
 
     /**

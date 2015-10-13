@@ -23,18 +23,25 @@ class Route
     protected $uri;
 
     /**
-     * The action.
-     *
-     * @var array|\Luminous\Routing\Closure
-     */
-    protected $action;
-
-    /**
      * The middleware.
      *
      * @var array
      */
     protected $middleware = [];
+
+    /**
+     * The controller.
+     *
+     * @var string|\Luminous\Routing\Controller
+     */
+    protected $controller;
+
+    /**
+     * The controller method.
+     *
+     * @var string
+     */
+    protected $controllerMethod;
 
     /**
      * The parameters.
@@ -64,13 +71,14 @@ class Route
 
         foreach ($options as $value) {
             if ($value instanceof Closure) {
-                $this->action = $value->bindTo(new \Luminous\Routing\Closure);
+                $this->controller = new ClosureController($value);
+                $this->controllerMethod = 'render';
                 break;
             }
         }
 
-        if (! $this->action && $uses = Arr::get($options, 'uses')) {
-            $this->action = explode('@', $uses);
+        if (! $this->controller && $uses = Arr::get($options, 'uses')) {
+            list($this->controller, $this->controllerMethod) = explode('@', $uses);
         }
 
         if ($middleware = Arr::get($options, 'middleware')) {
@@ -138,16 +146,6 @@ class Route
     }
 
     /**
-     * Get the action.
-     *
-     * @return array|\Luminous\Routing\Closure
-     */
-    public function getAction()
-    {
-        return $this->action;
-    }
-
-    /**
      * Get the middleware.
      *
      * @return array
@@ -155,6 +153,26 @@ class Route
     public function getMiddleware()
     {
         return $this->middleware;
+    }
+    
+    /**
+     * Get the controller.
+     *
+     * @return string|\Luminous\Routing\Controller
+     */
+    public function getController()
+    {
+        return $this->controller;
+    }
+
+    /**
+     * Get the controller method.
+     *
+     * @return string
+     */
+    public function getControllerMethod()
+    {
+        return $this->controllerMethod;
     }
 
     /**

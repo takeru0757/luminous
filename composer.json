@@ -13,16 +13,18 @@
     "require": {
         "php": ">=5.5.9",
         "composer/installers": "~1.0",
-        "illuminate/bus": "5.1.*",
         "illuminate/config": "5.1.*",
         "illuminate/container": "5.1.*",
         "illuminate/contracts": "5.1.*",
         "illuminate/cache": "5.1.*",
         "illuminate/cookie": "5.1.*",
         "illuminate/encryption": "5.1.*",
+        "illuminate/events": "5.1.*",
+        "illuminate/filesystem": "5.1.*",
         "illuminate/http": "5.1.*",
         "illuminate/mail": "5.1.*",
         "illuminate/pagination": "5.1.*",
+        "illuminate/pipeline": "5.1.*",
         "illuminate/session": "5.1.*",
         "illuminate/support": "5.1.*",
         "illuminate/translation": "5.1.*",
@@ -30,12 +32,10 @@
         "illuminate/view": "5.1.*",
         "monolog/monolog": "~1.0",
         "nikic/fast-route": "0.6.*",
-        "symfony/http-kernel": "2.7.*",
         "symfony/http-foundation": "2.7.*",
+        "symfony/http-kernel": "2.7.*",
         "symfony/security-core": "2.7.*",
-        "symfony/var-dumper": "2.7.*",
-        "illuminate/filesystem": "^5.1",
-        "illuminate/events": "^5.1"
+        "symfony/var-dumper": "2.7.*"
     },
     "suggest": {
         "vlucas/phpdotenv": "Required to use .env files (~1.0)."

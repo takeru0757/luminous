@@ -49,7 +49,6 @@ add_filter('post_link', function ($permalink, $post, $leavename) {
     }
     $placeholder = $leavename ? '%postname%' : null;
     $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
-    $parameters['host'] = home_url();
     return post_url(app('wp')->post($post), $parameters, true);
 }, 10, 3);
 
@@ -60,7 +59,6 @@ add_filter('_get_page_link', function ($permalink, $postId) {
     }
     $placeholder = strpos($permalink, '%pagename%') !== false ? '%pagename%' : null;
     $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
-    $parameters['host'] = home_url();
     return post_url(app('wp')->post($postId), $parameters, true);
 }, 10, 2);
 
@@ -71,15 +69,13 @@ add_filter('post_type_link', function ($permalink, $post, $leavename) {
     }
     $placeholder = $leavename ? "%{$post->post_type}%" : null;
     $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
-    $parameters['host'] = home_url();
     return post_url(app('wp')->post($post), $parameters, true);
 }, 10, 3);
 
 // @link https://developer.wordpress.org/reference/functions/get_term_link/
 add_filter('term_link', function ($termlink, $term, $taxonomy) {
     $term = app('wp')->term($term, $taxonomy);
-    $parameters = $term->forUrl() + ['host' => home_url()];
-    return posts_url($term->type->post_type, $parameters, true);
+    return posts_url($term->type->post_type, $term->forUrl(), true);
 }, 10, 3);
 
 // -----------------------------------------------------------------------------

@@ -244,8 +244,7 @@ class Router
 
         $host = "{$parameters['scheme']}://{$parameters['host']}";
 
-        // Use `!=` (Inequality)
-        if ($parameters['port'] && $parameters['port'] != $context['port']) {
+        if ($parameters['port'] && $parameters['port'] !== $context['port']) {
             $host .= ":{$parameters['port']}";
         }
 
@@ -281,10 +280,9 @@ class Router
             }
         }
 
-        if (isset($normalized['host']) && ($parsed = parse_url($normalized['host']))) {
-            $normalized['host'] = $parsed['host'];
-            $normalized['base'] = Arr::get($parsed, 'path', '/');
-            $normalized += Arr::only($parsed, ['scheme', 'port']);
+        if (isset($normalized['host']) && strpos($normalized['host'], '//') !== false) {
+            $context = Arr::pull($normalized, 'host');
+            $normalized += $this->parseContext($context);
         }
 
         return $normalized + ['path' => '', '?' => [], '#' => null];
@@ -333,11 +331,22 @@ class Router
     }
 
     /**
+     * Set the context.
+     *
+     * @param array|string $context
+     * @return void
+     */
+    public function setContext($context)
+    {
+        $this->cachedContext = $this->parseContext($context);
+    }
+
+    /**
      * Get the context from the request.
      *
      * @return array
      */
-    protected function getContext()
+    public function getContext()
     {
         if (is_null($this->cachedContext)) {
             $request = $this->app->make('request');
@@ -351,6 +360,35 @@ class Router
         }
 
         return $this->cachedContext;
+    }
+
+    /**
+     * Parse a context.
+     *
+     * @param string $context
+     * @return array
+     *
+     * @throws \InvalidArgumentException
+     */
+    protected function parseContext($context)
+    {
+        if (is_string($context) && ! ($context = parse_url($context))) {
+            throw new InvalidArgumentException;
+        }
+
+        if (empty($context['host'])) {
+            throw new InvalidArgumentException;
+        }
+
+        $values = [
+            'host' => $context['host'],
+            'scheme' => Arr::get($context, 'scheme', 'http'),
+        ];
+
+        $values['port'] = Arr::get($context, 'port', $context['scheme'] === 'https' ? 443 : 80);
+        $values['base'] = Arr::get($context, 'base', '/');
+
+        return $values;
     }
 
     /**

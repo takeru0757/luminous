@@ -2,25 +2,19 @@
 
 namespace Luminous\Routing;
 
-use Closure as BaseClosure;
+use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Validator;
+use Luminous\Application;
 
-/**
- * Closure Class
- *
- * This class is based on Laravel Lumen:
- *
- * - Copyright (c) Taylor Otwell
- * - Licensed under the MIT license
- * - {@link https://github.com/laravel/lumen-framework/blob/5.1/src/Routing/Closure.php}
- */
-class Closure
+class ClosureController extends Controller
 {
-    use DispatchesJobs, ValidatesRequests {
-        ValidatesRequests::buildFailedValidationResponse as baseBuildFailedValidationResponse;
-        ValidatesRequests::formatValidationErrors as baseFormatValidationErrors;
-    }
+    /**
+     * The closure.
+     *
+     * @var \Closure
+     */
+    protected $closure;
 
     /**
      * The response builder callback.
@@ -42,7 +36,7 @@ class Closure
      * @param \Closure $callback
      * @return void
      */
-    public static function buildResponseUsing(BaseClosure $callback)
+    public static function buildResponseUsing(Closure $callback)
     {
         static::$responseBuilder = $callback;
     }
@@ -53,9 +47,34 @@ class Closure
      * @param \Closure $callback
      * @return void
      */
-    public static function formatErrorsUsing(BaseClosure $callback)
+    public static function formatErrorsUsing(Closure $callback)
     {
         static::$errorFormatter = $callback;
+    }
+
+    /**
+     * Create a new closure controller instance.
+     *
+     * @param \Closure $closure
+     * @return void
+     */
+    public function __construct(Closure $closure)
+    {
+        $this->closure = $closure->bindTo($this);
+    }
+
+    /**
+     * The render action.
+     *
+     * @param \Luminous\Application $app
+     * @return mixed
+     */
+    public function render(Application $app)
+    {
+        $parameters = func_get_args();
+        $app = array_shift($parameters);
+
+        return $app->call($this->closure, $parameters);
     }
 
     /**
@@ -67,7 +86,7 @@ class Closure
             return call_user_func(static::$responseBuilder, $request, $errors);
         }
 
-        return $this->baseBuildFailedValidationResponse($request, $errors);
+        return parent::buildFailedValidationResponse($request, $errors);
     }
 
     /**
@@ -79,6 +98,6 @@ class Closure
             return call_user_func(static::$errorFormatter, $validator);
         }
 
-        return $this->baseFormatValidationErrors($validator);
+        return parent::formatValidationErrors($validator);
     }
 }
