@@ -25,10 +25,12 @@ trait TermParameter
      * Add a term parameter to the query.
      *
      * The option array accepts:
+     *
      * - field: (string) 'slug' or 'id'. Default value is 'slug'.
      * - include_children: (bool) Defaults to true.
      *
-     * You can pass a term entity instance.
+     * You can pass a term entity instance:
+     *
      * ```php
      * $query->whereTerm($term);
      * $query->whereTerm($term, ['include_children' => false]);

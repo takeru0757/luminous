@@ -3,19 +3,18 @@
 namespace Luminous\Bridge;
 
 use ArrayAccess;
-use InvalidArgumentException;
-use Illuminate\Contracts\Routing\UrlRoutable;
 
-abstract class Entity implements ArrayAccess, UrlRoutable
+abstract class Entity implements ArrayAccess, UrlResource
 {
     use DecoratorTrait;
+    use UrlPathTrait;
 
     /**
      * The WP.
      *
      * @var \Luminous\Bridge\WP
      */
-    protected $wp = [];
+    protected $wp;
 
     /**
      * The accessors map for original instance.
@@ -48,22 +47,14 @@ abstract class Entity implements ArrayAccess, UrlRoutable
     }
 
     /**
-     * Get the value of the model's route key.
+     * Get the array to build URL.
      *
-     * @return mixed
+     * @return array
      */
-    public function getRouteKey()
+    public function forUrl()
     {
-        return $this->{$this->getRouteKeyName()};
-    }
+        $type = $this->type->type();
 
-    /**
-     * Get the route key for the model.
-     *
-     * @return string
-     */
-    public function getRouteKeyName()
-    {
-        return 'path';
+        return array_merge($this->type->forUrl(), [$type => $this]);
     }
 }

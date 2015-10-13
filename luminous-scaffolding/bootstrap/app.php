@@ -11,20 +11,6 @@ $app = new Luminous\Application(
 );
 
 // -----------------------------------------------------------------------------
-// Register Container Bindings
-// -----------------------------------------------------------------------------
-
-$app->singleton(
-    Illuminate\Contracts\Debug\ExceptionHandler::class,
-    Luminous\Exceptions\Handler::class
-);
-
-$app->singleton(
-    Illuminate\Contracts\Console\Kernel::class,
-    Luminous\Console\Kernel::class
-);
-
-// -----------------------------------------------------------------------------
 // Register Middleware
 // -----------------------------------------------------------------------------
 
@@ -44,7 +30,7 @@ $app->singleton(
 // Load Routes
 // -----------------------------------------------------------------------------
 
-$app->group(['namespace' => 'Luminous\Http\Controllers'], function ($app) {
+$app->make('router')->scope(['namespace' => 'Luminous\Http\Controllers'], function ($router) {
     require __DIR__.'/routes.php';
 });
 

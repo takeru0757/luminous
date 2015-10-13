@@ -1,6 +1,6 @@
 <ul class="pager">
     @if (isset($index))
-    <li><a href="{{ archive_url($index) }}" title="{{ $index->label }}">Index</a></li>
+    <li><a href="{{ posts_url($index) }}" title="{{ $index->label }}">Index</a></li>
     @endif
 
     @if (isset($newer))

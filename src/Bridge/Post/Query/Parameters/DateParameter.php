@@ -3,8 +3,8 @@
 namespace Luminous\Bridge\Post\Query\Parameters;
 
 use DateTime;
-use Carbon\Carbon;
 use InvalidArgumentException;
+use Carbon\Carbon;
 
 /**
  * The date parameter for the post query.
@@ -38,7 +38,9 @@ trait DateParameter
      * Add a date parameter to the query.
      *
      * Available operators: '=', '>', '>=', '<', '<='
+     *
      * Available value types:
+     *
      * - An array has keys: 'year', 'month', 'week', 'day', 'hour', 'minute' and 'second'.
      * - A DateTime instance
      *

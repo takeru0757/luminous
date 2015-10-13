@@ -6,6 +6,7 @@ use WP_Post;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Luminous\Bridge\WP;
+use Luminous\Bridge\Term\Type as TermType;
 use Luminous\Bridge\Entity as BaseEntity;
 
 abstract class Entity extends BaseEntity
@@ -155,9 +156,10 @@ abstract class Entity extends BaseEntity
      * @uses \strip_shortcodes()
      *
      * @param int $length
+     * @param bool $useContent
      * @return string
      */
-    public function excerpt($length = 120)
+    public function excerpt($length = 120, $useContent = true)
     {
         $filter = function ($excerpt) {
             $excerpt = strip_shortcodes($excerpt);
@@ -169,7 +171,7 @@ abstract class Entity extends BaseEntity
 
         $excerpt = $filter($this->raw_excerpt);
 
-        if ($excerpt === '') {
+        if ($useContent && $excerpt === '') {
             $excerpt = $filter($this->raw_content);
         }
 
@@ -235,23 +237,93 @@ abstract class Entity extends BaseEntity
     }
 
     /**
-     * Get a URL parameter.
+     * Get the terms.
+     *
+     * @uses \get_the_terms()
+     * @uses \is_wp_error()
+     *
+     * @param string|\Luminous\Bridge\Term\Type $termType
+     * @return \Illuminate\Support\Collection|\Luminous\Bridge\Term\Entity[]
+     */
+    public function terms($type)
+    {
+        $type = $this->wp->termType($type);
+
+        $originals = get_the_terms($this->original->ID, $type->name);
+        $originals = $originals && ! is_wp_error($originals) ? $originals : [];
+
+        $terms = array_map(function ($original) {
+            return $this->wp->term($original);
+        }, $originals);
+
+        return new Collection($terms);
+    }
+
+    /**
+     * Get the meta data.
+     *
+     * @uses \get_post_meta()
+     *
+     * @param string $key
+     * @param bool $single
+     * @return mixed
+     */
+    public function meta($key, $single = true)
+    {
+        return get_post_meta($this->original->ID, $key, $single);
+    }
+
+    /**
+     * Get the thumbnail.
+     *
+     * @uses \get_post_thumbnail_id()
+     * @return \Luminous\Bridge\Post\Entities\AttachmentEntity|null
+     */
+    protected function getThumbnailAttribute()
+    {
+        if ($id = get_post_thumbnail_id($this->original->ID)) {
+            return $this->wp->post((int) $id);
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the thumbnail URL.
+     *
+     * @param string|null $size
+     * @param string $default
+     * @return string
+     */
+    public function thumbnailSrc($size = null, $default = null)
+    {
+        if ($thumbnail = $this->thumbnail) {
+            return $thumbnail->src($size);
+        }
+
+        return $default;
+    }
+
+    /**
+     * Get the URL apth.
      *
      * @param string $key
      * @return string
+     *
+     * @throws \InvalidArgumentException
      */
-    public function urlParameter($key)
+    public function urlPath($key)
     {
         $dateFormats = [
-            'year'  => 'Y',
-            'month' => 'm',
-            'day'   => 'd',
+            'date_year'     => 'Y',
+            'date_month'    => 'm',
+            'date_day'      => 'd',
         ];
 
         if (array_key_exists($key, $dateFormats)) {
             return $this->date($dateFormats[$key]);
         }
 
-        return $this->{$key};
+        return parent::urlPath($key);
     }
 }

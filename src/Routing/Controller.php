@@ -2,50 +2,79 @@
 
 namespace Luminous\Routing;
 
-use Illuminate\Http\Request;
 use Illuminate\Contracts\View\View;
-use Laravel\Lumen\Routing\Controller as BaseController;
+use Illuminate\Http\Request;
 
-abstract class Controller extends BaseController
+/**
+ * Abstract Controller Class
+ *
+ * This class is based on Laravel Lumen:
+ *
+ * - Copyright (c) Taylor Otwell
+ * - Licensed under the MIT license
+ * - {@link https://github.com/laravel/lumen-framework/blob/5.1/src/Routing/Controller.php}
+ */
+abstract class Controller
 {
+    use ValidatesRequests;
+
     /**
-     * Create a new response.
+     * The middleware defined on the controller.
      *
-     * - Set `Cache-Control` header.
-     * - Set `Etag` header and set 304 status code if not modified.
-     * - Fix `Content-Type` header (add the charset) and protocol version.
+     * @var array
+     */
+    protected $middleware = [];
+
+    /**
+     * Define a middleware on the controller.
      *
-     * @uses \response()
+     * @param string $middleware
+     * @param array $options
+     * @return void
+     */
+    public function middleware($middleware, array $options = [])
+    {
+        $this->middleware[$middleware] = $options;
+    }
+
+    /**
+     * Get the middleware for a given method.
      *
      * @param \Illuminate\Http\Request $request
-     * @param \Illuminate\Contracts\View\View $view
-     * @param array $headers
-     * @return \Illuminate\Http\Response
+     * @param string $method
+     * @return array
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function createResponse(Request $request, View $view, array $headers = [])
+    public function getMiddlewareForMethod(Request $request, $method)
     {
-        $response = response($view->render(), 200, $headers);
+        $middleware = [];
 
-        if ($maxAge = $this->maxAge()) {
-            $response->setCache(['private' => true, 'max_age' => $maxAge]);
+        foreach ($this->middleware as $name => $options) {
+            if (isset($options['only']) && ! in_array($method, (array) $options['only'])) {
+                continue;
+            }
+
+            if (isset($options['except']) && in_array($method, (array) $options['except'])) {
+                continue;
+            }
+
+            $middleware[] = $name;
         }
 
-        // The method `Request::isNotModified()` contains `Request::setNotModified()`.
-        // https://github.com/symfony/symfony/issues/13678
-        $response->setEtag(md5($response->getContent()));
-        $response->isNotModified($request);
-
-        return $response->prepare($request);
+        return $middleware;
     }
 
     /**
      * Get the `max-age`.
      *
-     * @uses \env()
-     *
+     * @param \Illuminate\Http\Request $request
+     * @param string $method
      * @return int Returns `600` (`0` when debug).
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function maxAge()
+    public function maxAge(Request $request, $method)
     {
         return env('APP_DEBUG', false) ? 0 : 600;
     }

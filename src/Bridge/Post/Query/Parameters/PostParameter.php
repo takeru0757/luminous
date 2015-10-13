@@ -46,8 +46,8 @@ trait PostParameter
      * @var array
      */
     protected $postWhereColumns = [
-        'id'        => ['in' => 'post__in', 'not in' => 'post__not_in'],
-        'parent_id' => ['in' => 'post_parent__in', 'not in' => 'post_parent__not_in'],
+        'id'        => ['=' => 'p', 'in' => 'post__in', 'not in' => 'post__not_in'],
+        'parent_id' => ['=' => 'post_parent', 'in' => 'post_parent__in', 'not in' => 'post_parent__not_in'],
         'path'      => ['=' => 'pagename'],
         'slug'      => ['=' => 'name'],
     ];
@@ -96,6 +96,18 @@ trait PostParameter
     }
 
     /**
+     * Set to get only root entities.
+     *
+     * @return $this
+     */
+    public function root()
+    {
+        $this->wherePost('parent_id', 0);
+
+        return $this;
+    }
+
+    /**
      * Add a post parameter to the query.
      *
      * @param string $column
@@ -115,8 +127,8 @@ trait PostParameter
             list($operator, $value) = ['=', $operator];
         }
 
-        if (in_array($column, ['id', 'parent_id'])) {
-            $operator = in_array($operator, ['=', 'in']) ? 'in' : 'not in';
+        if (in_array($column, ['id', 'parent_id']) && $operator !== '=') {
+            $operator = $operator === 'in' ? 'in' : 'not in';
             $value = array_map('intval', (array) $value);
         }
 

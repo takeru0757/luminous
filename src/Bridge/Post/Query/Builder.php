@@ -23,21 +23,14 @@ class Builder extends QueryBuilder
     use TermParameter;
 
     /**
-     * The post builder instance.
+     * Create a new post query builder instance.
      *
-     * @var \Luminous\Bridge\Post\Builder
-     */
-    protected $postBuilder;
-
-    /**
-     * Create a new post query instance.
-     *
-     * @param \Luminous\Bridge\Post\Builder $builder
+     * @param \Luminous\Bridge\Post\Builder $entityBuilder
      * @return void
      */
-    public function __construct(PostBuilder $postBuilder)
+    public function __construct(PostBuilder $entityBuilder)
     {
-        $this->postBuilder = $postBuilder;
+        parent::__construct($entityBuilder);
     }
 
     /**
@@ -48,6 +41,19 @@ class Builder extends QueryBuilder
     public function get()
     {
         return $this->retrievePosts($this->buildQuery());
+    }
+
+    /**
+     * Implementation for Countable.
+     *
+     * @return int
+     */
+    public function count()
+    {
+        $args = $this->buildArgs();
+        $args['fields'] = 'ids';
+
+        return count($this->buildQuery($args)->posts);
     }
 
     /**
@@ -112,7 +118,7 @@ class Builder extends QueryBuilder
         remove_filter('posts_fields', $fieldsFilter);
 
         return new Collection(array_map(function ($object) use ($type) {
-            $date = Carbon::createFromFormat('Y-m-d', $object->_date, $this->postBuilder->timezone());
+            $date = Carbon::createFromFormat('Y-m-d', $object->_date, $this->entityBuilder->timezone());
             return new Archive($type, $date->startOfDay(), (int) $object->_count);
         }, $query->posts));
     }
@@ -125,7 +131,7 @@ class Builder extends QueryBuilder
      */
     protected function retrievePosts(WP_Query $query)
     {
-        return $this->postBuilder->makeMany($query->posts);
+        return $this->entityBuilder->makeMany($query->posts);
     }
 
     /**
@@ -142,23 +148,32 @@ class Builder extends QueryBuilder
     /**
      * Build the original query instance.
      *
+     * @param array $args
      * @return \WP_Query
      */
-    protected function buildQuery()
+    protected function buildQuery(array $args = [])
+    {
+        return new WP_Query($args ?: $this->buildArgs());
+    }
+
+    /**
+     * Build the argumants for `get_terms()`.
+     *
+     * @return array
+     */
+    protected function buildArgs()
     {
         $query = [
             'posts_per_page' => $this->limit ?: -1,
             'offset' => $this->offset,
         ];
 
-        $query = array_merge(
+        return array_merge(
             $query,
             $this->getDateQuery(),
             $this->getOrderByQuery(),
             $this->getPostQuery(),
             $this->getTermQuery()
         );
-
-        return new WP_Query($query);
     }
 }

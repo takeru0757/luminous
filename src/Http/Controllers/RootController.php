@@ -12,10 +12,8 @@ class RootController extends BaseController
     /**
      * Handle requests for home (and shortlinks).
      *
-     * @uses \view()
-     *
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
+     * @return \Illuminate\View\View
      */
     public function home(Request $request)
     {
@@ -23,17 +21,13 @@ class RootController extends BaseController
             return $this->shortlink($id);
         }
 
-        return $this->createResponse($request, view('root.home'));
+        return view('root.home');
     }
 
     /**
      * Handle requests for shortlinks.
      *
      * @link https://developer.wordpress.org/reference/functions/wp_get_shortlink/
-     *
-     * @uses \app()
-     * @uses \abort()
-     * @uses \post_url()
      *
      * @param int $id
      * @return \Illuminate\Http\RedirectResponse
@@ -43,7 +37,7 @@ class RootController extends BaseController
     public function shortlink($id)
     {
         try {
-            $post = app('wp')->post($id);
+            $post = app('wp')->post((int) $id);
         } catch (EntityNotFoundException $e) {
             abort(404);
         }
@@ -54,32 +48,23 @@ class RootController extends BaseController
     /**
      * Handle requests for '/robots.txt'.
      *
-     * @uses \app()
-     * @uses \view()
-     *
-     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
-    public function robots(Request $request)
+    public function robots()
     {
         $view = view(app('wp')->isPublic() ? 'root.robots' : 'root.robots-noindex');
 
-        return $this->createResponse($request, $view, ['Content-Type' => 'text/plain']);
+        return response($view, 200, ['content-type' => 'text/plain']);
     }
 
     /**
      * Handle requests for '/sitemap.xml'.
      *
-     * @uses \app()
-     * @uses \abort()
-     * @uses \view()
-     *
-     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      *
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
-    public function sitemap(Request $request)
+    public function sitemap()
     {
         $wp = app('wp');
 
@@ -88,9 +73,9 @@ class RootController extends BaseController
         }
 
         $view = view('root.sitemap', [
-            'appModified' => app('modified')->setTimezone($wp->timezone())
+            'appModified' => Carbon::createFromTimeStamp(app('modified'), $wp->timezone()),
         ]);
 
-        return $this->createResponse($request, $view, ['Content-Type' => 'text/xml']);
+        return response($view, 200, ['content-type' => 'text/xml']);
     }
 }

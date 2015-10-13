@@ -3,6 +3,7 @@
 require __DIR__.'/wp-helpers.php';
 
 use Luminous\Bridge\WP;
+use Luminous\Bridge\Post\Entities\AttachmentEntity;
 
 // -----------------------------------------------------------------------------
 // Rewrite Rules
@@ -48,16 +49,18 @@ add_filter('post_link', function ($permalink, $post, $leavename) {
         return $permalink;
     }
     $placeholder = $leavename ? '%postname%' : null;
-    return luminous_post_url(app('wp')->post($post), $placeholder);
+    $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
+    return post_url(app('wp')->post($post), $parameters, true);
 }, 10, 3);
 
 // @link https://developer.wordpress.org/reference/functions/_get_page_link/
 add_filter('_get_page_link', function ($permalink, $postId) {
-    if ($permalink === home_url('/') || strpos($permalink, '?page_id=') !== false) {
+    if ($permalink === home_url() || strpos($permalink, '?page_id=') !== false) {
         return $permalink;
     }
     $placeholder = strpos($permalink, '%pagename%') !== false ? '%pagename%' : null;
-    return luminous_post_url(app('wp')->post($postId), $placeholder);
+    $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
+    return post_url(app('wp')->post($postId), $parameters, true);
 }, 10, 2);
 
 // @link https://developer.wordpress.org/reference/functions/get_post_permalink/
@@ -66,13 +69,20 @@ add_filter('post_type_link', function ($permalink, $post, $leavename) {
         return $permalink;
     }
     $placeholder = $leavename ? "%{$post->post_type}%" : null;
-    return luminous_post_url(app('wp')->post($post), $placeholder);
+    $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
+    return post_url(app('wp')->post($post), $parameters, true);
 }, 10, 3);
 
 // @link https://developer.wordpress.org/reference/functions/get_term_link/
 add_filter('term_link', function ($termlink, $term, $taxonomy) {
-    return luminous_term_url(app('wp')->term($term, $taxonomy));
+    $term = app('wp')->term($term, $taxonomy);
+    return posts_url($term->type->post_type, $term->forUrl(), true);
 }, 10, 3);
+
+// @link https://developer.wordpress.org/reference/hooks/wp_get_attachment_url/
+add_filter('wp_get_attachment_url', function ($url, $postId) {
+    return url(AttachmentEntity::attachmentUrl($url), true);
+}, 10, 2);
 
 // -----------------------------------------------------------------------------
 // Last Modified

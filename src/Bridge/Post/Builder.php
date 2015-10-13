@@ -2,8 +2,8 @@
 
 namespace Luminous\Bridge\Post;
 
-use Luminous\Bridge\Exceptions\MissingEntityException;
 use Luminous\Bridge\Builder as BaseBuilder;
+use Luminous\Bridge\Exceptions\MissingEntityException;
 use Luminous\Bridge\Post\Query\Builder as QueryBuilder;
 
 /**
@@ -16,12 +16,19 @@ class Builder extends BaseBuilder
      * Get an original object.
      *
      * @uses \get_post()
+     * @uses \get_page_by_path()
+     * @uses \OBJECT
      *
-     * @param int|\WP_Post $id
+     * @param int|string|\WP_Post $id
+     * @param string $type
      * @return \WP_Post|null
      */
-    protected function getOriginal($id)
+    protected function getOriginal($id, $type = null)
     {
+        if (is_string($id)) {
+            return get_page_by_path($id, \OBJECT, $type ?: 'page');
+        }
+
         // WordPress uses global $post when $id is null.
         return $id && ($original = get_post($id)) ? $original : null;
     }
@@ -37,10 +44,12 @@ class Builder extends BaseBuilder
     public function make($original)
     {
         $type = $this->getType($original->post_type);
-        $base = 'wp.post.entities.';
 
-        if (! $this->container->bound($abstract = $base.$type->name)) {
-            $abstract = $base.($type->hierarchical ? 'hierarchical' : 'nonhierarchical');
+        if (! $this->container->bound($abstract = "wp.post.entities.{$type->name}")) {
+            $abstract = $type->hierarchical ?
+                        'Luminous\Bridge\Post\Entities\HierarchicalEntity':
+                        'Luminous\Bridge\Post\Entities\NonHierarchicalEntity';
+
             if (! $this->container->bound($abstract)) {
                 throw new MissingEntityException($abstract);
             }
@@ -70,7 +79,7 @@ class Builder extends BaseBuilder
      */
     protected function makeType($original)
     {
-        return new Type($original);
+        return new Type($this->container['wp'], $original);
     }
 
     /**

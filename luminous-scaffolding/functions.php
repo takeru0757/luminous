@@ -4,3 +4,5 @@
  *
  * @link https://codex.wordpress.org/Child_Themes
  */
+
+add_theme_support('post-thumbnails');

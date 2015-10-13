@@ -14,6 +14,10 @@ spl_autoload_register(function ($className) use ($themePath) {
     }
 });
 
+if (! is_child_theme()) {
+    require $themePath.'/functions.php';
+}
+
 // -----------------------------------------------------------------------------
 // Environment Variables
 // -----------------------------------------------------------------------------
@@ -32,6 +36,10 @@ if (defined('WP_DEBUG') && WP_DEBUG) {
 
 $app = require $themePath.'/bootstrap/app.php';
 
+// Set the routing context.
+$app->make('router')->setContext(home_url());
+
+// Run the application.
 if (is_wp()) {
     require __DIR__.'/wp-bridges.php';
 } else {

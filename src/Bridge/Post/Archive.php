@@ -3,9 +3,20 @@
 namespace Luminous\Bridge\Post;
 
 use Carbon\Carbon;
+use Luminous\Bridge\UrlPathTrait;
+use Luminous\Bridge\UrlResource;
 
-class Archive
+/**
+ * @property-read string $type
+ * @property-read \Carbon\Carbon $date
+ * @property-read int|null $count
+ */
+class Archive implements UrlResource
 {
+    use UrlPathTrait {
+        urlPath as protected originalUrlPath;
+    }
+
     /**
      * The type name.
      *
@@ -16,14 +27,14 @@ class Archive
     /**
      * The date.
      *
-     * @var Carbon\Carbon
+     * @var \Carbon\Carbon
      */
     protected $date;
 
     /**
      * The number of posts.
      *
-     * @var int
+     * @var int|null
      */
     protected $count;
 
@@ -35,7 +46,7 @@ class Archive
      * @param int $count
      * @return void
      */
-    public function __construct($type, Carbon $date, $count = 0)
+    public function __construct($type, Carbon $date, $count = null)
     {
         $this->type = $type;
         $this->date = $date;
@@ -54,21 +65,34 @@ class Archive
     }
 
     /**
-     * Get a URL parameters.
+     * Get the URL apth.
+     *
+     * @param string $key
+     * @return string
+     */
+    public function urlPath($key)
+    {
+        if ($key === 'path') {
+            $formats = [
+                'yearly'    => 'Y',
+                'monthly'   => 'Y/m',
+                'daily'     => 'Y/m/d',
+            ];
+
+            return $this->format($formats[$this->type]);
+        }
+
+        return $this->originalUrlPath($key);
+    }
+
+    /**
+     * Get the array to build URL.
      *
      * @return array
      */
-    public function urlParameters()
+    public function forUrl()
     {
-        $types = [
-            'yearly'    => ['year'],
-            'monthly'   => ['year', 'month'],
-            'daily'     => ['year', 'month', 'day'],
-        ];
-
-        $keys = $types[$this->type];
-
-        return array_combine($keys, array_map([$this->date, '__get'], $keys));
+        return ['archive' => $this];
     }
 
     /**

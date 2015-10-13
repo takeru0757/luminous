@@ -3,77 +3,86 @@
 namespace Luminous\Exceptions;
 
 use Exception;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\Debug\ExceptionHandler as SymfonyExceptionHandler;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Illuminate\Http\Response;
-use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Application as ConsoleApplication;
+use Symfony\Component\Debug\ExceptionHandler as SymfonyExceptionHandler;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
-class Handler extends ExceptionHandler
+class Handler implements ExceptionHandler
 {
+    /**
+     * The log implementation.
+     *
+     * @var \Psr\Log\LoggerInterface
+     */
+    protected $log;
+
     /**
      * A list of the exception types that should not be reported.
      *
      * @var array
      */
     protected $dontReport = [
-        HttpException::class,
+        HttpExceptionInterface::class,
     ];
+
+    /**
+     * Create a new exception handler instance.
+     *
+     * @param \Psr\Log\LoggerInterface $log
+     * @return void
+     */
+    public function __construct(LoggerInterface $log)
+    {
+        $this->log = $log;
+    }
 
     /**
      * Report or log an exception.
      *
-     * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
-     *
-     * @param  \Exception  $e
+     * @param \Exception $exception
      * @return void
      */
-    public function report(Exception $e)
+    public function report(Exception $exception)
     {
-        return parent::report($e);
+        foreach ($this->dontReport as $type) {
+            if ($exception instanceof $type) {
+                return;
+            }
+        }
+
+        $this->log->error((string) $exception);
     }
 
     /**
      * Render an exception into a response.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Exception  $e
+     * @param \Illuminate\Http\Request $request
+     * @param \Exception $exception
      * @return \Illuminate\Http\Response
+     *
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function render($request, Exception $e)
+    public function render($request, Exception $exception)
     {
-        $responce = (new SymfonyExceptionHandler(env('APP_DEBUG', false)))->createResponse($e);
+        $response = (new SymfonyExceptionHandler(env('APP_DEBUG', false)))->createResponse($exception);
+        $response = new Response($response->getContent(), $response->getStatusCode(), $response->headers->all());
+        $response->exception = $exception;
 
-        if ($view = $this->getErrorView($e)) {
-            $responce->setContent($view->render());
-        }
-
-        return $responce;
+        return $response;
     }
 
     /**
-     * Get the error view if exists.
+     * Render an exception to the console.
      *
-     * @param Exception $e
-     * @return \Illuminate\View\View
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     * @param \Exception $exception
+     * @return void
      */
-    protected function getErrorView(Exception $e)
+    public function renderForConsole($output, Exception $exception)
     {
-        if ($e instanceof HttpException) {
-            $status = $e->getStatusCode();
-            $file = "error.{$status}";
-            if (view()->exists($file)) {
-                return view($file, ['status' => $status, 'exception' => $e]);
-            }
-        }
-
-        if (! env('APP_DEBUG', false)) {
-            $status = 500;
-            $file = "error.{$status}";
-            if (view()->exists($file)) {
-                return view($file, ['status' => $status, 'exception' => $e]);
-            }
-        }
-
-        return null;
+        (new ConsoleApplication)->renderException($exception, $output);
     }
 }

@@ -112,7 +112,7 @@ class WP
     }
 
     /**
-     * Get all post type instances.
+     * Get all post type collection.
      *
      * @uses \get_post_types()
      *
@@ -151,12 +151,13 @@ class WP
     /**
      * Get the post entity instance.
      *
-     * @param int|\WP_Post $id
+     * @param int|string|\WP_Post $id
+     * @param string $type
      * @return \Luminous\Bridge\Post\Entity
      */
-    public static function post($id)
+    public static function post($id, $type = null)
     {
-        return static::$post->get($id);
+        return static::$post->get($id, $type);
     }
 
     /**
@@ -180,5 +181,17 @@ class WP
     public static function term($id, $type = null)
     {
         return static::$term->get($id, $type);
+    }
+
+    /**
+     * Get the term query instance.
+     *
+     * @param string $type
+     * @return \Luminous\Bridge\Term\Query\Builder
+     */
+    public static function terms($type = null)
+    {
+        $query = static::$term->query();
+        return $type ? $query->type($type) : $query;
     }
 }

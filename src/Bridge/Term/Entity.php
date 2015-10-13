@@ -57,4 +57,24 @@ abstract class Entity extends BaseEntity
         $slugs = $this->ancestors->reverse()->pluck('slug')->push($this->slug);
         return implode('/', $slugs->all());
     }
+
+    /**
+     * Get the count.
+     *
+     * @return int
+     */
+    protected function getCountAttribute()
+    {
+        return $this->count();
+    }
+
+    /**
+     * Get the count.
+     *
+     * @return int
+     */
+    public function count()
+    {
+        return intval($this->original->count);
+    }
 }

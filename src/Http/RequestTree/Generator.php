@@ -4,9 +4,9 @@ namespace Luminous\Http\RequestTree;
 
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Luminous\Bridge\Post\Type as PostType;
 use Luminous\Bridge\Post\Archive;
 use Luminous\Bridge\Post\Entity as PostEntity;
+use Luminous\Bridge\Post\Type as PostType;
 use Luminous\Bridge\Term\Entity as TermEntity;
 
 class Generator
@@ -105,9 +105,6 @@ class Generator
     /**
      * Set the current post type.
      *
-     * @uses \trans()
-     * @uses \archive_url()
-     *
      * @param \Luminous\Bridge\Post\Type $postType
      * @return $this
      */
@@ -117,7 +114,7 @@ class Generator
 
         if ($this->postType->hasArchive()) {
             $label = $this->postType->name === 'post' ? trans('labels.post') : $this->postType->label;
-            $this->add($label, archive_url($this->postType), $this->postType);
+            $this->add($label, posts_url($this->postType), $this->postType);
         }
 
         return $this;
@@ -125,9 +122,6 @@ class Generator
 
     /**
      * Set the current date.
-     *
-     * @uses \trans()
-     * @uses \archive_url()
      *
      * @param array $date
      * @return $this
@@ -148,7 +142,7 @@ class Generator
         if ($type) {
             $this->archive = new Archive($type, $this->createDate($date));
             $label = $this->archive->format(trans("labels.archive.{$this->archive->type}"));
-            $this->add($label, archive_url($this->postType, $this->archive), $this->archive);
+            $this->add($label, posts_url($this->postType, ['archive' => $this->archive]), $this->archive);
         }
 
         return $this;
@@ -156,8 +150,6 @@ class Generator
 
     /**
      * Create a new DateTime from array.
-     *
-     * @uses \app()
      *
      * @param array $date
      * @return \Carbon\Carbon
@@ -173,8 +165,6 @@ class Generator
     /**
      * Set the current term entity.
      *
-     * @uses \term_url()
-     *
      * @param \Luminous\Bridge\Term\Entity $term
      * @return $this
      */
@@ -183,18 +173,16 @@ class Generator
         $this->term = $term;
 
         foreach ($this->term->ancestors->reverse() as $ancestor) {
-            $this->add($ancestor->name, term_url($ancestor), $ancestor);
+            $this->add($ancestor->name, posts_url($this->postType, ['term' => $ancestor]), $ancestor);
         }
 
-        $this->add($this->term->name, term_url($this->term), $this->term);
+        $this->add($this->term->name, posts_url($this->postType, ['term' => $this->term]), $this->term);
 
         return $this;
     }
 
     /**
      * Set the current post entity.
-     *
-     * @uses \post_url()
      *
      * @param \Luminous\Bridge\Post\Entity $post
      * @return $this
@@ -214,8 +202,6 @@ class Generator
 
     /**
      * Get the tree.
-     *
-     * @uses \trans()
      *
      * @return \Illuminate\Support\Collection|Luminous\Http\RequestTree\Node[]
      */
