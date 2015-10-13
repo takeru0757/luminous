@@ -35,7 +35,7 @@
     <div class="site-header jumbotron">
         <div class="container">
             <h1>Luminous</h1>
-            <p class="lead">Luminous is a <a href="https://wordpress.org/">WordPress</a> theme framework based on <a href="http://lumen.laravel.com/">Laravel Lumen</a>.<br>This framework will help you to develop WordPress themes like modern web applications using modern PHP.</p>
+            <p class="lead">Luminous is a <a href="https://wordpress.org/">WordPress</a> theme framework with <a href="http://laravel.com/">Laravel</a> components.<br>This framework will help you to develop WordPress themes like modern web applications using modern PHP.</p>
         </div>
     </div>
 

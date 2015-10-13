@@ -2,7 +2,7 @@
 
 **This project is still under development.**
 
-Luminous is a [WordPress](https://wordpress.org/) theme framework based on [Laravel Lumen](http://lumen.laravel.com/).
+Luminous is a [WordPress](https://wordpress.org/) theme framework with [Laravel](http://laravel.com/) components.
 
 ## License
 

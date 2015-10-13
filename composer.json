@@ -1,7 +1,7 @@
 {
     "name": "hrslash/luminous",
     "type": "wordpress-theme",
-    "description": "[under development] The WordPress theme framework based on Laravel components.",
+    "description": "[under development] The WordPress theme framework with Laravel components.",
     "keywords": ["luminous", "framework", "theme", "WordPress", "laravel"],
     "license": "GPL-2.0+",
     "authors": [
