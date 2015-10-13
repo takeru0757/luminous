@@ -3,6 +3,7 @@
 require __DIR__.'/wp-helpers.php';
 
 use Luminous\Bridge\WP;
+use Luminous\Bridge\Post\Entities\AttachmentEntity;
 
 // -----------------------------------------------------------------------------
 // Rewrite Rules
@@ -77,6 +78,11 @@ add_filter('term_link', function ($termlink, $term, $taxonomy) {
     $term = app('wp')->term($term, $taxonomy);
     return posts_url($term->type->post_type, $term->forUrl(), true);
 }, 10, 3);
+
+// @link https://developer.wordpress.org/reference/hooks/wp_get_attachment_url/
+add_filter('wp_get_attachment_url', function ($url, $postId) {
+    return url(AttachmentEntity::attachmentUrl($url), true);
+}, 10, 2);
 
 // -----------------------------------------------------------------------------
 // Last Modified

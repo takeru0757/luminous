@@ -1,5 +1,7 @@
 <?php
 
+use Luminous\Bridge\Post\Entities\AttachmentEntity;
+
 if (! function_exists('luminous_mod_rewrite_rules')) {
     /**
      * Get the mod rewitre rules for Luminous.
@@ -13,14 +15,15 @@ if (! function_exists('luminous_mod_rewrite_rules')) {
      */
     function luminous_mod_rewrite_rules()
     {
-        $publicUrl = get_stylesheet_directory_uri().(is_child_theme() ? '/public' : '/luminous-scaffolding/public');
-        $uploads = wp_upload_dir();
+        $rewriteBase = parse_url(home_url('/'), PHP_URL_PATH);
 
-        $rewriteBase = parse_url(home_url(), PHP_URL_PATH) ?: '/';
-        $uploadsPath = $uploads['basedir'];
-        $uploadsBase = parse_url($uploads['baseurl'], PHP_URL_PATH);
-        $publicPath  = base_path('public');
-        $publicBase  = parse_url($publicUrl, PHP_URL_PATH);
+        $uploadUrlReal = wp_upload_dir()['baseurl'];
+        $uploadUrlBase = AttachmentEntity::attachmentUrl($uploadUrlReal);
+        $uploadDir = parse_url($uploadUrlReal, PHP_URL_PATH);
+
+        $publicUrlReal = get_stylesheet_directory_uri().(is_child_theme() ? '/public' : '/luminous-scaffolding/public');
+        $publicDirPath = base_path('public');
+        $publicDir = parse_url($publicUrlReal, PHP_URL_PATH);
 
         return <<<EOT
 <IfModule mod_rewrite.c>
@@ -39,14 +42,13 @@ if (! function_exists('luminous_mod_rewrite_rules')) {
     # uploads
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond {$uploadsPath}%{REQUEST_URI} -f
-    RewriteRule ^uploads/(.*)$ {$uploadsBase}/$1 [L]
+    RewriteRule ^{$uploadUrlBase}/(.*)$ {$uploadDir}/$1 [L]
 
     # public
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteCond {$publicPath}%{REQUEST_URI} -f
-    RewriteRule ^(.*)$ {$publicBase}/$1 [L]
+    RewriteCond {$publicDirPath}%{REQUEST_URI} -f
+    RewriteRule ^(.*)$ {$publicDir}/$1 [L]
 
     # WordPress
     RewriteRule ^index\.php$ - [L]

@@ -156,9 +156,10 @@ abstract class Entity extends BaseEntity
      * @uses \strip_shortcodes()
      *
      * @param int $length
+     * @param bool $useContent
      * @return string
      */
-    public function excerpt($length = 120)
+    public function excerpt($length = 120, $useContent = true)
     {
         $filter = function ($excerpt) {
             $excerpt = strip_shortcodes($excerpt);
@@ -170,7 +171,7 @@ abstract class Entity extends BaseEntity
 
         $excerpt = $filter($this->raw_excerpt);
 
-        if ($excerpt === '') {
+        if ($useContent && $excerpt === '') {
             $excerpt = $filter($this->raw_content);
         }
 
@@ -257,7 +258,52 @@ abstract class Entity extends BaseEntity
 
         return new Collection($terms);
     }
-    
+
+    /**
+     * Get the meta data.
+     *
+     * @uses \get_post_meta()
+     *
+     * @param string $key
+     * @param bool $single
+     * @return mixed
+     */
+    public function meta($key, $single = true)
+    {
+        return get_post_meta($this->original->ID, $key, $single);
+    }
+
+    /**
+     * Get the thumbnail.
+     *
+     * @uses \get_post_thumbnail_id()
+     * @return \Luminous\Bridge\Post\Entities\AttachmentEntity|null
+     */
+    protected function getThumbnailAttribute()
+    {
+        if ($id = get_post_thumbnail_id($this->original->ID)) {
+            return $this->wp->post((int) $id);
+        }
+
+        return null;
+    }
+
+    /**
+     * Get the thumbnail URL.
+     *
+     * @param string|null $size
+     * @param string $default
+     * @return string
+     */
+    public function thumbnailSrc($size = null, $default = null)
+    {
+        if ($thumbnail = $this->thumbnail) {
+            return $thumbnail->src($size);
+        }
+
+        return $default;
+    }
+
     /**
      * Get the URL apth.
      *

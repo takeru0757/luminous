@@ -42,8 +42,8 @@ class BridgeServiceProvider extends ServiceProvider
             $app->register('Illuminate\Pagination\PaginationServiceProvider');
 
             $wp = new WP();
-            $wp->setPostBuilder($app['wp.post']);
-            $wp->setTermBuilder($app['wp.term']);
+            $wp->setPostBuilder($app['Luminous\Bridge\Post\Builder']);
+            $wp->setTermBuilder($app['Luminous\Bridge\Term\Builder']);
 
             return $wp;
         });
@@ -56,11 +56,11 @@ class BridgeServiceProvider extends ServiceProvider
      */
     protected function registerPostBuilder()
     {
-        $this->app->bind('wp.post.entities.attachment', 'Luminous\Bridge\Post\Entities\AttachmentEntity');
-        $this->app->bind('wp.post.entities.hierarchical', 'Luminous\Bridge\Post\Entities\HierarchicalEntity');
-        $this->app->bind('wp.post.entities.nonhierarchical', 'Luminous\Bridge\Post\Entities\NonHierarchicalEntity');
+        $this->app->bind(['Luminous\Bridge\Post\Entities\AttachmentEntity' => 'wp.post.entities.attachment']);
+        $this->app->bind(['Luminous\Bridge\Post\Entities\HierarchicalEntity' => 'wp.post.entities.page']);
+        $this->app->bind(['Luminous\Bridge\Post\Entities\NonHierarchicalEntity' => 'wp.post.entities.post']);
 
-        $this->app->singleton('wp.post', function ($app) {
+        $this->app->singleton('Luminous\Bridge\Post\Builder', function ($app) {
             return new PostBuilder($app);
         });
     }
@@ -72,10 +72,10 @@ class BridgeServiceProvider extends ServiceProvider
      */
     protected function registerTermBuilder()
     {
-        $this->app->bind('wp.term.entities.hierarchical', 'Luminous\Bridge\Term\Entities\HierarchicalEntity');
-        $this->app->bind('wp.term.entities.nonhierarchical', 'Luminous\Bridge\Term\Entities\NonHierarchicalEntity');
+        $this->app->bind(['Luminous\Bridge\Term\Entities\HierarchicalEntity' => 'wp.term.entities.category']);
+        $this->app->bind(['Luminous\Bridge\Term\Entities\NonHierarchicalEntity' => 'wp.term.entities.post_tag']);
 
-        $this->app->singleton('wp.term', function ($app) {
+        $this->app->singleton('Luminous\Bridge\Term\Builder', function ($app) {
             return new TermBuilder($app);
         });
     }

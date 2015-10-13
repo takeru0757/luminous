@@ -44,10 +44,12 @@ class Builder extends BaseBuilder
     public function make($original)
     {
         $type = $this->getType($original->post_type);
-        $base = 'wp.post.entities.';
 
-        if (! $this->container->bound($abstract = $base.$type->name)) {
-            $abstract = $base.($type->hierarchical ? 'hierarchical' : 'nonhierarchical');
+        if (! $this->container->bound($abstract = "wp.post.entities.{$type->name}")) {
+            $abstract = $type->hierarchical ?
+                        'Luminous\Bridge\Post\Entities\HierarchicalEntity':
+                        'Luminous\Bridge\Post\Entities\NonHierarchicalEntity';
+
             if (! $this->container->bound($abstract)) {
                 throw new MissingEntityException($abstract);
             }

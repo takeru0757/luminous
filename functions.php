@@ -14,6 +14,10 @@ spl_autoload_register(function ($className) use ($themePath) {
     }
 });
 
+if (! is_child_theme()) {
+    require $themePath.'/functions.php';
+}
+
 // -----------------------------------------------------------------------------
 // Environment Variables
 // -----------------------------------------------------------------------------
