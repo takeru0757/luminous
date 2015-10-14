@@ -12,6 +12,7 @@
     ],
     "require": {
         "php": ">=5.5.9",
+        "caouecs/laravel4-lang": "~2.0",
         "composer/installers": "~1.0",
         "illuminate/config": "5.1.*",
         "illuminate/container": "5.1.*",
@@ -38,7 +39,7 @@
         "symfony/var-dumper": "2.7.*"
     },
     "suggest": {
-        "vlucas/phpdotenv": "Required to use .env files (~1.0)."
+        "vlucas/phpdotenv": "Required to use .env files (~2.0)."
     },
     "autoload": {
         "psr-4": {

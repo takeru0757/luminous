@@ -1,6 +1,7 @@
 <?php
 
-// Dotenv::load(__DIR__.'/../');
+// $dotenv = new Dotenv\Dotenv(__DIR__.'/../');
+// $dotenv->load();
 
 // -----------------------------------------------------------------------------
 // Create The Application

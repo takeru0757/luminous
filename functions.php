@@ -22,11 +22,7 @@ if (! is_child_theme()) {
 // Environment Variables
 // -----------------------------------------------------------------------------
 
-// Configure APP_TIMEZONE as "UTC" for WordPress.
-// @link https://github.com/WordPress/WordPress/blob/4.3/wp-settings.php#L43
-putenv('APP_TIMEZONE='.date_default_timezone_get());
-
-if (defined('WP_DEBUG') && WP_DEBUG) {
+if (empty(getenv('APP_DEBUG')) && defined('WP_DEBUG') && WP_DEBUG) {
     putenv('APP_DEBUG=true');
 }
 
