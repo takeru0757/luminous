@@ -6,9 +6,8 @@ use Illuminate\Http\Request;
 use Luminous\Bridge\Post\Type;
 use Luminous\Bridge\Post\Entity;
 use Luminous\Http\RequestTree\Generator as Tree;
-use Luminous\Routing\Controller as BaseController;
 
-class PostController extends BaseController
+class PostController extends Controller
 {
     /**
      * Handle requests to posts.
@@ -20,10 +19,8 @@ class PostController extends BaseController
      */
     public function index(Request $request)
     {
-        $wp = app('wp');
-
-        $postType = $wp->postType($request->route('post_type'));
-        $postQuery = $wp->posts($postType);
+        $postType = $this->wp->postType($request->route('post_type'));
+        $postQuery = $this->wp->posts($postType);
 
         $tree = (new Tree())->setPostType($postType);
 
@@ -40,11 +37,11 @@ class PostController extends BaseController
 
         if ($termType = $request->route('term_type')) {
             if ($termId = $request->route('term__id')) {
-                $term = $wp->term((int) $termId, $termType);
+                $term = $this->wp->term((int) $termId, $termType);
             } elseif ($termSlug = $request->route('term__slug')) {
-                $term = $wp->term($termSlug, $termType);
+                $term = $this->wp->term($termSlug, $termType);
             } elseif ($termPath = $request->route('term__path')) {
-                $term = $wp->term($termPath, $termType);
+                $term = $this->wp->term($termPath, $termType);
             } else {
                 abort(404);
             }
@@ -73,10 +70,8 @@ class PostController extends BaseController
      */
     public function show(Request $request)
     {
-        $wp = app('wp');
-
-        $postType = $wp->postType($request->route('post_type'));
-        $postQuery = $wp->posts($postType);
+        $postType = $this->wp->postType($request->route('post_type'));
+        $postQuery = $this->wp->posts($postType);
 
         if ($postId = $request->route('post__id')) {
             $postQuery->wherePost('id', (int) $postId);

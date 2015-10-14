@@ -7,7 +7,7 @@
     <h1 class="h4"><a href="{{ post_url($_post) }}">{{ $_post->title }}</a></h1>
 
     <ul class="m-b-md list-inline">
-        <li class="text-muted"><time datetime="{{ $_post->date->toW3cString() }}" pubdate>{{ $_post->date($site->dateFormat) }}</time></li>
+        <li class="text-muted"><time datetime="{{ $_post->date->toW3cString() }}" pubdate>{{ $_post->date(wp_option('date_format')) }}</time></li>
         @if (($_terms = $_post->terms('category')) && ! $_terms->isEmpty())
         <li>
             <ul class="list-inline" style="display:inline-block">

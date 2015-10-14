@@ -22,7 +22,7 @@ class Builder extends BaseBuilder
      * @uses \is_wp_error()
      *
      * @param int|string|\stdClass $id
-     * @param string $type
+     * @param \Luminous\Bridge\Term\Type|string $type
      * @return \stdClass|null
      *
      * @throws \InvalidArgumentException
@@ -31,6 +31,8 @@ class Builder extends BaseBuilder
     {
         if (is_null($type) && isset($id->taxonomy)) {
             $type = $id->taxonomy;
+        } elseif ($type instanceof Type) {
+            $type = $type->name;
         }
 
         if (empty($type)) {

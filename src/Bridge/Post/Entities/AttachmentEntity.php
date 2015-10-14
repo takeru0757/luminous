@@ -7,27 +7,27 @@ use Luminous\Bridge\Post\Entity as BaseEntity;
 class AttachmentEntity extends BaseEntity
 {
     /**
-     * The base URL of upload directory.
+     * The real URL of upload directory.
      *
      * @var string
      */
-    protected static $attachmentBaseUrl;
+    protected static $attachmentUrlReal;
 
     /**
-     * Modify the attachment URL.
+     * Get the attachment relative path from original URI.
      *
      * @uses \wp_upload_dir()
      *
      * @param string $uri
      * @return string
      */
-    public static function attachmentUrl($uri)
+    public static function attachmentPath($uri)
     {
-        if (is_null(static::$attachmentBaseUrl)) {
-            static::$attachmentBaseUrl = wp_upload_dir()['baseurl'];
+        if (is_null(static::$attachmentUrlReal)) {
+            static::$attachmentUrlReal = wp_upload_dir()['baseurl'];
         }
 
-        return str_replace(static::$attachmentBaseUrl, 'uploads', $uri);
+        return str_replace(static::$attachmentUrlReal, 'uploads', $uri);
     }
 
     /**
@@ -51,7 +51,7 @@ class AttachmentEntity extends BaseEntity
     }
 
     /**
-     * Get the File path.
+     * Get the full path of the file.
      *
      * @uses \get_attached_file()
      *
@@ -59,7 +59,7 @@ class AttachmentEntity extends BaseEntity
      */
     protected function getFilePathAttribute()
     {
-        return get_attached_file($this->original->ID);
+        return get_attached_file($this->id);
     }
 
     /**
@@ -80,8 +80,15 @@ class AttachmentEntity extends BaseEntity
      */
     public function is($type)
     {
-        list($mimeType) = explode('/', $this->mime_type);
-        return $mimeType === $type;
+        $actual = $this->mime_type;
+
+        if ($actual === $type) {
+            return true;
+        } elseif (strpos($type, '/') === false) {
+            return strpos($actual, $type.'/') === 0;
+        }
+
+        return false;
     }
 
     /**
@@ -95,23 +102,23 @@ class AttachmentEntity extends BaseEntity
     }
 
     /**
-     * Get the file URL.
+     * Get the relative path of the file.
      *
      * @uses \wp_attachment_is_image()
      * @uses \image_downsize()
      * @uses \wp_get_attachment_url()
      *
      * @param string|null $size
-     * @return string Relative URL.
+     * @return string
      */
     public function src($size = null)
     {
-        if (wp_attachment_is_image($this->original->ID)) {
-            list($url) = image_downsize($this->original->ID, $size);
+        if (wp_attachment_is_image($this->id)) {
+            list($url) = image_downsize($this->id, $size);
         } else {
-            $url = wp_get_attachment_url($this->original->ID);
+            $url = wp_get_attachment_url($this->id);
         }
 
-        return static::attachmentUrl($url);
+        return static::attachmentPath($url);
     }
 }

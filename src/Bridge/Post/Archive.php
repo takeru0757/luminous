@@ -65,7 +65,7 @@ class Archive implements UrlResource
     }
 
     /**
-     * Get the URL apth.
+     * Get the URL path.
      *
      * @param string $key
      * @return string

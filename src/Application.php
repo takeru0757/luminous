@@ -10,6 +10,9 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
+use Luminous\Asset\Asset;
+use Luminous\Routing\Dispatcher;
+use Luminous\Routing\Router;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -346,9 +349,25 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      *
      * @return void
      */
+    protected function registerAssetBindings()
+    {
+        $this->singleton('asset', function () {
+            $this->configure('asset');
+            $config = $this->make('config')->get('asset');
+            return new Asset($config['manifest'], $config['prefix']);
+        });
+    }
+
+    /**
+     * Register container bindings for the application.
+     *
+     * @return void
+     */
     protected function registerDispatcherBindings()
     {
-        $this->singleton('Luminous\Routing\Dispatcher');
+        $this->singleton('dispatcher', function () {
+            return new Dispatcher($this, $this->make('router'));
+        });
     }
 
     /**
@@ -358,7 +377,10 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      */
     protected function registerRouterBindings()
     {
-        $this->singleton('Luminous\Routing\Router');
+        $this->singleton('router', function () {
+            $context = $this->make('wp')->option('url');
+            return (new Router($this))->setContext($context);
+        });
     }
 
     /**
@@ -758,8 +780,10 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     {
         $this->aliases = [
             'Luminous\Application' => 'app',
-            'dispatcher' => 'Luminous\Routing\Dispatcher',
-            'router' => 'Luminous\Routing\Router',
+            'Luminous\Bridge\WP' => 'wp',
+            'Luminous\Asset\Asset' => 'asset',
+            'Luminous\Routing\Dispatcher' => 'dispatcher',
+            'Luminous\Routing\Router' => 'router',
             'Illuminate\Contracts\Foundation\Application' => 'app',
             'Illuminate\Contracts\Cache\Factory' => 'cache',
             'Illuminate\Contracts\Cache\Repository' => 'cache.store',
@@ -786,10 +810,9 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      */
     protected $availableBindings = [
         'wp' => 'registerBridgeBindings',
+        'asset' => 'registerAssetBindings',
         'dispatcher' => 'registerDispatcherBindings',
-        'Luminous\Routing\Dispatcher' => 'registerDispatcherBindings',
         'router' => 'registerRouterBindings',
-        'Luminous\Routing\Router' => 'registerRouterBindings',
         'cache' => 'registerCacheBindings',
         'Illuminate\Contracts\Cache\Factory' => 'registerCacheBindings',
         'Illuminate\Contracts\Cache\Repository' => 'registerCacheBindings',

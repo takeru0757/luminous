@@ -249,7 +249,7 @@ abstract class Entity extends BaseEntity
     {
         $type = $this->wp->termType($type);
 
-        $originals = get_the_terms($this->original->ID, $type->name);
+        $originals = get_the_terms($this->id, $type->name);
         $originals = $originals && ! is_wp_error($originals) ? $originals : [];
 
         $terms = array_map(function ($original) {
@@ -270,7 +270,7 @@ abstract class Entity extends BaseEntity
      */
     public function meta($key, $single = true)
     {
-        return get_post_meta($this->original->ID, $key, $single);
+        return get_post_meta($this->id, $key, $single);
     }
 
     /**
@@ -281,7 +281,7 @@ abstract class Entity extends BaseEntity
      */
     protected function getThumbnailAttribute()
     {
-        if ($id = get_post_thumbnail_id($this->original->ID)) {
+        if ($id = get_post_thumbnail_id($this->id)) {
             return $this->wp->post((int) $id);
         }
 
@@ -305,7 +305,7 @@ abstract class Entity extends BaseEntity
     }
 
     /**
-     * Get the URL apth.
+     * Get the URL path.
      *
      * @param string $key
      * @return string

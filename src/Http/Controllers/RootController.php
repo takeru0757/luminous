@@ -5,9 +5,8 @@ namespace Luminous\Http\Controllers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Luminous\Bridge\Exceptions\EntityNotFoundException;
-use Luminous\Routing\Controller as BaseController;
 
-class RootController extends BaseController
+class RootController extends Controller
 {
     /**
      * Handle requests for home (and shortlinks).
@@ -37,7 +36,7 @@ class RootController extends BaseController
     public function shortlink($id)
     {
         try {
-            $post = app('wp')->post((int) $id);
+            $post = $this->wp->post((int) $id);
         } catch (EntityNotFoundException $e) {
             abort(404);
         }
@@ -52,7 +51,7 @@ class RootController extends BaseController
      */
     public function robots()
     {
-        $view = view(app('wp')->isPublic() ? 'root.robots' : 'root.robots-noindex');
+        $view = view($this->wp->isPublic() ? 'root.robots' : 'root.robots-noindex');
 
         return response($view, 200, ['content-type' => 'text/plain']);
     }
@@ -66,14 +65,12 @@ class RootController extends BaseController
      */
     public function sitemap()
     {
-        $wp = app('wp');
-
-        if (! $wp->isPublic()) {
+        if (! $this->wp->isPublic()) {
             abort(404);
         }
 
         $view = view('root.sitemap', [
-            'appModified' => Carbon::createFromTimeStamp(app('modified'), $wp->timezone()),
+            'appModified' => Carbon::createFromTimeStamp(app('modified'), $this->wp->timezone()),
         ]);
 
         return response($view, 200, ['content-type' => 'text/xml']);

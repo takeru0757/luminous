@@ -36,11 +36,8 @@ if (defined('WP_DEBUG') && WP_DEBUG) {
 
 $app = require $themePath.'/bootstrap/app.php';
 
-// Set the routing context.
-$app->make('router')->setContext(home_url());
-
-// Run the application.
-if (is_wp()) {
+// Run the application or load "wp-bridges.php" if the request should be handled by WordPress.
+if (is_admin() || (isset($pagenow) && $pagenow !== 'index.php') || (defined('WP_INSTALLING') && WP_INSTALLING)) {
     require __DIR__.'/wp-bridges.php';
 } else {
     add_action('wp_loaded', function () use ($app) {

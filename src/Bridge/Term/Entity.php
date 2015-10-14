@@ -41,8 +41,8 @@ abstract class Entity extends BaseEntity
     protected function getAncestorsAttribute()
     {
         $ancestors = array_map(function ($id) {
-            return $this->wp->term($id, $this->type->name);
-        }, get_ancestors($this->original->term_id, $this->original->taxonomy, 'taxonomy'));
+            return $this->wp->term($id, $this->type);
+        }, get_ancestors($this->id, $this->original->taxonomy, 'taxonomy'));
 
         return new Collection($ancestors);
     }

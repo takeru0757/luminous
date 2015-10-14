@@ -81,7 +81,7 @@ add_filter('term_link', function ($termlink, $term, $taxonomy) {
 
 // @link https://developer.wordpress.org/reference/hooks/wp_get_attachment_url/
 add_filter('wp_get_attachment_url', function ($url, $postId) {
-    return url(AttachmentEntity::attachmentUrl($url), true);
+    return url(AttachmentEntity::attachmentPath($url), true);
 }, 10, 2);
 
 // -----------------------------------------------------------------------------

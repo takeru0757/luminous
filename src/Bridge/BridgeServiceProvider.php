@@ -9,26 +9,6 @@ use Luminous\Bridge\Term\Builder as TermBuilder;
 class BridgeServiceProvider extends ServiceProvider
 {
     /**
-     * Bootstrap the application events.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        $wp = $this->app['wp'];
-
-        $site = (object) [
-            'name'          => $wp->option('blogname'),
-            'description'   => $wp->option('blogdescription'),
-            'url'           => $wp->option('home'),
-            'dateFormat'    => $wp->option('date_format'),
-            'timeFormat'    => $wp->option('time_format'),
-        ];
-
-        $this->app['view']->share(compact('wp', 'site'));
-    }
-
-    /**
      * Register the service provider.
      *
      * @return void

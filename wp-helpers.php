@@ -6,6 +6,7 @@ if (! function_exists('luminous_mod_rewrite_rules')) {
     /**
      * Get the mod rewitre rules for Luminous.
      *
+     * @uses \Luminous\Bridge\Post\Entities\AttachmentEntity::attachmentPath()
      * @uses \get_stylesheet_directory_uri()
      * @uses \is_child_theme()
      * @uses \wp_upload_dir()
@@ -18,7 +19,7 @@ if (! function_exists('luminous_mod_rewrite_rules')) {
         $rewriteBase = parse_url(home_url('/'), PHP_URL_PATH);
 
         $uploadUrlReal = wp_upload_dir()['baseurl'];
-        $uploadUrlBase = AttachmentEntity::attachmentUrl($uploadUrlReal);
+        $uploadUrlBase = AttachmentEntity::attachmentPath($uploadUrlReal);
         $uploadDir = parse_url($uploadUrlReal, PHP_URL_PATH);
 
         $publicUrlReal = get_stylesheet_directory_uri().(is_child_theme() ? '/public' : '/luminous-scaffolding/public');

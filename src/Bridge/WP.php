@@ -19,23 +19,44 @@ class WP
     const OPTION_LAST_MODIFIED = 'luminous_last_modified';
 
     /**
+     * The map of option aliases.
+     *
+     * @var array
+     */
+    protected static $optionAliases = [
+        'url'           => 'home',
+        'name'          => 'blogname',
+        'description'   => 'blogdescription',
+    ];
+
+    /**
+     * The map of methods to get a option value.
+     *
+     * @var array
+     */
+    protected static $optionMethods = [
+        'last_modified' => 'lastModified',
+        'timezone' => 'timezone',
+    ];
+
+    /**
      * The post builder.
      *
-     * @var Luminous\Bridge\Post\Builder
+     * @var \Luminous\Bridge\Post\Builder
      */
     protected static $post;
 
     /**
      * The term builder.
      *
-     * @var Luminous\Bridge\Term\Builder
+     * @var \Luminous\Bridge\Term\Builder
      */
     protected static $term;
 
     /**
      * Set the post builder.
      *
-     * @param Luminous\Bridge\Post\Builder $builder
+     * @param \Luminous\Bridge\Post\Builder $builder
      * @return void
      */
     public static function setPostBuilder(PostBuilder $builder)
@@ -46,7 +67,7 @@ class WP
     /**
      * Set the term builder.
      *
-     * @param Luminous\Bridge\Term\Builder $builder
+     * @param \Luminous\Bridge\Term\Builder $builder
      * @return void
      */
     public static function setTermBuilder(TermBuilder $builder)
@@ -59,13 +80,21 @@ class WP
      *
      * @uses \get_option()
      *
-     * @param string $name
-     * @param bool $default
+     * @param string $key
+     * @param mixed $default
      * @return mixed
      */
-    public static function option($name, $default = false)
+    public static function option($key, $default = null)
     {
-        return get_option($name, $default);
+        if (array_key_exists($key, static::$optionMethods)) {
+            return static::{static::$optionMethods[$key]}();
+        }
+
+        if (array_key_exists($key, static::$optionAliases)) {
+            $key = static::$optionAliases[$key];
+        }
+
+        return get_option($key, $default);
     }
 
     /**
@@ -128,7 +157,7 @@ class WP
     /**
      * Get the post type instance.
      *
-     * @param string $name
+     * @param string|\Luminous\Bridge\Post\Type $name
      * @return \Luminous\Bridge\Post\Type
      */
     public static function postType($name)
@@ -152,7 +181,7 @@ class WP
      * Get the post entity instance.
      *
      * @param int|string|\WP_Post $id
-     * @param string $type
+     * @param \Luminous\Bridge\Post\Type|string $type
      * @return \Luminous\Bridge\Post\Entity
      */
     public static function post($id, $type = null)
@@ -163,7 +192,7 @@ class WP
     /**
      * Get the term type (taxonomy) instance.
      *
-     * @param string $name
+     * @param string|\Luminous\Bridge\Term\Type $name
      * @return \Luminous\Bridge\Term\Type
      */
     public static function termType($name)
@@ -175,7 +204,7 @@ class WP
      * Get the term entity instance.
      *
      * @param int|\stdClass $id
-     * @param string $type
+     * @param \Luminous\Bridge\Term\Type|string $type
      * @return \Luminous\Bridge\Term\Entity
      */
     public static function term($id, $type = null)
@@ -186,7 +215,7 @@ class WP
     /**
      * Get the term query instance.
      *
-     * @param string $type
+     * @param \Luminous\Bridge\Term\Type|string $type
      * @return \Luminous\Bridge\Term\Query\Builder
      */
     public static function terms($type = null)

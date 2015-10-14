@@ -22,6 +22,13 @@ trait DecoratorTrait
     protected $accessorsForOriginal = [];
 
     /**
+     * The cached attributes.
+     *
+     * @var array
+     */
+    protected $cachedAttributes = [];
+
+    /**
      * Dynamically retrieve attributes on the entity.
      *
      * @param string $key
@@ -40,13 +47,17 @@ trait DecoratorTrait
      */
     public function getAttribute($key)
     {
-        $value = $this->getOriginalAttribute($key);
+        if (! array_key_exists($key, $this->cachedAttributes)) {
+            $value = $this->getOriginalAttribute($key);
 
-        if ($mutator = $this->getMutator($key)) {
-            return $this->{$mutator}($value);
+            if ($mutator = $this->getMutator($key)) {
+                $value = $this->{$mutator}($value);
+            }
+
+            $this->cachedAttributes[$key] = $value;
         }
 
-        return $value;
+        return $this->cachedAttributes[$key];
     }
 
     /**
@@ -71,6 +82,7 @@ trait DecoratorTrait
         if (isset($this->accessorsForOriginal[$key])) {
             return $this->accessorsForOriginal[$key];
         }
+
         return property_exists($this->original, $key) ? $key : null;
     }
 
@@ -121,7 +133,7 @@ trait DecoratorTrait
      */
     public function offsetSet($key, $value)
     {
-        throw new Exception(__FUNCTION__.' is not implemented');
+        throw new Exception(__FUNCTION__.' is not implemented.');
     }
 
     /**
@@ -136,6 +148,6 @@ trait DecoratorTrait
      */
     public function offsetUnset($key)
     {
-        throw new Exception(__FUNCTION__.' is not implemented');
+        throw new Exception(__FUNCTION__.' is not implemented.');
     }
 }

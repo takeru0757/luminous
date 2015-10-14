@@ -20,11 +20,15 @@ class Builder extends BaseBuilder
      * @uses \OBJECT
      *
      * @param int|string|\WP_Post $id
-     * @param string $type
+     * @param \Luminous\Bridge\Post\Type|string $type
      * @return \WP_Post|null
      */
     protected function getOriginal($id, $type = null)
     {
+        if ($type instanceof Type) {
+            $type = $type->name;
+        }
+
         if (is_string($id)) {
             return get_page_by_path($id, \OBJECT, $type ?: 'page');
         }

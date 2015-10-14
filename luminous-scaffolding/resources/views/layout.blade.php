@@ -27,8 +27,8 @@
 <body>
     <nav class="navbar navbar-light">
         <div class="container">
-            <a class="navbar-brand" href="{{ url('/') }}">{{ $site->name }}</a>
-            <p class="header-description pull-right text-muted">{{ $site->description }}</p>
+            <a class="navbar-brand" href="{{ url('/') }}">{{ wp_option('name') }}</a>
+            <p class="header-description pull-right text-muted">{{ wp_option('description') }}</p>
         </div>
     </nav>
 

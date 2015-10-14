@@ -27,7 +27,7 @@
                 };
                 ?>
 
-                @foreach ($wp->posts('page')->root() as $_post)
+                @foreach (app('wp')->posts('page')->root() as $_post)
                 {!! $_formatter($_post) !!}
                 @endforeach
             </ul>

@@ -1,7 +1,7 @@
 @if ($tree && ! $tree->isEmpty())
-<title>{{ $tree->all()->reverse()->implode('label', ' - ') }} | {{ $site->name }}</title>
+<title>{{ $tree->all()->reverse()->implode('label', ' - ') }} | {{ wp_option('name') }}</title>
 @else
-<title>@yield('meta:title', e("{$site->name} | {$site->description}"))</title>
+<title>@yield('meta:title', e(wp_option('name').' | '.wp_option('description')))</title>
 @endif
 
 @if ($post)
@@ -17,5 +17,5 @@
 @endif
 
 @else
-<meta name="description" content="@yield('meta:description', e($site->description))">
+<meta name="description" content="@yield('meta:description', e(wp_option('description')))">
 @endif

@@ -84,33 +84,19 @@ if (! function_exists('storage_path')) {
 
 // Utilities ===================================================================
 
-if (! function_exists('is_wp')) {
+if (! function_exists('wp_option')) {
     /**
-     * Determine if the request should be handled by WordPress.
+     * Get the WordPress option value.
      *
-     * @uses $pagenow
-     * @uses \is_admin()
-     * @uses \WP_INSTALLING
+     * @uses \app()
      *
-     * @return bool
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
      */
-    function is_wp()
+    function wp_option($key, $default = null)
     {
-        global $pagenow;
-
-        $scripts = [
-            'wp-activate.php',
-            'wp-comments-post.php',
-            'wp-cron.php',
-            'wp-links-opml.php',
-            'wp-login.php',
-            'wp-mail.php',
-            'wp-signup.php',
-            'wp-trackback.php',
-            'xmlrpc.php',
-        ];
-
-        return is_admin() || in_array($pagenow, $scripts) || (defined('WP_INSTALLING') && WP_INSTALLING);
+        return app('wp')->option($key, $default);
     }
 }
 
@@ -532,12 +518,14 @@ if (! function_exists('post_url')) {
      */
     function post_url($post, $parameters = [], $full = false)
     {
-        if (!($post instanceof Luminous\Bridge\Post\Entity)) {
-            $post = app('wp')->post($post, isset($parameters['post_type']) ? $parameters['post_type'] : null);
-        }
-
         if (is_bool($parameters)) {
             list($parameters, $full) = [[], $parameters];
+        } elseif (! is_array($parameters)) {
+            $parameters = [$parameters];
+        }
+
+        if (!($post instanceof Luminous\Bridge\Post\Entity)) {
+            $post = app('wp')->post($post, isset($parameters['post_type']) ? $parameters['post_type'] : null);
         }
 
         $parameters['post'] = $post;
@@ -550,7 +538,7 @@ if (! function_exists('asset')) {
     /**
      * Get the path to a versioned file.
      *
-     * @uses \config()
+     * @uses \app()
      * @uses \url()
      *
      * @param string $file
@@ -562,24 +550,14 @@ if (! function_exists('asset')) {
      */
     function asset($file, $parameters = [], $full = false)
     {
-        static $manifest = null;
-        static $prefix = null;
-
-        if (is_null($manifest)) {
-            $manifestPath = config('assets.manifest');
-            $manifest = json_decode(file_get_contents($manifestPath), true);
-            $prefix = trim(config('assets.prefix'), '/').'/';
-        }
-
         if (is_bool($parameters)) {
             list($parameters, $full) = [[], $parameters];
+        } elseif (! is_array($parameters)) {
+            $parameters = [$parameters];
         }
 
-        if (isset($manifest[$file])) {
-            $parameters['path'] = $prefix.$manifest[$file];
-            return url($parameters, $full);
-        }
+        $parameters['path'] = app('asset')->path($file);
 
-        throw new InvalidArgumentException("File {$file} not defined in asset manifest.");
+        return url($parameters, $full);
     }
 }

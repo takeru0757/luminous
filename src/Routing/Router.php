@@ -334,11 +334,13 @@ class Router
      * Set the context.
      *
      * @param array|string $context
-     * @return void
+     * @return $this
      */
     public function setContext($context)
     {
         $this->cachedContext = $this->parseContext($context);
+
+        return $this;
     }
 
     /**

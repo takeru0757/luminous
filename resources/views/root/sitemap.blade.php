@@ -5,11 +5,11 @@
         <loc>{{ url('/', true) }}</loc>
         <priority>1.0</priority>
         <changefreq>daily</changefreq>
-        <lastmod>{{ $wp->lastModified()->max($appModified)->toW3cString() }}</lastmod>
+        <lastmod>{{ wp_option('last_modified')->max($appModified)->toW3cString() }}</lastmod>
     </url>
 
-    @foreach ($wp->postTypes() as $_type)
-    @if ($_posts = $wp->posts($_type)->orderBy('modified_at', 'desc')->getOrNull())
+    @foreach (app('wp')->postTypes() as $_type)
+    @if ($_posts = app('wp')->posts($_type)->orderBy('modified_at', 'desc')->getOrNull())
     @if ($_type->hasArchive() && $_latest = $_posts->first())
 
     <url>
