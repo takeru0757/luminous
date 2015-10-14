@@ -10,7 +10,7 @@ spl_autoload_register(function ($className) use ($themePath) {
     $className = ltrim($className, '\\');
     if (strpos($className, 'App\\') === 0) {
         $fileName = str_replace('\\', '/', substr($className, 4));
-        require "{$themePath}/app/{$fileName}.php";
+        require "{$themePath}/src/{$fileName}.php";
     }
 });
 

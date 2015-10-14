@@ -150,9 +150,11 @@ class Router
      *
      * The attributes array accepts:
      *
+     * - namespace: (string) The value is combined with current value.
      * - prefix: (string) The value is combined with current value.
-     * - namespace: (string) The value REPLACEs with current value.
      * - parameters: (array) The value is merged with current value.
+     *
+     * @todo Merge middleware.
      *
      * @param array|string $attributes If string, used as `prefix`;
      * @param Closure $callback The collback receives $this.
@@ -181,12 +183,14 @@ class Router
      */
     protected function mergeScope(array $current, array $attributes)
     {
-        if (isset($attributes['prefix'])) {
-            $current['prefix'] = Url::join(Arr::get($current, 'prefix', ''), $attributes['prefix']);
+        if (isset($attributes['namespace'])) {
+            $current['namespace'] = isset($current['namespace'])
+                ? $current['namespace'].'\\'.$attributes['namespace']
+                : $attributes['namespace'];
         }
 
-        if (isset($attributes['namespace'])) {
-            $current['namespace'] = $attributes['namespace'];
+        if (isset($attributes['prefix'])) {
+            $current['prefix'] = Url::join(Arr::get($current, 'prefix', ''), $attributes['prefix']);
         }
 
         if (isset($attributes['parameters'])) {

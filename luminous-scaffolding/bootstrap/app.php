@@ -30,7 +30,7 @@ $app = new Luminous\Application(
 // Load Routes
 // -----------------------------------------------------------------------------
 
-$app->make('router')->scope(['namespace' => 'Luminous\Http\Controllers'], function ($router) {
+$app->make('router')->scope(['namespace' => 'App\Http\Controllers'], function ($router) {
     require __DIR__.'/routes.php';
 });
 

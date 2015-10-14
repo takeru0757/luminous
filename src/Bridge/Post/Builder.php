@@ -50,9 +50,9 @@ class Builder extends BaseBuilder
         $type = $this->getType($original->post_type);
 
         if (! $this->container->bound($abstract = "wp.post.entities.{$type->name}")) {
-            $abstract = $type->hierarchical ?
-                        'Luminous\Bridge\Post\Entities\HierarchicalEntity':
-                        'Luminous\Bridge\Post\Entities\NonHierarchicalEntity';
+            $abstract = $type->hierarchical
+                ? 'Luminous\Bridge\Post\Entities\HierarchicalEntity'
+                : 'Luminous\Bridge\Post\Entities\NonHierarchicalEntity';
 
             if (! $this->container->bound($abstract)) {
                 throw new MissingEntityException($abstract);

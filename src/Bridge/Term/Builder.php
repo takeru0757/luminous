@@ -62,9 +62,9 @@ class Builder extends BaseBuilder
         $type = $this->getType($original->taxonomy);
 
         if (! $this->container->bound($abstract = "wp.term.entities.{$type->name}")) {
-            $abstract = $type->hierarchical ?
-                        'Luminous\Bridge\Term\Entities\HierarchicalEntity':
-                        'Luminous\Bridge\Term\Entities\NonHierarchicalEntity';
+            $abstract = $type->hierarchical
+                ? 'Luminous\Bridge\Term\Entities\HierarchicalEntity'
+                : 'Luminous\Bridge\Term\Entities\NonHierarchicalEntity';
 
             if (! $this->container->bound($abstract)) {
                 throw new MissingEntityException($abstract);
