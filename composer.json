@@ -12,6 +12,7 @@
     ],
     "require": {
         "php": ">=5.5.9",
+        "ext-mbstring": "*",
         "caouecs/laravel4-lang": "~2.0",
         "composer/installers": "~1.0",
         "illuminate/config": "5.1.*",
