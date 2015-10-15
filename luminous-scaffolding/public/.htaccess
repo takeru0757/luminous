@@ -28,7 +28,7 @@ AddEncoding x-gzip .gz
 
 <IfModule mod_headers.c>
   <FilesMatch "\.gz$">
-      Header set Vary "Accept-Encoding"
+    Header set Vary "Accept-Encoding"
   </FilesMatch>
 </IfModule>
 
@@ -46,7 +46,7 @@ AddEncoding x-gzip .gz
 
 # svg --------------------------------------------------------------------------
 
-AddType image/svg+xml svg
+AddType image/svg+xml .svg
 
 <FilesMatch ".*\.svg\.gz$">
   ForceType "image/svg+xml; charset=utf-8"

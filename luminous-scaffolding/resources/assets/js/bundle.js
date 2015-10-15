@@ -1,10 +1,8 @@
-import $ from 'global-jquery';
+import $ from 'jquery';
 import attachFastClick from 'fastclick';
 
 // https://api.jquery.com/jquery-2/
 console.log('jQuery version: ' + $.fn.jquery);
 
 // https://github.com/ftlabs/fastclick
-$(function () {
-  attachFastClick(document.body);
-});
+$( () => attachFastClick(document.body) );
