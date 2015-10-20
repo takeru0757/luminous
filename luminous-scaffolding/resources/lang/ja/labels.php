@@ -2,7 +2,6 @@
 
 return [
     'home'  => 'ホーム',
-    'post'  => 'ブログ',
     'page'  => 'ページ: :page',
     'archive'  => [
         'yearly'   => 'Y年',

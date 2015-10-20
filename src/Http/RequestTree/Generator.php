@@ -113,8 +113,7 @@ class Generator
         $this->postType = $postType;
 
         if ($this->postType->hasArchive()) {
-            $label = $this->postType->name === 'post' ? trans('labels.post') : $this->postType->label;
-            $this->add($label, posts_url($this->postType), $this->postType);
+            $this->add($this->postType->label, posts_url($this->postType), $this->postType);
         }
 
         return $this;

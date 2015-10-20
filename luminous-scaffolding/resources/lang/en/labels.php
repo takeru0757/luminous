@@ -2,7 +2,6 @@
 
 return [
     'home'  => 'Home',
-    'post'  => 'Posts',
     'page'  => 'Page: :page',
     'archive'  => [
         'yearly'   => 'Y',
