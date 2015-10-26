@@ -5,11 +5,10 @@ namespace Luminous\Bridge\Post\Query;
 use WP_Query;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Pagination\Paginator;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Luminous\Bridge\QueryBuilder;
 use Luminous\Bridge\Post\Builder as PostBuilder;
 use Luminous\Bridge\Post\DateArchive;
+use Luminous\Bridge\Post\Paginator;
 use Luminous\Bridge\Post\Query\Parameters\DateParameter;
 use Luminous\Bridge\Post\Query\Parameters\OrderByParameter;
 use Luminous\Bridge\Post\Query\Parameters\PostParameter;
@@ -62,7 +61,7 @@ class Builder extends QueryBuilder
      * @param int $perPage
      * @param int $page
      * @param string $pageName
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @return \Luminous\Bridge\Post\Paginator
      */
     public function paginate($perPage, $page = null, $pageName = 'page')
     {
@@ -72,7 +71,7 @@ class Builder extends QueryBuilder
         $posts = $this->retrievePosts($query);
         $total = $this->retrieveTotal($query);
 
-        return new LengthAwarePaginator($posts, $total, $perPage, $page, [
+        return new Paginator($posts, $total, $perPage, $page, [
             'path' => Paginator::resolveCurrentPath(),
             'pageName' => $pageName,
         ]);

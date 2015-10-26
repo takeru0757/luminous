@@ -4,6 +4,7 @@ namespace Luminous\Bridge;
 
 use Illuminate\Support\ServiceProvider;
 use Luminous\Bridge\Post\Builder as PostBuilder;
+use Luminous\Bridge\Post\Paginator;
 use Luminous\Bridge\Term\Builder as TermBuilder;
 
 class BridgeServiceProvider extends ServiceProvider
@@ -19,8 +20,6 @@ class BridgeServiceProvider extends ServiceProvider
         $this->registerTermBuilder();
 
         $this->app->singleton('wp', function ($app) {
-            $app->register('Illuminate\Pagination\PaginationServiceProvider');
-
             $wp = new WP();
             $wp->setPostBuilder($app['Luminous\Bridge\Post\Builder']);
             $wp->setTermBuilder($app['Luminous\Bridge\Term\Builder']);
@@ -41,6 +40,14 @@ class BridgeServiceProvider extends ServiceProvider
         $this->app->bind(['Luminous\Bridge\Post\Entities\NonHierarchicalEntity' => 'wp.post.entities.post']);
 
         $this->app->singleton('Luminous\Bridge\Post\Builder', function ($app) {
+            Paginator::currentPathResolver(function () {
+                return $this->app['request']->url();
+            });
+
+            Paginator::currentPageResolver(function ($pageName = 'page') {
+                return $this->app['request']->input($pageName);
+            });
+
             return new PostBuilder($app);
         });
     }
