@@ -8,8 +8,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Luminous\Bridge\QueryBuilder;
-use Luminous\Bridge\Post\Archive;
 use Luminous\Bridge\Post\Builder as PostBuilder;
+use Luminous\Bridge\Post\DateArchive;
 use Luminous\Bridge\Post\Query\Parameters\DateParameter;
 use Luminous\Bridge\Post\Query\Parameters\OrderByParameter;
 use Luminous\Bridge\Post\Query\Parameters\PostParameter;
@@ -79,7 +79,7 @@ class Builder extends QueryBuilder
     }
 
     /**
-     * Get the archives.
+     * Get the date archives.
      *
      * @link https://developer.wordpress.org/reference/functions/wp_get_archives/
      *
@@ -87,7 +87,7 @@ class Builder extends QueryBuilder
      * @uses \remove_filter()
      *
      * @param string $type
-     * @return \Illuminate\Support\Collection|\Luminous\Bridge\Post\Archive[]
+     * @return \Illuminate\Support\Collection|\Luminous\Bridge\Post\DateArchive[]
      */
     public function archives($type)
     {
@@ -118,8 +118,7 @@ class Builder extends QueryBuilder
         remove_filter('posts_fields', $fieldsFilter);
 
         return new Collection(array_map(function ($object) use ($type) {
-            $date = Carbon::createFromFormat('Y-m-d', $object->_date, $this->entityBuilder->timezone());
-            return new Archive($type, $date->startOfDay(), (int) $object->_count);
+            return DateArchive::createFromFormat($type, 'Y-m-d', $object->_date)->setCount($object->_count);
         }, $query->posts));
     }
 

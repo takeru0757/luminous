@@ -30,18 +30,16 @@ class RootController extends Controller
      *
      * @param int $id
      * @return \Illuminate\Http\RedirectResponse
-     *
-     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
     public function shortlink($id)
     {
         try {
             $post = $this->wp->post((int) $id);
         } catch (EntityNotFoundException $e) {
-            abort(404);
+            return redirect('/');
         }
 
-        return redirect(post_url($post));
+        return redirect($post);
     }
 
     /**

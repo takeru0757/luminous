@@ -2,6 +2,7 @@
 
 namespace Luminous\Routing;
 
+use Closure;
 use Error;
 use Exception;
 use Throwable;
@@ -12,6 +13,7 @@ use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Arr;
 use Luminous\Application;
 use Symfony\Component\Debug\Exception\FatalThrowableError;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -102,7 +104,7 @@ class Dispatcher
      * Dispatch the incoming request.
      *
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function dispatch(Request $request)
     {
@@ -127,10 +129,10 @@ class Dispatcher
      * Call the terminable middleware.
      *
      * @param \Illuminate\Http\Request $request
-     * @param \Illuminate\Http\Response $response
+     * @param \Symfony\Component\HttpFoundation\Response $response
      * @return void
      */
-    public function terminate(Request $request, Response $response)
+    public function terminate(Request $request, SymfonyResponse $response)
     {
         foreach ($this->middleware as $middleware) {
             if (method_exists($instance = $this->app->make($middleware), 'terminate')) {
@@ -143,7 +145,7 @@ class Dispatcher
      * Handle the request with middleware.
      *
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function handleRequestWithMiddleware(Request $request)
     {
@@ -164,7 +166,7 @@ class Dispatcher
      * @uses \FastRoute\simpleDispatcher()
      *
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      *
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      * @throws \Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException
@@ -209,7 +211,7 @@ class Dispatcher
      * @param \Illuminate\Http\Request $request
      * @param \Luminous\Routing\Route $route
      * @param array $parameters
-     * @return \Illuminate\Http\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function handleRouteWithMiddleware(Request $request, Route $route, array $parameters)
     {
@@ -226,7 +228,7 @@ class Dispatcher
      * @param \Illuminate\Http\Request $request
      * @param \Luminous\Routing\Route $route
      * @param array $parameters
-     * @return \Illuminate\Http\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      *
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
@@ -263,13 +265,13 @@ class Dispatcher
      * @param callable $callback
      * @param array $parameters
      * @param int $maxAge
-     * @return \Illuminate\Http\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     protected function call(callable $callback, array $parameters, $maxAge = 0)
     {
         $response = $this->app->call($callback, $parameters);
 
-        if (! $response instanceof Response) {
+        if (! $response instanceof SymfonyResponse) {
             $response = new Response($response);
         }
 
@@ -304,7 +306,7 @@ class Dispatcher
      * @param \Closure $then
      * @return mixed
      */
-    protected function sendThroughPipeline(array $middleware, Request $request, \Closure $then)
+    protected function sendThroughPipeline(array $middleware, Request $request, Closure $then)
     {
         $shouldSkipMiddleware = $this->app->bound('middleware.disable') &&
                                 $this->app->make('middleware.disable') === true;

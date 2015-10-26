@@ -5,6 +5,7 @@ namespace Luminous\Bridge\Post\Query\Parameters;
 use DateTime;
 use InvalidArgumentException;
 use Carbon\Carbon;
+use Luminous\Bridge\Post\DateArchive;
 
 /**
  * The date parameter for the post query.
@@ -46,7 +47,7 @@ trait DateParameter
      *
      * @param string $column
      * @param string $operator
-     * @param array|\DateTime $value
+     * @param array|\DateTime|\Luminous\Bridge\Post\DateArchive $value
      * @return $this
      *
      * @throws \InvalidArgumentException
@@ -63,6 +64,10 @@ trait DateParameter
 
         if (! in_array($operator, ['=', '>', '>=', '<', '<='])) {
             throw new InvalidArgumentException;
+        }
+
+        if ($value instanceof DateArchive) {
+            $value = $value->forQuery();
         }
 
         if ($value instanceof DateTime) {

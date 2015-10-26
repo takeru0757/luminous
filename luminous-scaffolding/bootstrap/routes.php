@@ -29,27 +29,27 @@ $router->get('/robots.txt', 'RootController@robots');
 $router->scope(['prefix' => 'posts', 'parameters' => ['post_type' => 'post']], function ($router) {
     $router->any('/', [
         'parameters' => ['limit' => 10],
-        'uses' => 'PostController@index',
+        'uses' => 'PostController@posts',
     ]);
 
     $router->any('/{post}', [
         'parameters' => ['post' => '{date_year:\d{4}}/{date_month:\d{2}}/{date_day:\d{2}}/{slug}'],
-        'uses' => 'PostController@show',
+        'uses' => 'PostController@post',
     ]);
 
-    $router->any('/{archive}', [
-        'parameters' => ['limit' => 10, 'archive' => '{path:\d{4}(?:/\d{2}(?:/\d{2})?)?}'],
-        'uses' => 'PostController@index',
+    $router->any('/{date}', [
+        'parameters' => ['limit' => 10, 'date' => '{path:\d{4}(?:/\d{2}(?:/\d{2})?)?}'],
+        'uses' => 'PostController@posts',
     ]);
 
     $router->any('/category/{term}', [
         'parameters' => ['limit' => 10, 'term_type' => 'category', 'term' => '{path:.+}'],
-        'uses' => 'PostController@index',
+        'uses' => 'PostController@posts',
     ]);
 
     $router->any('/tag/{term}', [
         'parameters' => ['limit' => 10, 'term_type' => 'post_tag', 'term' => '{slug}'],
-        'uses' => 'PostController@index',
+        'uses' => 'PostController@posts',
     ]);
 });
 
@@ -59,5 +59,5 @@ $router->scope(['prefix' => 'posts', 'parameters' => ['post_type' => 'post']], f
 
 $router->any('/{post}', [
     'parameters' => ['post_type' => 'page', 'post' => '{path:.+}'],
-    'uses' => 'PostController@show',
+    'uses' => 'PostController@post',
 ]);

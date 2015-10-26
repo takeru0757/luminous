@@ -28,7 +28,7 @@ abstract class Entity implements ArrayAccess, UrlResource
      *
      * @var \Luminous\Bridge\Type
      */
-    public $type;
+    protected $type;
 
     /**
      * Create a new entity instance.
@@ -44,6 +44,16 @@ abstract class Entity implements ArrayAccess, UrlResource
         $this->original = $original;
         $this->accessorsForOriginal = $this->accessors;
         $this->type = $type;
+    }
+
+    /**
+     * Get the type.
+     *
+     * @return \Luminous\Bridge\Type
+     */
+    protected function getTypeAttribute()
+    {
+        return $this->type;
     }
 
     /**

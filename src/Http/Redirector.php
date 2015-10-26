@@ -37,33 +37,16 @@ class Redirector
     /**
      * Create a new redirect response to the given path.
      *
-     * @param string $path
+     * @param array|string|mixed $parameters
      * @param int $status
      * @param array $headers
-     * @param bool $secure
      * @return \Illuminate\Http\RedirectResponse
      */
-    public function to($path, $status = 302, $headers = [], $secure = null)
+    public function to($parameters, $status = 302, $headers = [])
     {
-        $path = $this->app->make('url')->to($path, [], $secure);
+        $path = $this->app->make('router')->url($parameters, true);
 
         return $this->createRedirect($path, $status, $headers);
-    }
-
-    /**
-     * Create a new redirect response to a named route.
-     *
-     * @param string $route
-     * @param array $parameters
-     * @param int $status
-     * @param array $headers
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function route($route, $parameters = [], $status = 302, $headers = [])
-    {
-        $path = $this->app->make('url')->route($route, $parameters);
-
-        return $this->to($path, $status, $headers);
     }
 
     /**

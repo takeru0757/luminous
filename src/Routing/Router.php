@@ -326,7 +326,7 @@ class Router
         foreach ($parameters as $key => $value) {
             if (in_array($key, ['post_type', 'term_type'])) {
                 $names[] = "{$key}:{$value}";
-            } elseif (in_array($key, ['archive', 'post', 'term', 'user'])) {
+            } elseif (in_array($key, ['date', 'post', 'term', 'user'])) {
                 $names[] = $key;
             }
         }

@@ -8,25 +8,25 @@
         <lastmod>{{ wp_option('last_modified')->max($appModified)->toW3cString() }}</lastmod>
     </url>
 
-    @foreach (app('wp')->postTypes() as $_type)
-    @if ($_posts = app('wp')->posts($_type)->orderBy('modified_at', 'desc')->getOrNull())
-    @if ($_type->hasArchive() && $_latest = $_posts->first())
+    @foreach (app('wp')->postTypes() as $type)
+    @if (($posts = app('wp')->posts($type)->orderBy('modified_at', 'desc')->get()) && ! $posts->isEmpty())
+    @if ($type->hasArchive() && $latest = $posts->first())
 
     <url>
-        <loc>{{ posts_url($_type, true) }}</loc>
-        <lastmod>{{ $_latest->modified_at->max($appModified)->toW3cString() }}</lastmod>
+        <loc>{{ posts_url($type, true) }}</loc>
+        <lastmod>{{ $latest->modified_at->max($appModified)->toW3cString() }}</lastmod>
         <priority>0.8</priority>
         <changefreq>weekly</changefreq>
     </url>
 
     @endif
-    @foreach ($_posts as $_post)
+    @foreach ($posts as $post)
 
     <url>
-        <loc>{{ post_url($_post, true) }}</loc>
-        <lastmod>{{ $_post->modified_at->max($appModified)->toW3cString() }}</lastmod>
-        <priority>{{ $_type->hierarchical ? '0.8' : '0.6' }}</priority>
-        <changefreq>{{ $_type->hierarchical ? 'weekly' : 'monthly' }}</changefreq>
+        <loc>{{ post_url($post, true) }}</loc>
+        <lastmod>{{ $post->modified_at->max($appModified)->toW3cString() }}</lastmod>
+        <priority>{{ $type->hierarchical ? '0.8' : '0.6' }}</priority>
+        <changefreq>{{ $type->hierarchical ? 'weekly' : 'monthly' }}</changefreq>
     </url>
 
     @endforeach

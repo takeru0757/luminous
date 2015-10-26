@@ -32,30 +32,13 @@ abstract class Entity extends BaseEntity
     }
 
     /**
-     * Get the ancestors.
-     *
-     * @uses \get_ancestors()
-     *
-     * @return \Illuminate\Support\Collection|\Luminous\Bridge\Term\Entity[]
-     */
-    protected function getAncestorsAttribute()
-    {
-        $ancestors = array_map(function ($id) {
-            return $this->wp->term($id, $this->type);
-        }, get_ancestors($this->id, $this->original->taxonomy, 'taxonomy'));
-
-        return new Collection($ancestors);
-    }
-
-    /**
      * Get the path.
      *
      * @return string
      */
     protected function getPathAttribute()
     {
-        $slugs = $this->ancestors->reverse()->pluck('slug')->push($this->slug);
-        return implode('/', $slugs->all());
+        return $this->slug;
     }
 
     /**

@@ -3,130 +3,59 @@
 namespace Luminous\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Luminous\Bridge\Exceptions\EntityNotFoundException;
 use Luminous\Bridge\Post\Type;
 use Luminous\Bridge\Post\Entity;
-use Luminous\Http\RequestTree\Generator as Tree;
+use Luminous\Http\Queries\PostsQuery;
+use Luminous\Http\Queries\PostQuery;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PostController extends Controller
 {
     /**
      * Handle requests to posts.
      *
-     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\View\View
-     *
-     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
-    public function index(Request $request)
+    public function posts()
     {
-        $postType = $this->wp->postType($request->route('post_type'));
-        $postQuery = $this->wp->posts($postType);
+        return $this->getPostsView($this->app->make(PostsQuery::class));
+    }
 
-        $tree = (new Tree())->setPostType($postType);
+    /**
+     * Get the view for posts.
+     *
+     * @param \Luminous\Http\Queries\PostsQuery $query
+     * @return \Illuminate\View\View
+     */
+    protected function getPostsView(PostsQuery $query)
+    {
+        $postType = $query->postType;
 
-        if ($order = $request->route('order')) {
-            $postQuery->orderBy($order['column'], $order['direction']);
-        } else {
-            $postQuery->orderBy('created_at', 'desc');
-        }
-
-        if ($date = $this->getDateQuery($request)) {
-            $postQuery->whereDate('created_at', $date);
-            $tree->setDate($date);
-        }
-
-        if ($termType = $request->route('term_type')) {
-            if ($termId = $request->route('term__id')) {
-                $term = $this->wp->term((int) $termId, $termType);
-            } elseif ($termSlug = $request->route('term__slug')) {
-                $term = $this->wp->term($termSlug, $termType);
-            } elseif ($termPath = $request->route('term__path')) {
-                $term = $this->wp->term($termPath, $termType);
-            } else {
-                abort(404);
-            }
-
-            $postQuery->whereTerm($term);
-            $tree->setTerm($term);
-        }
-
-        $posts = $postQuery->paginate($request->route('limit') ?: 10);
-        $tree->setPage($page = $posts->currentPage());
-
-        if ($posts->isEmpty() && $page > 1) {
-            abort(404);
-        }
-
-        return view($this->getTemplateName($postType), compact('tree', 'posts'));
+        return $this->findView($postType, ['index', 'base'])->with(compact('query'));
     }
 
     /**
      * Handle requests to the post.
      *
-     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\View\View
-     *
-     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
      */
-    public function show(Request $request)
+    public function post()
     {
-        $postType = $this->wp->postType($request->route('post_type'));
-        $postQuery = $this->wp->posts($postType);
-
-        if ($postId = $request->route('post__id')) {
-            $postQuery->wherePost('id', (int) $postId);
-        } elseif ($postSlug = $request->route('post__slug')) {
-            $postQuery->wherePost('slug', $postSlug);
-        } elseif ($postPath = $request->route('post__path')) {
-            $postQuery->wherePost('path', $postPath);
-        } else {
-            abort(404);
-        }
-
-        if (! $post = $postQuery->first()) {
-            abort(404);
-        }
-
-        $tree = (new Tree())->setPostType($postType)->setPost($post);
-
-        return view($this->getTemplateName($postType, $post), compact('tree', 'post'));
+        return $this->getPostView($this->app->make(PostQuery::class));
     }
 
     /**
-     * Get the date parameter from the request.
+     * Get the view for the post.
      *
-     * @param \Illuminate\Http\Request $request
-     * @return array|null
+     * @param \Luminous\Http\Queries\PostsQuery $query
+     * @return \Illuminate\View\View
      */
-    protected function getDateQuery(Request $request)
+    protected function getPostView(PostQuery $query)
     {
-        if (! $parameter = $request->route('archive__path')) {
-            return null;
-        }
+        $postType = $query->postType;
+        $post = $query->post;
 
-        $parts = explode('/', $parameter);
-        $value = [];
-
-        foreach (['year', 'month', 'day'] as $i => $key) {
-            if (! isset($parts[$i])) {
-                break;
-            }
-            $value[$key] = intval($parts[$i], 10);
-        }
-
-        return $value;
-    }
-
-    /**
-     * Determine the template name.
-     *
-     * @param \Luminous\Bridge\Post\Type $postType
-     * @param \Luminous\Bridge\Post\Entity $post
-     * @return string
-     */
-    protected function getTemplateName(Type $postType, Entity $post = null)
-    {
-        $factory = view();
         $files = [];
 
         if ($post && $postType->hierarchical) {
@@ -137,17 +66,33 @@ class PostController extends Controller
                 array_pop($paths);
             }
         } else {
-            $files[] = $post ? 'show' : 'index';
+            $files[] = 'show';
         }
 
         $files[] = 'base';
 
+        return $this->findView($postType, $files)->with(compact('query'));
+    }
+
+    /**
+     * Find the view.
+     *
+     * @param \Luminous\Bridge\Post\Type $postType
+     * @param array $files
+     * @return \Illuminate\View\View
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     */
+    protected function findView(Type $postType, array $files)
+    {
+        $factory = view();
+
         foreach ($files as $file) {
             if ($factory->exists($name = "{$postType->name}.{$file}")) {
-                return $name;
+                return $factory->make($name);
             }
         }
 
-        return 'layout';
+        throw new NotFoundHttpException;
     }
 }

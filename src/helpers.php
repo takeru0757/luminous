@@ -310,21 +310,20 @@ if (! function_exists('redirect')) {
      *
      * @uses \app()
      *
-     * @param string|null $to
+     * @param array|string|mixed $parameters
      * @param int $status
      * @param array $headers
-     * @param bool $secure
      * @return \Luminous\Http\Redirector|\Luminous\Http\RedirectResponse
      */
-    function redirect($to = null, $status = 302, $headers = [], $secure = null)
+    function redirect($parameters = null, $status = 302, $headers = [])
     {
         $redirector = new Luminous\Http\Redirector(app());
 
-        if (is_null($to)) {
+        if (is_null($parameters)) {
             return $redirector;
         }
 
-        return $redirector->to($to, $status, $headers, $secure);
+        return $redirector->to($parameters, $status, $headers);
     }
 }
 

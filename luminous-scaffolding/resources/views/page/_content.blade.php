@@ -1,6 +1,12 @@
-@extends('layout')
+@extends('_content')
+
+@section('meta')
+<meta name="description" content="{{ $query->post->excerpt }}">
+@endsection
 
 @section('content')
+
+@parent
 
 <div class="row">
     <div class="col-md-9">
@@ -11,14 +17,14 @@
             <h1 class="h4">Pages</h1>
             <ul class="nav">
                 <?php
-                $_formatter = function ($post) use (&$_formatter) {
+                $formatter = function ($post) use (&$formatter) {
                     ?>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ post_url($post) }}">{{ $post->title }}</a>
-                        @if ($children = $post->children->getOrNull())
+                        @if ($children = $post->children->all())
                         <ul class="nav p-l">
                             @foreach ($children as $child)
-                            {!! $_formatter($child) !!}
+                            {!! $formatter($child) !!}
                             @endforeach
                         </ul>
                         @endif
@@ -27,8 +33,8 @@
                 };
                 ?>
 
-                @foreach (app('wp')->posts('page')->root() as $_post)
-                {!! $_formatter($_post) !!}
+                @foreach (app('wp')->posts('page')->root() as $post)
+                {!! $formatter($post) !!}
                 @endforeach
             </ul>
         </nav>

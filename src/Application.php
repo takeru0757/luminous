@@ -681,13 +681,10 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
      * Dispatch the incoming request.
      *
      * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function dispatch(Request $request)
     {
-        $this->configure('assets');
-        $this->make('wp');
-
         return $this->make('dispatcher')->dispatch($request);
     }
 

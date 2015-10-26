@@ -5,7 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
 
-    @include('_components.meta', ['tree' => isset($tree) ? $tree : null, 'post' => isset($post) ? $post : null])
+    @if (isset($query))
+
+    @include('_components.meta-title', ['titles' => $query->tree()->pluck('label')->reverse(), 'page' => $query->page])
+    <link rel="canonical" href="{{ $query->canonicalUrl() }}">
+
+    @if ($prev = $query->prev())
+    <link rel="prev" href="{{ $prev }}">
+    @endif
+
+    @if ($next = $query->next())
+    <link rel="next" href="{{ $next }}">
+    @endif
+
+    @endif
+
+    @yield('meta')
 
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:100,400,700">
     <link rel="stylesheet" href="{{ asset('css/bundle.css') }}">
@@ -40,8 +55,6 @@
     </div>
 
     <div class="container">
-
-        @include('_components.breadcrumbs', ['tree' => isset($tree) ? $tree : null])
 
         @yield('content')
 

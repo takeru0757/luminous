@@ -2,9 +2,14 @@
 
 namespace Luminous\Bridge;
 
+use BadMethodCallException;
 use Countable;
 use IteratorAggregate;
 
+/**
+ * @property-read int|null $limit
+ * @property-read int $offset
+ */
 abstract class QueryBuilder implements Countable, IteratorAggregate
 {
     /**
@@ -19,14 +24,27 @@ abstract class QueryBuilder implements Countable, IteratorAggregate
      *
      * @var int|null
      */
-    public $limit;
+    protected $limit;
 
     /**
      * The number of records to skip.
      *
      * @var int
      */
-    public $offset = 0;
+    protected $offset = 0;
+
+    /**
+     * Dynamically retrieve attributes on the entity.
+     *
+     * @param string $key
+     * @return mixed
+     */
+    public function __get($key)
+    {
+        if (in_array($key, ['limit', 'offset'])) {
+            return $this->{$key};
+        }
+    }
 
     /**
      * Create a new query builder instance.
@@ -111,18 +129,6 @@ abstract class QueryBuilder implements Countable, IteratorAggregate
     abstract public function get();
 
     /**
-     * Execute the query.
-     *
-     * @return \Illuminate\Support\Collection|null
-     */
-    public function getOrNull()
-    {
-        $result = $this->get();
-
-        return ! $result->isEmpty() ? $result : null;
-    }
-
-    /**
      * Execute the query and get the first result.
      *
      * @return mixed
@@ -147,5 +153,23 @@ abstract class QueryBuilder implements Countable, IteratorAggregate
     public function getIterator()
     {
         return $this->get()->getIterator();
+    }
+
+    /**
+     * Dynamically handle calls to the class.
+     *
+     * @param string $method
+     * @param array $arguments
+     * @return mixed
+     *
+     * @throws \BadMethodCallException
+     */
+    public function __call($method, $arguments)
+    {
+        if (method_exists($collection = $this->get(), $method)) {
+            return call_user_func_array([$collection, $method], $arguments);
+        }
+
+        throw new BadMethodCallException("Method {$method} does not exist.");
     }
 }

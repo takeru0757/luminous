@@ -3,6 +3,7 @@
 namespace Luminous\Bridge;
 
 use Exception;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 trait DecoratorTrait
@@ -55,9 +56,19 @@ trait DecoratorTrait
             }
 
             $this->cachedAttributes[$key] = $value;
+        } else {
+            $value = $this->cachedAttributes[$key];
         }
 
-        return $this->cachedAttributes[$key];
+        if ($value instanceof QueryBuilder) {
+            return clone $value;
+        }
+
+        if ($value instanceof Collection) {
+            return $value->make($value);
+        }
+
+        return $value;
     }
 
     /**
