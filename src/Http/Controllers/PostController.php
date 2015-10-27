@@ -32,7 +32,7 @@ class PostController extends Controller
     {
         $postType = $query->postType;
 
-        return $this->findView($postType, ['index', 'base'])->with(compact('query'));
+        return $this->findView($postType, ['posts', 'base'])->with(compact('query'));
     }
 
     /**
@@ -66,7 +66,7 @@ class PostController extends Controller
                 array_pop($paths);
             }
         } else {
-            $files[] = 'show';
+            $files[] = 'post';
         }
 
         $files[] = 'base';
