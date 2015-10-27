@@ -32,16 +32,9 @@ class PostsQuery extends Query
     protected $date;
 
     /**
-     * The page.
-     *
-     * @var int
-     */
-    protected $page;
-
-    /**
      * {@inheritdoc}
      */
-    protected $througs = ['posts', 'term', 'date', 'page'];
+    protected $througs = ['posts', 'term', 'date'];
 
     /**
      * {@inheritdoc}
@@ -86,7 +79,7 @@ class PostsQuery extends Query
         if (! $type = $this->route('term_type')) {
             return null;
         }
-        
+
         try {
             if ($id = $this->route('term__id')) {
                 return $this->wp->term((int) $id, $type);

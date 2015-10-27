@@ -30,6 +30,13 @@ abstract class Query
     protected $postType;
 
     /**
+     * The page.
+     *
+     * @var int
+     */
+    protected $page = 1;
+
+    /**
      * The cached tree items.
      *
      * @var \Luminous\Http\Queries\Node[]
@@ -51,7 +58,7 @@ abstract class Query
      */
     public function __get($key)
     {
-        if ($key === 'postType' || in_array($key, $this->througs)) {
+        if (in_array($key, ['postType', 'page']) || in_array($key, $this->througs)) {
             return $this->{$key};
         }
     }
