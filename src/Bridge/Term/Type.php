@@ -24,6 +24,6 @@ class Type extends BaseType
     protected function getPostTypeAttribute()
     {
         $postType = $this->original->object_type[0];
-        return $this->wp->postType($postType);
+        return WP::postType($postType);
     }
 }

@@ -3,6 +3,7 @@
 namespace Luminous\Bridge\Post\Entities;
 
 use Illuminate\Support\Collection;
+use Luminous\Bridge\WP;
 use Luminous\Bridge\Post\Entity as BaseEntity;
 
 class HierarchicalEntity extends BaseEntity
@@ -17,7 +18,7 @@ class HierarchicalEntity extends BaseEntity
     protected function getAncestorsAttribute()
     {
         $ancestors = array_map(function ($id) {
-            return $this->wp->post($id);
+            return WP::post($id);
         }, get_post_ancestors($this->original));
 
         return new Collection($ancestors);
@@ -30,6 +31,6 @@ class HierarchicalEntity extends BaseEntity
      */
     protected function getChildrenAttribute()
     {
-        return $this->wp->posts($this->type)->wherePost('parent_id', $this->id);
+        return WP::posts($this->type)->wherePost('parent_id', $this->id);
     }
 }

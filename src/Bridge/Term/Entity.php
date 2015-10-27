@@ -4,8 +4,8 @@ namespace Luminous\Bridge\Term;
 
 use stdClass;
 use Illuminate\Support\Collection;
-use Luminous\Bridge\WP;
 use Luminous\Bridge\Entity as BaseEntity;
+use Luminous\Bridge\WP;
 
 abstract class Entity extends BaseEntity
 {
@@ -21,14 +21,13 @@ abstract class Entity extends BaseEntity
     /**
      * Create a new term entity instance.
      *
-     * @param \Luminous\Bridge\WP $wp
      * @param \Luminous\Bridge\Term\Type $type
      * @param \stdClass $original
      * @return void
      */
-    public function __construct(WP $wp, Type $type, stdClass $original)
+    public function __construct(Type $type, stdClass $original)
     {
-        parent::__construct($wp, $type, $original);
+        parent::__construct($type, $original);
     }
 
     /**

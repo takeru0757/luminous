@@ -13,13 +13,6 @@ use IteratorAggregate;
 abstract class QueryBuilder implements Countable, IteratorAggregate
 {
     /**
-     * The wp instance.
-     *
-     * @var \Luminous\Bridge\WP
-     */
-    protected $wp;
-
-    /**
      * The entity builder instance.
      *
      * @var \Luminous\Bridge\Builder
@@ -56,13 +49,11 @@ abstract class QueryBuilder implements Countable, IteratorAggregate
     /**
      * Create a new query builder instance.
      *
-     * @param \Luminous\Bridge\WP $wp
      * @param \Luminous\Bridge\Builder $entityBuilder
      * @return void
      */
-    public function __construct(WP $wp, Builder $entityBuilder)
+    public function __construct(Builder $entityBuilder)
     {
-        $this->wp = $wp;
         $this->entityBuilder = $entityBuilder;
     }
 

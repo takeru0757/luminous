@@ -4,6 +4,7 @@ namespace Luminous\Bridge\Term;
 
 use InvalidArgumentException;
 use Luminous\Bridge\Builder as BaseBuilder;
+use Luminous\Bridge\WP;
 use Luminous\Bridge\Exceptions\MissingEntityException;
 use Luminous\Bridge\Term\Query\Builder as QueryBuilder;
 
@@ -71,7 +72,7 @@ class Builder extends BaseBuilder
             }
         }
 
-        return $this->container->make($abstract, [$this->wp, $type, $original]);
+        return $this->container->make($abstract, [$type, $original]);
     }
 
     /**
@@ -95,7 +96,7 @@ class Builder extends BaseBuilder
      */
     protected function makeType($original)
     {
-        return new Type($this->wp, $original);
+        return new Type($original);
     }
 
     /**
@@ -105,6 +106,6 @@ class Builder extends BaseBuilder
      */
     public function query()
     {
-        return new QueryBuilder($this->wp, $this);
+        return new QueryBuilder($this);
     }
 }

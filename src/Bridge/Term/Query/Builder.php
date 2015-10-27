@@ -27,13 +27,12 @@ class Builder extends QueryBuilder
     /**
      * Create a new term query builder instance.
      *
-     * @param \Luminous\Bridge\WP $wp
      * @param \Luminous\Bridge\Term\Builder $entityBuilder
      * @return void
      */
-    public function __construct(WP $wp, TermBuilder $entityBuilder)
+    public function __construct(TermBuilder $entityBuilder)
     {
-        parent::__construct($wp, $entityBuilder);
+        parent::__construct($entityBuilder);
     }
 
     /**

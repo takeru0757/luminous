@@ -25,13 +25,12 @@ class Builder extends QueryBuilder
     /**
      * Create a new post query builder instance.
      *
-     * @param \Luminous\Bridge\WP $wp
      * @param \Luminous\Bridge\Post\Builder $entityBuilder
      * @return void
      */
-    public function __construct(WP $wp, PostBuilder $entityBuilder)
+    public function __construct(PostBuilder $entityBuilder)
     {
-        parent::__construct($wp, $entityBuilder);
+        parent::__construct($entityBuilder);
     }
 
     /**

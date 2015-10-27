@@ -5,9 +5,9 @@ namespace Luminous\Bridge\Post;
 use WP_Post;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Luminous\Bridge\Entity as BaseEntity;
 use Luminous\Bridge\WP;
 use Luminous\Bridge\Term\Type as TermType;
-use Luminous\Bridge\Entity as BaseEntity;
 
 abstract class Entity extends BaseEntity
 {
@@ -42,14 +42,13 @@ abstract class Entity extends BaseEntity
     /**
      * Create a new post entity instance.
      *
-     * @param \Luminous\Bridge\WP $wp
      * @param \Luminous\Bridge\Post\Type $type
      * @param \WP_Post $original
      * @return void
      */
-    public function __construct(WP $wp, Type $type, WP_Post $original)
+    public function __construct(Type $type, WP_Post $original)
     {
-        parent::__construct($wp, $type, $original);
+        parent::__construct($type, $original);
     }
 
     /**
@@ -184,7 +183,7 @@ abstract class Entity extends BaseEntity
      */
     protected function getCreatedAtAttribute($value)
     {
-        return Carbon::createFromFormat('Y-m-d H:i:s', $value, $this->wp->timezone());
+        return Carbon::createFromFormat('Y-m-d H:i:s', $value, WP::timezone());
     }
 
     /**
@@ -195,7 +194,7 @@ abstract class Entity extends BaseEntity
      */
     protected function getModifiedAtAttribute($value)
     {
-        return Carbon::createFromFormat('Y-m-d H:i:s', $value, $this->wp->timezone());
+        return Carbon::createFromFormat('Y-m-d H:i:s', $value, WP::timezone());
     }
 
     /**
@@ -231,13 +230,13 @@ abstract class Entity extends BaseEntity
      */
     public function terms($type)
     {
-        $type = $this->wp->termType($type);
+        $type = WP::termType($type);
 
         $originals = get_the_terms($this->id, $type->name);
         $originals = $originals && ! is_wp_error($originals) ? $originals : [];
 
         $terms = array_map(function ($original) {
-            return $this->wp->term($original);
+            return WP::term($original);
         }, $originals);
 
         return new Collection($terms);
@@ -266,7 +265,7 @@ abstract class Entity extends BaseEntity
     protected function getThumbnailAttribute()
     {
         if ($id = get_post_thumbnail_id($this->id)) {
-            return $this->wp->post((int) $id);
+            return WP::post((int) $id);
         }
 
         return null;

@@ -2,8 +2,8 @@
 
 namespace Luminous\Bridge;
 
-use Exception;
 use DateTimeZone;
+use RuntimeException;
 use Carbon\Carbon;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Collection;
@@ -24,28 +24,14 @@ class WP
      *
      * @var \Illuminate\Contracts\Container\Container
      */
-    protected $container;
-
-    /**
-     * The post builder.
-     *
-     * @var \Luminous\Bridge\Post\Builder
-     */
-    protected $post;
-
-    /**
-     * The term builder.
-     *
-     * @var \Luminous\Bridge\Term\Builder
-     */
-    protected $term;
+    protected static $container;
 
     /**
      * The map of methods to get a option value.
      *
      * @var array
      */
-    protected $optionMethods = [
+    protected static $optionMethods = [
         'last_modified' => 'lastModified',
         'timezone' => 'timezone',
     ];
@@ -55,24 +41,11 @@ class WP
      *
      * @var array
      */
-    protected $optionAliases = [
+    protected static $optionAliases = [
         'url'           => 'home',
         'name'          => 'blogname',
         'description'   => 'blogdescription',
     ];
-
-    /**
-     * Create a new wp instance.
-     *
-     * @param \Illuminate\Contracts\Container\Container $container
-     * @return void
-     */
-    public function __construct(Container $container)
-    {
-        $this->container = $container;
-        $this->post = new PostBuilder($this->container, $this);
-        $this->term = new TermBuilder($this->container, $this);
-    }
 
     /**
      * Get the value from the options database table.
@@ -83,14 +56,14 @@ class WP
      * @param mixed $default
      * @return mixed
      */
-    public function option($key, $default = null)
+    public static function option($key, $default = null)
     {
-        if (array_key_exists($key, $this->optionMethods)) {
-            return $this->{$this->optionMethods[$key]}();
+        if (array_key_exists($key, static::$optionMethods)) {
+            return call_user_func([get_called_class(), static::$optionMethods[$key]]);
         }
 
-        if (array_key_exists($key, $this->optionAliases)) {
-            $key = $this->optionAliases[$key];
+        if (array_key_exists($key, static::$optionAliases)) {
+            $key = static::$optionAliases[$key];
         }
 
         return get_option($key, $default);
@@ -103,15 +76,15 @@ class WP
      *
      * @throws \Exception
      */
-    public function lastModified()
+    public static function lastModified()
     {
         static $value = null;
 
         if (is_null($value)) {
-            if (! $timestamp = $this->option(static::OPTION_LAST_MODIFIED)) {
-                throw new Exception("Option [".static::OPTION_LAST_MODIFIED."] could not be found.");
+            if (! $timestamp = static::option(static::OPTION_LAST_MODIFIED)) {
+                throw new RuntimeException("Option [".static::OPTION_LAST_MODIFIED."] could not be found.");
             }
-            $value = Carbon::createFromTimeStamp((int) $timestamp, $this->timezone());
+            $value = Carbon::createFromTimeStamp((int) $timestamp, static::timezone());
         }
 
         return $value;
@@ -122,10 +95,10 @@ class WP
      *
      * @return \DateTimeZone
      */
-    public function timezone()
+    public static function timezone()
     {
         static $value = null;
-        return ! is_null($value) ? $value : ($value = new DateTimeZone($this->option('timezone_string')));
+        return ! is_null($value) ? $value : ($value = new DateTimeZone(static::option('timezone_string')));
     }
 
     /**
@@ -133,10 +106,10 @@ class WP
      *
      * @return bool
      */
-    public function isPublic()
+    public static function isPublic()
     {
         static $value = null;
-        return ! is_null($value) ? $value : ($value = (bool) $this->option('blog_public'));
+        return ! is_null($value) ? $value : ($value = (bool) static::option('blog_public'));
     }
 
     /**
@@ -146,11 +119,11 @@ class WP
      *
      * @return \Illuminate\Support\Collection|\Luminous\Bridge\Post\Type[]
      */
-    public function postTypes()
+    public static function postTypes()
     {
         $types = array_merge(['page', 'post'], get_post_types(['public' => true, '_builtin' => false]));
 
-        return new Collection(array_map([$this, 'postType'], $types));
+        return new Collection(array_map([get_called_class(), 'postType'], $types));
     }
 
     /**
@@ -159,9 +132,9 @@ class WP
      * @param string|\Luminous\Bridge\Post\Type $name
      * @return \Luminous\Bridge\Post\Type
      */
-    public function postType($name)
+    public static function postType($name)
     {
-        return $this->post->getType($name);
+        return static::getPostBuilder()->getType($name);
     }
 
     /**
@@ -170,9 +143,9 @@ class WP
      * @param \Luminous\Bridge\Post\Type|string|array $type
      * @return \Luminous\Bridge\Post\Query\Builder
      */
-    public function posts($type = null)
+    public static function posts($type = null)
     {
-        $query = $this->post->query();
+        $query = static::getPostBuilder()->query();
 
         return $type ? $query->type($type) : $query;
     }
@@ -184,9 +157,9 @@ class WP
      * @param \Luminous\Bridge\Post\Type|string $type
      * @return \Luminous\Bridge\Post\Entity
      */
-    public function post($id, $type = null)
+    public static function post($id, $type = null)
     {
-        return $this->post->get($id, $type);
+        return static::getPostBuilder()->get($id, $type);
     }
 
     /**
@@ -195,9 +168,9 @@ class WP
      * @param string|\Luminous\Bridge\Term\Type $name
      * @return \Luminous\Bridge\Term\Type
      */
-    public function termType($name)
+    public static function termType($name)
     {
-        return $this->term->getType($name);
+        return static::getTermBuilder()->getType($name);
     }
 
     /**
@@ -207,9 +180,9 @@ class WP
      * @param \Luminous\Bridge\Term\Type|string $type
      * @return \Luminous\Bridge\Term\Entity
      */
-    public function term($id, $type = null)
+    public static function term($id, $type = null)
     {
-        return $this->term->get($id, $type);
+        return static::getTermBuilder()->get($id, $type);
     }
 
     /**
@@ -218,10 +191,50 @@ class WP
      * @param \Luminous\Bridge\Term\Type|string $type
      * @return \Luminous\Bridge\Term\Query\Builder
      */
-    public function terms($type = null)
+    public static function terms($type = null)
     {
-        $query = $this->term->query();
+        $query = static::getTermBuilder()->query();
 
         return $type ? $query->type($type) : $query;
+    }
+
+    /**
+     * Set the container.
+     *
+     * @param \Illuminate\Contracts\Container\Container $container
+     */
+    public static function setContainer(Container $container)
+    {
+        static::$container = $container;
+    }
+
+    /**
+     * Get the container.
+     *
+     * @return \Illuminate\Contracts\Container\Container $container
+     */
+    public static function getContainer()
+    {
+        return static::$container;
+    }
+
+    /**
+     * Get the post builder.
+     *
+     * @return \Luminous\Post\Builder
+     */
+    protected static function getPostBuilder()
+    {
+        return static::$container->make(PostBuilder::class);
+    }
+
+    /**
+     * Get the term builder.
+     *
+     * @return \Luminous\Term\Builder
+     */
+    protected static function getTermBuilder()
+    {
+        return static::$container->make(TermBuilder::class);
     }
 }

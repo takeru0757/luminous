@@ -2,6 +2,7 @@
 
 namespace Luminous\Bridge\Post\Entities;
 
+use Luminous\Bridge\WP;
 use Luminous\Bridge\Post\Entity as BaseEntity;
 
 /**
@@ -17,7 +18,7 @@ class NonHierarchicalEntity extends BaseEntity
      */
     public function getNewerAttribute()
     {
-        return $this->wp->posts($this->type)
+        return WP::posts($this->type)
             ->whereDate('created_at', '>', $this->created_at)
             ->orderBy('created_at', 'asc')
             ->first();
@@ -30,7 +31,7 @@ class NonHierarchicalEntity extends BaseEntity
      */
     public function getOlderAttribute()
     {
-        return $this->wp->posts($this->type)
+        return WP::posts($this->type)
             ->whereDate('created_at', '<', $this->created_at)
             ->orderBy('created_at', 'desc')
             ->first();

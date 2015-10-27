@@ -10,13 +10,6 @@ abstract class Entity implements ArrayAccess, UrlResource
     use UrlPathTrait;
 
     /**
-     * The WP.
-     *
-     * @var \Luminous\Bridge\WP
-     */
-    protected $wp;
-
-    /**
      * The type.
      *
      * @var \Luminous\Bridge\Type
@@ -33,14 +26,12 @@ abstract class Entity implements ArrayAccess, UrlResource
     /**
      * Create a new entity instance.
      *
-     * @param \Luminous\Bridge\WP $wp
      * @param \Luminous\Bridge\Type $type
      * @param object $original
      * @return void
      */
-    public function __construct(WP $wp, Type $type, $original)
+    public function __construct(Type $type, $original)
     {
-        $this->wp = $wp;
         $this->type = $type;
         $this->original = $original;
         $this->accessorsForOriginal = $this->accessors;

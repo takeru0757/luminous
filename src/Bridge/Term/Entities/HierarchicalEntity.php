@@ -3,6 +3,7 @@
 namespace Luminous\Bridge\Term\Entities;
 
 use Illuminate\Support\Collection;
+use Luminous\Bridge\WP;
 use Luminous\Bridge\Term\Entity as BaseEntity;
 
 class HierarchicalEntity extends BaseEntity
@@ -17,7 +18,7 @@ class HierarchicalEntity extends BaseEntity
     protected function getAncestorsAttribute()
     {
         $ancestors = array_map(function ($id) {
-            return $this->wp->term($id, $this->type);
+            return WP::term($id, $this->type);
         }, get_ancestors($this->id, $this->original->taxonomy, 'taxonomy'));
 
         return new Collection($ancestors);
@@ -53,7 +54,7 @@ class HierarchicalEntity extends BaseEntity
     public function children($direct = true)
     {
         $column = $direct ? 'parent_id' : 'ancestor_id';
-        return $this->wp->terms($this->type)->whereTerm($column, $this->id);
+        return WP::terms($this->type)->whereTerm($column, $this->id);
     }
 
     /**
