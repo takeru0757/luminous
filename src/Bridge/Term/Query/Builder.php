@@ -6,6 +6,7 @@ use WP_Query;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Luminous\Bridge\QueryBuilder;
+use Luminous\Bridge\WP;
 use Luminous\Bridge\Term\Builder as TermBuilder;
 use Luminous\Bridge\Term\Type;
 use Luminous\Bridge\Term\Query\Parameters\OrderByParameter;
@@ -26,12 +27,13 @@ class Builder extends QueryBuilder
     /**
      * Create a new term query builder instance.
      *
+     * @param \Luminous\Bridge\WP $wp
      * @param \Luminous\Bridge\Term\Builder $entityBuilder
      * @return void
      */
-    public function __construct(TermBuilder $entityBuilder)
+    public function __construct(WP $wp, TermBuilder $entityBuilder)
     {
-        parent::__construct($entityBuilder);
+        parent::__construct($wp, $entityBuilder);
     }
 
     /**

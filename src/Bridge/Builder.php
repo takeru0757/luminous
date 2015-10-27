@@ -17,6 +17,13 @@ abstract class Builder
     protected $container;
 
     /**
+     * The wp instance.
+     *
+     * @var \Luminous\Bridge\WP
+     */
+    protected $wp;
+
+    /**
      * Cached type instances.
      *
      * @var \Luminous\Bridge\Type[]
@@ -27,21 +34,13 @@ abstract class Builder
      * Create a new builder instance.
      *
      * @param \Illuminate\Contracts\Container\Container $container
+     * @param \Luminous\Bridge\WP $wp
      * @return void
      */
-    public function __construct(Container $container)
+    public function __construct(Container $container, WP $wp)
     {
         $this->container = $container;
-    }
-
-    /**
-     * Get the timezone.
-     *
-     * @return \DateTimeZone
-     */
-    public function timezone()
-    {
-        return $this->container['wp']->timezone();
+        $this->wp = $wp;
     }
 
     /**

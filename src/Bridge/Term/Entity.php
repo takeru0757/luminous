@@ -22,13 +22,13 @@ abstract class Entity extends BaseEntity
      * Create a new term entity instance.
      *
      * @param \Luminous\Bridge\WP $wp
-     * @param \stdClass $original
      * @param \Luminous\Bridge\Term\Type $type
+     * @param \stdClass $original
      * @return void
      */
-    public function __construct(WP $wp, stdClass $original, Type $type)
+    public function __construct(WP $wp, Type $type, stdClass $original)
     {
-        parent::__construct($wp, $original, $type);
+        parent::__construct($wp, $type, $original);
     }
 
     /**

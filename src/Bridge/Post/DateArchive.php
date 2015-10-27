@@ -2,6 +2,7 @@
 
 namespace Luminous\Bridge\Post;
 
+use Closure;
 use Carbon\Carbon;
 use Luminous\Bridge\UrlPathTrait;
 use Luminous\Bridge\UrlResource;
@@ -37,6 +38,13 @@ class DateArchive implements UrlResource
      * @var int|null
      */
     protected $count;
+
+    /**
+     * The timezone resolver callback.
+     *
+     * @var \Closure
+     */
+    protected static $timezoneResolver;
 
     /**
      * Dynamically access this attributes.
@@ -77,7 +85,7 @@ class DateArchive implements UrlResource
      */
     public static function createFromPath($value, $local = true)
     {
-        $timezone = $local ? WP::timezone() : null;
+        $timezone = $local ? static::getTimezone() : null;
         $value = array_map('intval', explode('/', $value));
 
         $types = [
@@ -104,10 +112,20 @@ class DateArchive implements UrlResource
      */
     public static function createFromFormat($type, $format, $value, $local = true)
     {
-        $timezone = $local ? WP::timezone() : null;
+        $timezone = $local ? static::getTimezone() : null;
         $datetime = Carbon::createFromFormat($format, $value, $timezone);
 
         return new static($type, $datetime->startOfDay());
+    }
+
+    /**
+     * Get the timezone.
+     *
+     * @return \DateTimeZone|null
+     */
+    protected static function getTimezone()
+    {
+        return static::$timezoneResolver ? call_user_func(static::$timezoneResolver) : null;
     }
 
     /**
@@ -183,5 +201,16 @@ class DateArchive implements UrlResource
         return array_combine($keys, array_map(function ($key) {
             return $this->datetime->{$key};
         }, $keys));
+    }
+
+    /**
+     * Set the timezone resolver callback.
+     *
+     * @param \Closure $resolver
+     * @return void
+     */
+    public static function timezoneResolver(Closure $resolver)
+    {
+        static::$timezoneResolver = $resolver;
     }
 }

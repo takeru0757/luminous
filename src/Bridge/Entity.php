@@ -17,13 +17,6 @@ abstract class Entity implements ArrayAccess, UrlResource
     protected $wp;
 
     /**
-     * The accessors map for original instance.
-     *
-     * @var array
-     */
-    protected $accessors = [];
-
-    /**
      * The type.
      *
      * @var \Luminous\Bridge\Type
@@ -31,19 +24,26 @@ abstract class Entity implements ArrayAccess, UrlResource
     protected $type;
 
     /**
+     * The accessors map for original instance.
+     *
+     * @var array
+     */
+    protected $accessors = [];
+
+    /**
      * Create a new entity instance.
      *
      * @param \Luminous\Bridge\WP $wp
-     * @param object $original
      * @param \Luminous\Bridge\Type $type
+     * @param object $original
      * @return void
      */
-    public function __construct(WP $wp, $original, Type $type)
+    public function __construct(WP $wp, Type $type, $original)
     {
         $this->wp = $wp;
+        $this->type = $type;
         $this->original = $original;
         $this->accessorsForOriginal = $this->accessors;
-        $this->type = $type;
     }
 
     /**

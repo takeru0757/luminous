@@ -59,7 +59,7 @@ class Builder extends BaseBuilder
             }
         }
 
-        return $this->container->make($abstract, [$this->container['wp'], $original, $type]);
+        return $this->container->make($abstract, [$this->wp, $type, $original]);
     }
 
     /**
@@ -83,7 +83,7 @@ class Builder extends BaseBuilder
      */
     protected function makeType($original)
     {
-        return new Type($this->container['wp'], $original);
+        return new Type($this->wp, $original);
     }
 
     /**
@@ -93,6 +93,6 @@ class Builder extends BaseBuilder
      */
     public function query()
     {
-        return new QueryBuilder($this);
+        return new QueryBuilder($this->wp, $this);
     }
 }

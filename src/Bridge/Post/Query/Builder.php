@@ -6,6 +6,7 @@ use WP_Query;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Luminous\Bridge\QueryBuilder;
+use Luminous\Bridge\WP;
 use Luminous\Bridge\Post\Builder as PostBuilder;
 use Luminous\Bridge\Post\DateArchive;
 use Luminous\Bridge\Post\Paginator;
@@ -24,12 +25,13 @@ class Builder extends QueryBuilder
     /**
      * Create a new post query builder instance.
      *
+     * @param \Luminous\Bridge\WP $wp
      * @param \Luminous\Bridge\Post\Builder $entityBuilder
      * @return void
      */
-    public function __construct(PostBuilder $entityBuilder)
+    public function __construct(WP $wp, PostBuilder $entityBuilder)
     {
-        parent::__construct($entityBuilder);
+        parent::__construct($wp, $entityBuilder);
     }
 
     /**

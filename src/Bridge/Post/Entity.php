@@ -43,13 +43,13 @@ abstract class Entity extends BaseEntity
      * Create a new post entity instance.
      *
      * @param \Luminous\Bridge\WP $wp
-     * @param \WP_Post $original
      * @param \Luminous\Bridge\Post\Type $type
+     * @param \WP_Post $original
      * @return void
      */
-    public function __construct(WP $wp, WP_Post $original, Type $type)
+    public function __construct(WP $wp, Type $type, WP_Post $original)
     {
-        parent::__construct($wp, $original, $type);
+        parent::__construct($wp, $type, $original);
     }
 
     /**
@@ -184,7 +184,7 @@ abstract class Entity extends BaseEntity
      */
     protected function getCreatedAtAttribute($value)
     {
-        return Carbon::createFromFormat('Y-m-d H:i:s', $value, WP::timezone());
+        return Carbon::createFromFormat('Y-m-d H:i:s', $value, $this->wp->timezone());
     }
 
     /**
@@ -195,7 +195,7 @@ abstract class Entity extends BaseEntity
      */
     protected function getModifiedAtAttribute($value)
     {
-        return Carbon::createFromFormat('Y-m-d H:i:s', $value, WP::timezone());
+        return Carbon::createFromFormat('Y-m-d H:i:s', $value, $this->wp->timezone());
     }
 
     /**
