@@ -87,7 +87,7 @@ class Route
 
         if ($this->parameters = Arr::get($options, 'parameters', [])) {
             foreach ($this->parameters as $key => $value) {
-                if (strpos($value, '{') !== false) {
+                if (is_string($value) && strpos($value, '{') !== false) {
                     $replacement = preg_replace('/\{([a-z][a-z\d_]*)/i', "{{$key}__$1", $value);
                     $this->uri = preg_replace("/\{{$key}\}/", $replacement, $this->uri);
                 }
@@ -154,7 +154,7 @@ class Route
     {
         return $this->middleware;
     }
-    
+
     /**
      * Get the controller.
      *
