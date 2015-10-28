@@ -46,7 +46,7 @@ class PostsQuery extends Query
         $query = $this->wp->posts($this->postType);
 
         if ($order = $this->route('order')) {
-            $query->orderBy($order['column'], $order['direction']);
+            call_user_func_array([$query, 'orderBy'], $order);
         } else {
             $query->orderBy('created_at', 'desc');
         }

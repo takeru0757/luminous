@@ -7,7 +7,6 @@ use InvalidArgumentException;
 /**
  * The ordering parameter for the post query.
  *
- * @todo Support 'meta_key', 'meta_value' and 'meta_type'.
  * @todo Support 'post__in'.
  *
  * @link https://codex.wordpress.org/Class_Reference/WP_Query#Order_.26_Orderby_Parameters
@@ -20,6 +19,20 @@ trait OrderByParameter
      * @var array
      */
     protected $orders = [];
+
+    /**
+     * The ordering parameter for the query.
+     *
+     * @var string
+     */
+    protected $orderMetaKey;
+
+    /**
+     * The ordering parameter for the query.
+     *
+     * @var string
+     */
+    protected $orderMetaType;
 
     /**
      * Columns can be used by ordering.
@@ -35,8 +48,8 @@ trait OrderByParameter
         'slug'          => 'name',
         'parent_id'     => 'parent',
         'comment_count' => 'comment_count',
-        //'meta_value'    => 'meta_value',
-        //'meta_value_num' => 'meta_value_num',
+        'meta_value'    => 'meta_value',
+        'meta_value_num' => 'meta_value_num',
         //'post__in' => 'post__in',
     ];
 
@@ -45,12 +58,22 @@ trait OrderByParameter
      *
      * @param string $column
      * @param string $direction Possible values are 'asc' and 'desc'.
+     * @param string $metaKey
+     * @param string $metaType
      * @return $this
      *
      * @throws \InvalidArgumentException
      */
-    public function orderBy($column, $direction = 'asc')
+    public function orderBy($column, $direction = 'asc', $metaKey = null, $metaType = null)
     {
+        if (in_array($column, ['meta_value', 'meta_value_num'])) {
+            if (! $metaKey) {
+                throw new InvalidArgumentException;
+            }
+            $this->orderMetaKey = $metaKey;
+            $this->orderMetaType = $metaType;
+        }
+
         if (! in_array($column, array_keys($this->orderByColumns))) {
             throw new InvalidArgumentException;
         }
@@ -76,6 +99,16 @@ trait OrderByParameter
             $query[$this->orderByColumns[$order['column']]] = strtoupper($order['direction']);
         }
 
-        return ['orderby' => $query ?: 'none' ];
+        $meta = [];
+
+        if ($this->orderMetaKey) {
+            $meta['meta_key'] = $this->orderMetaKey;
+        }
+
+        if ($this->orderMetaType) {
+            $meta['meta_type'] = $this->orderMetaType;
+        }
+
+        return ['orderby' => $query ?: 'none' ] + $meta;
     }
 }
