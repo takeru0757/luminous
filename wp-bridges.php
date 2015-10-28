@@ -48,34 +48,48 @@ add_filter('post_link', function ($permalink, $post, $leavename) {
     if (strpos($permalink, '?p=') !== false) {
         return $permalink;
     }
+
     $placeholder = $leavename ? '%postname%' : null;
     $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
+
     return post_url(app('wp')->post($post), $parameters, true);
 }, 10, 3);
 
-// @link https://developer.wordpress.org/reference/functions/_get_page_link/
-add_filter('_get_page_link', function ($permalink, $postId) {
-    if ($permalink === home_url() || strpos($permalink, '?page_id=') !== false) {
+// @link https://developer.wordpress.org/reference/functions/get_page_link/
+add_filter('page_link', function ($permalink, $postId) {
+    if (strpos($permalink, '?page_id=') !== false) {
         return $permalink;
     }
+
+    if ($permalink === home_url('/')) {
+        return url('/', true);
+    }
+
     $placeholder = strpos($permalink, '%pagename%') !== false ? '%pagename%' : null;
     $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
+
     return post_url(app('wp')->post($postId), $parameters, true);
 }, 10, 2);
 
 // @link https://developer.wordpress.org/reference/functions/get_post_permalink/
 add_filter('post_type_link', function ($permalink, $post, $leavename) {
-    if (strpos($permalink, '?post_type=') !== false) {
+    $postType = get_post_type_object($post->post_type);
+    $draft = isset($post->post_status) && in_array($post->post_status, ['draft', 'pending', 'auto-draft', 'future']);
+
+    if (! $postType->public || $draft) {
         return $permalink;
     }
+
     $placeholder = $leavename ? "%{$post->post_type}%" : null;
     $parameters = $placeholder ? ['post__path' => $placeholder, 'post__slug' => $placeholder] : [];
+
     return post_url(app('wp')->post($post), $parameters, true);
 }, 10, 3);
 
 // @link https://developer.wordpress.org/reference/functions/get_term_link/
 add_filter('term_link', function ($termlink, $term, $taxonomy) {
     $term = app('wp')->term($term, $taxonomy);
+
     return posts_url($term->type->post_type, $term->forUrl(), true);
 }, 10, 3);
 
