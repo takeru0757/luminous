@@ -52,6 +52,16 @@ abstract class Entity extends BaseEntity
     }
 
     /**
+     * Determine if the post is public.
+     *
+     * @return bool
+     */
+    public function isPublic()
+    {
+        return $this->status === 'publish';
+    }
+
+    /**
      * Get the path.
      *
      * @uses \get_page_uri()

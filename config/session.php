@@ -50,7 +50,7 @@ return [
     // Session Cookie Name
     // -------------------------------------------------------------------------
 
-    'cookie' => 'laravel_session',
+    'cookie' => env('SESSION_COOKIE_NAME', 'luminous_session'),
 
     // -------------------------------------------------------------------------
     // Session Cookie Path

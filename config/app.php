@@ -6,7 +6,7 @@ return [
     // Encryption Key
     // -------------------------------------------------------------------------
 
-    'key' => env('APP_KEY', NONCE_SALT ?: 'SomeRandomString!!!'),
+    'key' => env('APP_KEY', NONCE_SALT ? substr(NONCE_SALT, 0, 32) : 'SomeRandomString!!!'),
     'cipher' => 'AES-256-CBC',
 
     // -------------------------------------------------------------------------

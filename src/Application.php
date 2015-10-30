@@ -603,6 +603,7 @@ class Application extends Container implements ApplicationContract, HttpKernelIn
     {
         $this->singleton('validator', function () {
             $this->register('Illuminate\Validation\ValidationServiceProvider');
+            unset($this['validation.presence']);
 
             return $this->make('validator');
         });

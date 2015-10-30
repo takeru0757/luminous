@@ -9,6 +9,18 @@ use Luminous\Bridge\Post\Entity as BaseEntity;
 class HierarchicalEntity extends BaseEntity
 {
     /**
+     * {@inheritdoc}
+     */
+    public function isPublic()
+    {
+        if ($parent = $this->parent) {
+            return $parent->isPublic() && parent::isPublic();
+        }
+
+        return parent::isPublic();
+    }
+
+    /**
      * Get the ancestors.
      *
      * @uses \get_post_ancestors()
@@ -22,6 +34,16 @@ class HierarchicalEntity extends BaseEntity
         }, get_post_ancestors($this->original));
 
         return new Collection($ancestors);
+    }
+
+    /**
+     * Get the parent.
+     *
+     * @return \Luminous\Bridge\Post\Entity|null
+     */
+    protected function getParentAttribute()
+    {
+        return $this->ancestors->first();
     }
 
     /**

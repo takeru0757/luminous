@@ -38,6 +38,11 @@ class PostQuery extends Query
             } else {
                 throw new NotFoundHttpException;
             }
+
+            if (! $this->post->isPublic()) {
+                throw new NotFoundHttpException;
+            }
+
         } catch (EntityNotFoundException $e) {
             throw new NotFoundHttpException(null, $e);
         }

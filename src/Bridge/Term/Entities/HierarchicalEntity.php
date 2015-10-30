@@ -25,14 +25,25 @@ class HierarchicalEntity extends BaseEntity
     }
 
     /**
-     * Get the path.
+     * Get the parent.
      *
-     * @return string
+     * @return \Luminous\Bridge\Term\Entity|null
+     */
+    protected function getParentAttribute()
+    {
+        return $this->ancestors->first();
+    }
+
+    /**
+     * {@inheritdoc}
      */
     protected function getPathAttribute()
     {
-        $path = parent::getPathAttribute();
-        return $this->ancestors->pluck('slug')->reverse()->push($path)->implode('/');
+        if ($parent = $this->parent) {
+            return $parent->path.'/'.parent::getPathAttribute();
+        }
+
+        return parent::getPathAttribute();
     }
 
     /**
