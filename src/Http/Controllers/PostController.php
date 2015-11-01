@@ -19,7 +19,17 @@ class PostController extends Controller
      */
     public function posts()
     {
-        return $this->getPostsView($this->app->make(PostsQuery::class));
+        return $this->getPostsView($this->getPostsQuery());
+    }
+
+    /**
+     * Get the query for posts.
+     *
+     * @return \Luminous\Http\Queries\PostsQuery
+     */
+    protected function getPostsQuery()
+    {
+        return $this->app->make(PostsQuery::class);
     }
 
     /**
@@ -42,7 +52,17 @@ class PostController extends Controller
      */
     public function post()
     {
-        return $this->getPostView($this->app->make(PostQuery::class));
+        return $this->getPostView($this->getPostQuery());
+    }
+
+    /**
+     * Get the query for the post.
+     *
+     * @return \Luminous\Http\Queries\PostQuery
+     */
+    protected function getPostQuery()
+    {
+        return $this->app->make(PostQuery::class);
     }
 
     /**
