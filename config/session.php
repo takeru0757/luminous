@@ -13,7 +13,6 @@ return [
     // -------------------------------------------------------------------------
 
     'lifetime' => env('SESSION_LIFETIME', 120),
-
     'expire_on_close' => env('SESSION_EXPIRE_ON_CLOSE', false),
 
     // -------------------------------------------------------------------------
@@ -29,16 +28,11 @@ return [
     'files' => storage_path('framework/sessions'),
 
     // -------------------------------------------------------------------------
-    // Session Database Connection
+    // Session Database
     // -------------------------------------------------------------------------
 
-    'connection' => env('SESSION_DATABASE_CONNECTION'),
-
-    // -------------------------------------------------------------------------
-    // Session Database Table
-    // -------------------------------------------------------------------------
-
-    'table' => env('SESSION_DATABASE_TABLE', 'sessions'),
+    'connection'    => env('SESSION_DATABASE_CONNECTION'),
+    'table'         => env('SESSION_DATABASE_TABLE', 'sessions'),
 
     // -------------------------------------------------------------------------
     // Session Sweeping Lottery
@@ -47,27 +41,12 @@ return [
     'lottery' => [2, 100],
 
     // -------------------------------------------------------------------------
-    // Session Cookie Name
+    // Session Cookie
     // -------------------------------------------------------------------------
 
-    'cookie' => env('SESSION_COOKIE_NAME', 'luminous_session'),
-
-    // -------------------------------------------------------------------------
-    // Session Cookie Path
-    // -------------------------------------------------------------------------
-
-    'path' => '/',
-
-    // -------------------------------------------------------------------------
-    // Session Cookie Domain
-    // -------------------------------------------------------------------------
-
-    'domain' => null,
-
-    // -------------------------------------------------------------------------
-    // HTTPS Only Cookies
-    // -------------------------------------------------------------------------
-
-    'secure' => false,
+    'cookie'    => env('SESSION_COOKIE_NAME', 'luminous_session'),
+    'path'      => env('SESSION_COOKIE_PATH', '/'),
+    'domain'    => env('SESSION_COOKIE_DOMAIN', null),
+    'secure'    => env('SESSION_COOKIE_SECURE', false),
 
 ];
