@@ -11,6 +11,7 @@ use Luminous\Bridge\Post\Builder as PostBuilder;
 use Luminous\Bridge\Post\DateArchive;
 use Luminous\Bridge\Post\Paginator;
 use Luminous\Bridge\Post\Query\Parameters\DateParameter;
+use Luminous\Bridge\Post\Query\Parameters\MetaParameter;
 use Luminous\Bridge\Post\Query\Parameters\OrderByParameter;
 use Luminous\Bridge\Post\Query\Parameters\PostParameter;
 use Luminous\Bridge\Post\Query\Parameters\TermParameter;
@@ -18,6 +19,7 @@ use Luminous\Bridge\Post\Query\Parameters\TermParameter;
 class Builder extends QueryBuilder
 {
     use DateParameter;
+    use MetaParameter;
     use OrderByParameter;
     use PostParameter;
     use TermParameter;
@@ -170,6 +172,7 @@ class Builder extends QueryBuilder
         return array_merge(
             $query,
             $this->getDateQuery(),
+            $this->getMetaQuery(),
             $this->getOrderByQuery(),
             $this->getPostQuery(),
             $this->getTermQuery()
