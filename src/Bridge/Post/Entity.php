@@ -146,30 +146,21 @@ abstract class Entity extends BaseEntity
     /**
      * Get the excerpt.
      *
-     * @uses \strip_shortcodes()
-     *
-     * @param int $length
+     * @param int|false $length
      * @param bool $useContent
+     * @param string $marker
      * @return string
      */
-    public function excerpt($length = 120, $useContent = true)
+    public function excerpt($length = 120, $useContent = true, $marker = '…')
     {
-        $filter = function ($excerpt) {
-            $excerpt = strip_shortcodes($excerpt);
-            $excerpt = strip_tags($excerpt);
-            $excerpt = preg_replace('/<!--[^>]*-->/', '', $excerpt);
-            $excerpt = preg_replace('/[\s|\x{3000}]+/u', ' ', $excerpt);
-            return trim($excerpt);
-        };
-
-        $excerpt = $filter($this->raw_excerpt);
+        $excerpt = $this->excerpt;
 
         if ($useContent && $excerpt === '') {
-            $excerpt = $filter($this->raw_content);
+            $excerpt = $this->stripTags($this->raw_content);
         }
 
         if ($length && mb_strlen($excerpt) > $length) {
-            $excerpt = mb_substr($excerpt, 0, $length - 1, 'utf8') . '…';
+            $excerpt = mb_substr($excerpt, 0, $length - 1, 'utf8').$marker;
         }
 
         return $excerpt;
@@ -182,7 +173,7 @@ abstract class Entity extends BaseEntity
      */
     protected function getExcerptAttribute()
     {
-        return $this->excerpt();
+        return $this->stripTags($this->raw_excerpt);
     }
 
     /**

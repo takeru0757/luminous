@@ -16,7 +16,7 @@
             @foreach (app('wp')->posts('page')->orderBy('order')->take(5) as $post)
             <a href="{{ post_url($post) }}" class="list-group-item">
                 <p class="h5 list-group-item-heading">{{ $post->title }}</p>
-                <p class="list-group-item-text">{{ $post->excerpt }}</p>
+                <p class="list-group-item-text">{{ $post->excerpt() }}</p>
                 <p class="list-group-item-text"><small class="text-muted">{{ $post->date(wp_option('date_format')) }}</small></p>
             </a>
             @endforeach
@@ -31,7 +31,7 @@
             @foreach (app('wp')->posts('post')->orderBy('created_at', 'desc')->take(5) as $post)
             <a href="{{ post_url($post) }}" class="list-group-item">
                 <p class="h5 list-group-item-heading">{{ $post->title }}</p>
-                <p class="list-group-item-text">{{ $post->excerpt }}</p>
+                <p class="list-group-item-text">{{ $post->excerpt() }}</p>
                 <p class="list-group-item-text"><small class="text-muted">{{ $post->date(wp_option('date_format')) }}</small></p>
             </a>
             @endforeach

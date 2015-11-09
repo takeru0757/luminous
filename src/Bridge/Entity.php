@@ -58,4 +58,22 @@ abstract class Entity implements ArrayAccess, UrlResource
 
         return array_merge($this->type->forUrl(), [$type => $this]);
     }
+
+    /**
+     * Strip all HTML tags and shortcode tags.
+     *
+     * @uses \strip_shortcodes()
+     *
+     * @param string $content
+     * @return string
+     */
+    protected function stripTags($content)
+    {
+        $content = strip_shortcodes($content);
+        $content = strip_tags($content);
+        $content = preg_replace('/<!--[^>]*-->/', '', $content);
+        $content = preg_replace('/[\s|\x{3000}]+/u', ' ', $content);
+
+        return trim($content);
+    }
 }

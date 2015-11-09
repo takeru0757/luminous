@@ -30,7 +30,7 @@
         @endif
     </ul>
 
-    <p>{{ $post->excerpt }}</p>
+    <p>{{ $post->excerpt() }}</p>
 
 </article>
 

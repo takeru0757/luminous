@@ -16,6 +16,7 @@ abstract class Entity extends BaseEntity
      */
     protected $accessors = [
         'id' => 'term_id',
+        'raw_description' => 'description',
     ];
 
     /**
@@ -38,6 +39,16 @@ abstract class Entity extends BaseEntity
     protected function getPathAttribute()
     {
         return $this->slug;
+    }
+
+    /**
+     * Get the description.
+     *
+     * @return string
+     */
+    protected function getDescriptionAttribute()
+    {
+        return $this->stripTags($this->raw_description);
     }
 
     /**
