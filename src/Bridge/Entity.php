@@ -65,14 +65,16 @@ abstract class Entity implements ArrayAccess, UrlResource
      * @uses \strip_shortcodes()
      *
      * @param string $content
+     * @param string $lineFeedMarker
      * @return string
      */
-    protected function stripTags($content)
+    protected function stripTags($content, $lineFeedMarker = '')
     {
         $content = strip_shortcodes($content);
         $content = strip_tags($content);
-        $content = preg_replace('/<!--[^>]*-->/', '', $content);
-        $content = preg_replace('/[\s|\x{3000}]+/u', ' ', $content);
+        $content = preg_replace('/(?:<!--[^>]*-->)/', '', $content);
+        $content = preg_replace('/(?:\n|\r|\r\n)/', $lineFeedMarker, $content);
+        $content = preg_replace('/(?:[\s|\x{3000}]+)/u', ' ', $content);
 
         return trim($content);
     }

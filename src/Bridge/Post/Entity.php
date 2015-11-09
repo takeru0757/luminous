@@ -156,7 +156,7 @@ abstract class Entity extends BaseEntity
         $excerpt = $this->excerpt;
 
         if ($useContent && $excerpt === '') {
-            $excerpt = $this->stripTags($this->raw_content);
+            $excerpt = $this->stripTags($this->raw_content, ' ');
         }
 
         if ($length && mb_strlen($excerpt) > $length) {
