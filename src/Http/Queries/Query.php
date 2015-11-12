@@ -58,9 +58,20 @@ abstract class Query
      */
     public function __get($key)
     {
-        if (in_array($key, ['postType', 'page']) || in_array($key, $this->througs)) {
+        if ($this->__isset($key)) {
             return $this->{$key};
         }
+    }
+
+    /**
+     * Dynamically check if a value is set on the user.
+     *
+     * @param string $key
+     * @return bool
+     */
+    public function __isset($key)
+    {
+        return in_array($key, ['postType', 'page']) || in_array($key, $this->througs);
     }
 
     /**
